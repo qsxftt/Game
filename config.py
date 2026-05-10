@@ -38,7 +38,7 @@ for i in text_map:
 # трассировка лучей
 FOV = pi / 3
 HALF_FOV = FOV / 2
-max_depth = WIDTH // block_size
+MAX_DEPTH = WIDTH // block_size
 NUM_RAYS = 120
 DELTA_RAY = FOV / (NUM_RAYS - 1)
 SCALE = WIDTH // NUM_RAYS

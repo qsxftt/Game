@@ -35,7 +35,6 @@ while running:
         wall_height = 50000 // max(depth, 1)
         wall_x = ray * SCALE
         wall_y = HEIGHT_HALF - wall_height // 2
-        print(wall_height)
         # pygame.draw.line(screen, RED, (player.x, player.y), (endX, endY), 2)
         # pygame.draw.circle(screen, RED, (endX, endY), 5)
         pygame.draw.rect(screen, GRAY, (wall_x, wall_y, SCALE, wall_height))
