@@ -1,7 +1,7 @@
 import pygame
 from math import *
 from config import *
-from func import is_wall
+from func import is_wall, open_door
 
 class Player:
     def __init__(self):
@@ -9,11 +9,25 @@ class Player:
         self.y = HEIGHT // 2
         self.angle = 0
         self.speed = 5
+        self.radius = PLAYER_RADIUS
+        self.cooldown = 0
+        self.delay = 20
+
+    def can_move(self, x, y):
+        return (
+            not is_wall(x + self.radius, y)
+            and not is_wall(x, y + self.radius)
+            and not is_wall(x - self.radius, y)
+            and not is_wall(x, y - self.radius)
+        )
 
     def move(self):
         keys = pygame.key.get_pressed()
         sin_a = sin(self.angle)
         cos_a = cos(self.angle)
+
+        if self.cooldown > 0:
+            self.cooldown -= 1
 
         dx = 0
         dy = 0
@@ -34,9 +48,12 @@ class Player:
             self.angle -= 0.01 * self.speed 
         if keys[pygame.K_RIGHT]:
             self.angle += 0.01 * self.speed
+        if keys[pygame.K_e] and self.cooldown == 0:
+            if open_door(self):
+                self.cooldown = self.delay
         
-        if not is_wall(self.x + dx, self.y):
+        if self.can_move(self.x + dx, self.y):
                 self.x += dx
 
-        if not is_wall(self.x, self.y + dy):
+        if self.can_move(self.x, self.y + dy):
             self.y += dy
