@@ -4,41 +4,149 @@ import pygame
 from config import *
 
 
+# Работа с клетками карты
+
 def get_cell(x, y):
+    '''
+    Возвращает координаты клетки карты по переданным координатам
+    '''
     endX = x // block_size * block_size
     endY = y // block_size * block_size
 
     return endX, endY
 
+
+def get_front_cell(player):
+    '''
+    Возвращает координаты клетки, находящейся перед игроком
+    '''
+    front_x = player.x + cos(player.angle) * block_size
+    front_y = player.y + sin(player.angle) * block_size
+
+    cell = get_cell(front_x, front_y)
+
+    return cell
+
+
+# Проверки блоков и препятствий
+
 def is_wall(x, y):
+    '''
+    Проверяет, является ли клетка препятствием для движения
+    Обычные стены всегда считаются препятствием
+    Дверь считается препятствием, пока её open_progress меньше 0.8
+    '''
     cell = get_cell(x, y)
-    
+
     if cell in block_map:
         return True
-    
+
     if cell in doors:
         door = doors[cell]
         return door.open_progress < 0.8
-    
+
     return False
 
+
 def get_block_type(x, y):
+    '''
+    Возвращает тип блока в указанной клетке карты
+    '''
     cell = get_cell(x, y)
 
     if cell in block_map:
         return 'wall'
-    
-    if cell in doors and not doors[cell].is_open:
+
+    if cell in doors and doors[cell].open_progress < 1.0:
         return 'door'
-    
+
     return None
 
+
+# Работа с цветом
+
+def apply_shade(color, shade):
+    '''
+    Возвращает затемнённую версию переданного цвета
+    shade работает как коэффициент яркости
+    '''
+    return tuple(int(channel * shade) for channel in color)
+
+
+# Работа с дверями
+
+def get_door(x, y):
+    '''
+    Возвращает объект двери по переданным координатам
+    '''
+    cell = get_cell(x, y)
+    return doors.get(cell)
+
+
+def open_door(player):
+    '''
+    Пытается открыть дверь, находящуюся перед игроком
+    Если перед игроком есть дверь, вызывается её метод open()
+    '''
+    cell = get_front_cell(player)
+
+    if cell in doors:
+        return doors[cell].open()
+
+    return False
+
+
+def update_doors():
+    '''
+    Обновляет состояние всех дверей на карте
+    '''
+    for door in doors.values():
+        door.update()
+
+
+def cast_ray_to_door(player, angle, door):
+    '''
+    Проверяет пересечение луча с движущейся дверной перегородкой
+
+    Дверь рассматривается не как целая клетка, а как тонкий отрезок
+    который может смещаться при открытии
+    '''
+    sin_a = sin(angle)
+    cos_a = cos(angle)
+
+    orient, x1, y1, x2, y2 = door.get_panel_segment()
+
+    if orient == "hor":
+        depth = (y1 - player.y) / sin_a
+        hit_x = player.x + cos_a * depth
+
+        if depth > 0 and x1 <= hit_x <= x2:
+            return hit_x, y1, depth
+
+    if orient == "vert":
+        depth = (x1 - player.x) / cos_a
+        hit_y = player.y + sin_a * depth
+
+        if depth > 0 and y1 <= hit_y <= y2:
+            return x1, hit_y, depth
+
+    return None
+
+
+# Ray casting
+
 def cast_single_ray(player, angle):
+    '''
+    Выпускает один луч и ищет ближайшее столкновение со стеной или дверью
+
+    Луч проверяет пересечения с вертикальными и горизонтальными линиями сетки карты
+    После этого выбирается ближайшее найденное попадание
+    '''
     sin_a = sin(angle)
     cos_a = cos(angle)
     tan_a = tan(angle)
 
-    # Пересечения с вертикальной стенкой
+    # Пересечения с вертикальными линиями сетки
     vert_x = 0
     vert_y = 0
     vert_type = None
@@ -81,7 +189,7 @@ def cast_single_ray(player, angle):
         x_vert += vert_delta_x
         y_vert += vert_delta_y
 
-    # Пересечения с горизонтальной стенкой
+    # Пересечения с горизонтальными линиями сетки
     hor_x = 0
     hor_y = 0
     hor_type = None
@@ -128,31 +236,37 @@ def cast_single_ray(player, angle):
         return vert_x, vert_y, vert_depth, 'vert', vert_type
     else:
         return hor_x, hor_y, hor_depth, 'hor', hor_type
-    
+
+
 def ray_casting(screen, player):
+    """
+    Выпускает веер лучей от игрока и рисует 3D сцену
+
+    Каждый луч ищет ближайшее столкновение со стеной или дверью
+    По расстоянию до столкновения вычисляется высота вертикальной полоски
+    Также применяется затемнение по расстоянию и затемнение горизонтальных сторон
+    """
     start = player.angle - HALF_FOV
+
     for ray in range(NUM_RAYS):
         ray_angle = start + ray * DELTA_RAY
         endX, endY, depth, side, block_type = cast_single_ray(player, ray_angle)
-        door = get_door(endX, endY)
+
         depth *= cos(player.angle - ray_angle)
+
         wall_height = block_size * SCREEN_DISTANCE // depth
-
-
-
         wall_x = ray * SCALE
         wall_y = HEIGHT_HALF - wall_height // 2
+
         shade = max(30, 255 - (depth // 3)) / 255
 
         if side == 'hor':
-           shade *= 0.75
+            shade *= 0.75
 
         if block_type == 'door':
             wall_color = apply_shade(GREEN, shade)
         else:
             wall_color = apply_shade(GRAY, shade)
-
-        
 
         pygame.draw.rect(screen, wall_color, (wall_x, wall_y, SCALE, wall_height))
 
@@ -160,32 +274,16 @@ def ray_casting(screen, player):
             pygame.draw.line(screen, RED, (player.x, player.y), (endX, endY), 2)
             pygame.draw.circle(screen, RED, (endX, endY), 5)
 
-def get_front_cell(player):
-    front_x = player.x + cos(player.angle) * block_size
-    front_y = player.y + sin(player.angle) * block_size
 
-    cell = get_cell(front_x, front_y)
-
-    return cell
-
-def apply_shade(color, shade):
-    return tuple(int(channel * shade) for channel in color)
-
-def open_door(player):
-    cell = get_front_cell(player)
-
-    if cell in doors:
-        return doors[cell].open()
-    
-    return False
-
-def update_doors():
-    for door in doors.values():
-        door.update()
+# Debug-отрисовка
 
 def draw_map(screen, player):
+    '''
+    Рисует debug-карту сверху
+    '''
     for x, y in block_map:
         pygame.draw.rect(screen, GRAY, (x, y, block_size, block_size), 2)
+
     for cell, door in doors.items():
         x, y = cell
 
@@ -200,29 +298,3 @@ def draw_map(screen, player):
         pygame.draw.rect(screen, color, rect)
 
     pygame.draw.circle(screen, RED, (player.x, player.y), 10)
-
-def get_door(x, y):
-    cell = get_cell(x, y)
-    return doors.get(cell)
-
-def cast_ray_to_door(player, angle, door):
-    sin_a = sin(angle)
-    cos_a = cos(angle)
-
-    orient, x1, y1, x2, y2 = door.get_panel_segment()
-
-    if orient == "hor":
-        depth = (y1 - player.y) / sin_a
-        hit_x = player.x + cos_a * depth
-
-        if depth > 0 and x1 <= hit_x <= x2:
-            return hit_x, y1, depth
-
-    if orient == "vert":
-        depth = (x1 - player.x) / cos_a
-        hit_y = player.y + sin_a * depth
-
-        if depth > 0 and y1 <= hit_y <= y2:
-            return x1, hit_y, depth
-
-    return None
