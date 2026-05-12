@@ -72,6 +72,12 @@ def apply_shade(color, shade):
     '''
     return tuple(int(channel * shade) for channel in color)
 
+def apply_shade_texture(texture_column, shade):
+    shade *= 255
+    texture_column_copy = texture_column.copy()
+    texture_column_copy.fill((shade, shade, shade), special_flags=pygame.BLEND_MULT)
+
+    return texture_column_copy
 
 # Работа с дверями
 
@@ -250,7 +256,7 @@ def ray_casting(screen, player):
 
     for ray in range(NUM_RAYS):
         ray_angle = start + ray * DELTA_RAY
-        endX, endY, depth, side, block_type = cast_single_ray(player, ray_angle)
+        hit_x, hit_y, depth, side, block_type = cast_single_ray(player, ray_angle)
 
         depth *= cos(player.angle - ray_angle)
 
@@ -260,19 +266,26 @@ def ray_casting(screen, player):
 
         shade = max(30, 255 - (depth // 3)) / 255
 
-        if side == 'hor':
+        if side == 'vert':
+            texture_offset = hit_y % block_size
+        else:
+            texture_offset = hit_x % block_size
             shade *= 0.75
 
         if block_type == 'door':
-            wall_color = apply_shade(GREEN, shade)
+            texture = DOOR_TEXTURE
         else:
-            wall_color = apply_shade(GRAY, shade)
+            texture = WALL_TEXTURE
 
-        pygame.draw.rect(screen, wall_color, (wall_x, wall_y, SCALE, wall_height))
+        texture_column = texture.subsurface(texture_offset, 0, 1, block_size)
+        texture_column = pygame.transform.scale(texture_column, (SCALE, wall_height))
+        texture_column = apply_shade_texture(texture_column, shade)
+
+        screen.blit(texture_column, (wall_x, wall_y))
 
         if DEBUG:
-            pygame.draw.line(screen, RED, (player.x, player.y), (endX, endY), 2)
-            pygame.draw.circle(screen, RED, (endX, endY), 5)
+            pygame.draw.line(screen, RED, (player.x, player.y), (hit_x, hit_y), 2)
+            pygame.draw.circle(screen, RED, (hit_x, hit_y), 5)
 
 
 # Debug-отрисовка
@@ -287,10 +300,10 @@ def draw_map(screen, player):
     for cell, door in doors.items():
         x, y = cell
 
-        if door.is_open:
-            color = GREEN
-        elif door.is_opening:
+        if door.state == 'opening' or door.state == 'closing':
             color = YELLOW
+        elif door.state == 'open':
+            color = GREEN
         else:
             color = RED
 

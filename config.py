@@ -1,8 +1,9 @@
 from math import pi, tan
 from door import Door
+import pygame
 
 
-DEBUG = True
+DEBUG = False
 # экран
 WIDTH = 1200
 HEIGHT = 800
@@ -17,7 +18,11 @@ GRAY = (128, 128, 128)
 GREEN = (0, 255, 0)
 YELLOW = (255, 220, 0)
 
-#карта
+# текстуры
+WALL_TEXTURE = pygame.image.load('assets/textures/wall.png')
+DOOR_TEXTURE = pygame.image.load('assets/textures/door.png')
+
+# карта
 def get_orient_door(x, y):
     left = (x - block_size, y) in block_map
     right = (x + block_size, y) in block_map

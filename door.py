@@ -4,38 +4,40 @@ class Door:
         self.y = y
         self.orient = orient
         self.block_size = block_size
-        self.is_open = False
-        self.is_opening = False
+        self.state = 'closed'
         self.open_progress = 0.0
         self.open_speed = 0.03
         self.delay = 240
         self.cooldown = 0
 
     def open(self):
-        if self.is_open or self.is_opening:
+        if self.state != 'closed':
             return False
 
-        self.is_opening = True
+        self.state = 'opening'
         return True
     
     def update(self):
-        if self.cooldown > 0:
-            self.cooldown -= 1
-
-        if self.is_opening and self.cooldown == 0:
+        if self.state == 'opening':
             self.open_progress += self.open_speed
 
-            if self.open_progress > 1.0:
+            if self.open_progress >= 1.0:
                 self.open_progress = 1.0
-                self.is_open = True
+                self.state = 'open'
                 self.cooldown = self.delay
-                self.open_speed = -self.open_speed
-            
-            if self.open_progress < 0.0:
+
+        elif self.state == 'open':
+            if self.cooldown > 0:
+                self.cooldown -= 1
+            else:
+                self.state = 'closing'
+
+        elif self.state == 'closing':
+            self.open_progress -= self.open_speed
+
+            if self.open_progress <= 0:
                 self.open_progress = 0.0
-                self.is_opening = False
-                self.is_open = False
-                self.open_speed = -self.open_speed
+                self.state = 'closed'
 
     def get_panel_rect(self, thickness=8):
         offset = self.block_size * self.open_progress
