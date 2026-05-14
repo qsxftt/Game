@@ -257,19 +257,12 @@ def ray_casting(screen, player):
     for ray in range(NUM_RAYS):
         ray_angle = start + ray * DELTA_RAY
         hit_x, hit_y, depth, side, block_type = cast_single_ray(player, ray_angle)
-
-        depth *= cos(player.angle - ray_angle)
-
-        wall_height = block_size * SCREEN_DISTANCE // depth
-        wall_x = ray * SCALE
-        wall_y = HEIGHT_HALF - wall_height // 2
-
         shade = max(30, 255 - (depth // 3)) / 255
 
         if side == 'vert':
-            texture_offset = hit_y % block_size
+            texture_offset = int(hit_y % block_size)
         else:
-            texture_offset = hit_x % block_size
+            texture_offset = int(hit_x % block_size)
             shade *= 0.75
 
         if block_type == 'door':
@@ -277,9 +270,26 @@ def ray_casting(screen, player):
         else:
             texture = WALL_TEXTURE
 
-        texture_column = texture.subsurface(texture_offset, 0, 1, block_size)
-        texture_column = pygame.transform.scale(texture_column, (SCALE, wall_height))
-        texture_column = apply_shade_texture(texture_column, shade)
+        depth *= cos(player.angle - ray_angle)
+
+        wall_height = int(block_size * SCREEN_DISTANCE / depth)
+        wall_x = ray * SCALE
+
+        if wall_height <= HEIGHT:
+            wall_y = int(HEIGHT_HALF - wall_height // 2)
+            texture_column = texture.subsurface(texture_offset, 0, 1, block_size)
+            texture_column = apply_shade_texture(texture_column, shade)
+            texture_column = pygame.transform.scale(texture_column, (SCALE, wall_height))
+        else:
+            wall_y = 0
+
+            texture_y = int((wall_height - HEIGHT) / 2 / wall_height * block_size)
+            texture_height = int(HEIGHT / wall_height * block_size)
+
+            texture_column = texture.subsurface(texture_offset, texture_y, 1, texture_height)
+            texture_column = apply_shade_texture(texture_column, shade)
+            texture_column = pygame.transform.scale(texture_column, (SCALE, HEIGHT))
+
 
         screen.blit(texture_column, (wall_x, wall_y))
 

@@ -27,6 +27,7 @@ while running:
         draw_map(screen, player)
 
     pygame.display.flip()
+    pygame.display.set_caption(f'{clock}')
     clock.tick(FPS)
     
 pygame.quit()
