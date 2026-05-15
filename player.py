@@ -1,6 +1,7 @@
 import pygame
 from math import *
 from config import *
+from weapon import Pistol
 from func import is_wall, open_door
 
 class Player:
@@ -12,6 +13,7 @@ class Player:
         self.radius = PLAYER_RADIUS
         self.cooldown = 0
         self.delay = 20
+        self.weapon = Pistol()
 
     def can_move(self, x, y):
         return (
@@ -25,6 +27,7 @@ class Player:
         keys = pygame.key.get_pressed()
         sin_a = sin(self.angle)
         cos_a = cos(self.angle)
+        self.weapon.update()
 
         if self.cooldown > 0:
             self.cooldown -= 1
@@ -51,6 +54,14 @@ class Player:
         if keys[pygame.K_e] and self.cooldown == 0:
             if open_door(self):
                 self.cooldown = self.delay
+
+        if keys[pygame.K_SPACE]:
+            if self.weapon.shoot():
+                print('Выстрел', self.weapon.ammo)
+
+        if keys[pygame.K_r]:
+            if self.weapon.reload():
+                print('Перезарядка')
         
         if self.can_move(self.x + dx, self.y):
                 self.x += dx

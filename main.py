@@ -23,11 +23,13 @@ while running:
     ray_casting(screen, player)
     update_doors()
 
+    player.weapon.draw(screen)
+
     if DEBUG:
         draw_map(screen, player)
 
     pygame.display.flip()
-    pygame.display.set_caption(f'{clock}')
+    pygame.display.set_caption(f'{clock.get_fps()}')
     clock.tick(FPS)
     
 pygame.quit()

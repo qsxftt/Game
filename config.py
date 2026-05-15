@@ -71,7 +71,7 @@ for x, y in door_positions:
 FOV = pi / 3
 HALF_FOV = FOV / 2
 MAX_DEPTH = WIDTH // block_size
-NUM_RAYS = 30
+NUM_RAYS = 120
 DELTA_RAY = FOV / (NUM_RAYS - 1)
 SCALE = WIDTH // NUM_RAYS
 SCREEN_DISTANCE = WIDTH_HALF / tan(HALF_FOV)
