@@ -7,6 +7,7 @@ class Weapon:
         self.damage = 0
         self.ammo = 0
         self.magazine_size = 0
+        self.reserve_ammo = 0
 
         self.shot_delay = 0
         self.shot_cooldown = 0
@@ -15,6 +16,8 @@ class Weapon:
         self.reload_cooldown = 0
 
         self.texture = None
+        self.texture_reload = None
+        self.frame_count = 0
 
     def update(self):
         if self.shot_cooldown > 0:
@@ -23,7 +26,11 @@ class Weapon:
         if self.reload_cooldown > 0:
             self.reload_cooldown -= 1
             if self.reload_cooldown == 0:
-                self.ammo = self.magazine_size
+                need_ammo = self.magazine_size - self.ammo
+                ammo_to = min(self.reserve_ammo, need_ammo)
+
+                self.ammo += ammo_to
+                self.reserve_ammo -= ammo_to
 
     def can_shoot(self):
         if self.ammo > 0 and self.shot_cooldown == 0 and self.reload_cooldown == 0:
@@ -47,17 +54,41 @@ class Weapon:
         if self.reload_cooldown > 0:
             return False
         
+        if self.reserve_ammo <= 0:
+            return False
+        
         self.reload_cooldown = self.reload_delay
 
         return True
     
-    def draw(self, screen):
-        x_size = 100
-        y_size = 30
-        x = WIDTH - x_size - 20
-        y = HEIGHT - y_size - 20
+    def get_frame(self, texture, status=None):
+        frame_width = texture.get_width() // self.frame_count
+        frame_height = texture.get_height()
+        if status == 'shot':
+            frame_index = round((1 - self.shot_cooldown / self.shot_delay) * (self.frame_count - 1))
+        elif status == 'reload':
+            frame_index = round((1 - self.reload_cooldown / self.reload_delay) * (self.frame_count - 1))
+        else:
+            frame_index = 0
 
-        pygame.draw.rect(screen, RED, (x, y, x_size, y_size))
+        x = frame_width * frame_index
+        frame = texture.subsurface(x, 0, frame_width, frame_height)
+
+        return frame, frame_width, frame_height
+
+    
+    def draw(self, screen):
+        if self.shot_cooldown > 0:
+            frame, frame_width, frame_height = self.get_frame(self.texture, 'shot')
+        elif self.reload_cooldown > 0:
+            frame, frame_width, frame_height = self.get_frame(self.texture_reload, 'reload')
+        else:
+            frame, frame_width, frame_height = self.get_frame(self.texture)
+
+        screen_width = (frame_width * HEIGHT_HALF / frame_height)
+        frame = pygame.transform.scale(frame, (screen_width, HEIGHT_HALF))
+
+        screen.blit(frame, (WIDTH - screen_width, HEIGHT_HALF))
 
 
 class Pistol(Weapon):
@@ -68,4 +99,7 @@ class Pistol(Weapon):
         self.magazine_size = 10
         self.shot_delay = 20
         self.reload_delay = 60
-        self.texture = None
+        self.texture = PISTOL_TEXTURE
+        self.frame_count = 5
+        self.texture_reload = PISTOLR_TEXTURE
+        self.reserve_ammo = 30

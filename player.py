@@ -56,12 +56,10 @@ class Player:
                 self.cooldown = self.delay
 
         if keys[pygame.K_SPACE]:
-            if self.weapon.shoot():
-                print('Выстрел', self.weapon.ammo)
+            self.weapon.shoot()
 
         if keys[pygame.K_r]:
-            if self.weapon.reload():
-                print('Перезарядка')
+            self.weapon.reload()
         
         if self.can_move(self.x + dx, self.y):
                 self.x += dx
