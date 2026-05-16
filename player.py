@@ -8,6 +8,7 @@ class Player:
     def __init__(self):
         self.x = WIDTH // 2
         self.y = HEIGHT // 2
+        self.health = 100
         self.angle = 0
         self.speed = 5
         self.radius = PLAYER_RADIUS
@@ -28,6 +29,8 @@ class Player:
         sin_a = sin(self.angle)
         cos_a = cos(self.angle)
         self.weapon.update()
+
+        shot_fired = False
 
         if self.cooldown > 0:
             self.cooldown -= 1
@@ -51,12 +54,16 @@ class Player:
             self.angle -= 0.01 * self.speed 
         if keys[pygame.K_RIGHT]:
             self.angle += 0.01 * self.speed
+
+        self.angle %= 2 * pi
+
         if keys[pygame.K_e] and self.cooldown == 0:
             if open_door(self):
                 self.cooldown = self.delay
 
         if keys[pygame.K_SPACE]:
-            self.weapon.shoot()
+            if self.weapon.shoot():
+                shot_fired = True
 
         if keys[pygame.K_r]:
             self.weapon.reload()
@@ -66,3 +73,5 @@ class Player:
 
         if self.can_move(self.x, self.y + dy):
             self.y += dy
+        
+        return shot_fired

@@ -24,6 +24,7 @@ WALL_TEXTURE = pygame.image.load('assets/textures/wall.png')
 DOOR_TEXTURE = pygame.image.load('assets/textures/door.png')
 PISTOL_TEXTURE = pygame.image.load('assets/weapons/Pistol.png')
 PISTOLR_TEXTURE = pygame.image.load('assets/weapons/Pistolreload.png')
+ENEMY1_TEXTURE = pygame.image.load('assets/enemies/MAX.png')
 
 # карта
 def get_orient_door(x, y):

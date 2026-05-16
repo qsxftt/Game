@@ -9,8 +9,8 @@ class Weapon:
         self.magazine_size = 0
         self.reserve_ammo = 0
 
-        self.shot_delay = 0
-        self.shot_cooldown = 0
+        self.shoot_delay = 0
+        self.shoot_cooldown = 0
 
         self.reload_delay = 0
         self.reload_cooldown = 0
@@ -20,8 +20,8 @@ class Weapon:
         self.frame_count = 0
 
     def update(self):
-        if self.shot_cooldown > 0:
-            self.shot_cooldown -= 1
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
 
         if self.reload_cooldown > 0:
             self.reload_cooldown -= 1
@@ -33,7 +33,7 @@ class Weapon:
                 self.reserve_ammo -= ammo_to
 
     def can_shoot(self):
-        if self.ammo > 0 and self.shot_cooldown == 0 and self.reload_cooldown == 0:
+        if self.ammo > 0 and self.shoot_cooldown == 0 and self.reload_cooldown == 0:
             return True
         else:
             return False
@@ -43,7 +43,7 @@ class Weapon:
             return False
         
         self.ammo -= 1
-        self.shot_cooldown = self.shot_delay
+        self.shoot_cooldown = self.shoot_delay
 
         return True
     
@@ -64,8 +64,8 @@ class Weapon:
     def get_frame(self, texture, status=None):
         frame_width = texture.get_width() // self.frame_count
         frame_height = texture.get_height()
-        if status == 'shot':
-            frame_index = round((1 - self.shot_cooldown / self.shot_delay) * (self.frame_count - 1))
+        if status == 'shoot':
+            frame_index = round((1 - self.shoot_cooldown / self.shoot_delay) * (self.frame_count - 1))
         elif status == 'reload':
             frame_index = round((1 - self.reload_cooldown / self.reload_delay) * (self.frame_count - 1))
         else:
@@ -78,8 +78,8 @@ class Weapon:
 
     
     def draw(self, screen):
-        if self.shot_cooldown > 0:
-            frame, frame_width, frame_height = self.get_frame(self.texture, 'shot')
+        if self.shoot_cooldown > 0:
+            frame, frame_width, frame_height = self.get_frame(self.texture, 'shoot')
         elif self.reload_cooldown > 0:
             frame, frame_width, frame_height = self.get_frame(self.texture_reload, 'reload')
         else:
@@ -97,7 +97,7 @@ class Pistol(Weapon):
         self.damage = 15
         self.ammo = 10
         self.magazine_size = 10
-        self.shot_delay = 20
+        self.shoot_delay = 20
         self.reload_delay = 60
         self.texture = PISTOL_TEXTURE
         self.frame_count = 5

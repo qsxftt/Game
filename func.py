@@ -200,43 +200,43 @@ def cast_single_ray(player, angle):
     hor_y = 0
     hor_type = None
     hor_depth = float("inf")
-
-    if sin_a > 0:
-        y_hor = (player.y // block_size) * block_size + block_size
-        hor_delta_y = block_size
-    else:
-        y_hor = (player.y // block_size) * block_size
-        hor_delta_y = -block_size
-
-    x_hor = player.x + (y_hor - player.y) / tan_a
-    hor_delta_x = hor_delta_y / tan_a
-
-    for _ in range(MAX_DEPTH):
+    if tan_a != 0:
         if sin_a > 0:
-            y_check = y_hor
+            y_hor = (player.y // block_size) * block_size + block_size
+            hor_delta_y = block_size
         else:
-            y_check = y_hor - 1
+            y_hor = (player.y // block_size) * block_size
+            hor_delta_y = -block_size
 
-        block_type = get_block_type(x_hor, y_check)
+        x_hor = player.x + (y_hor - player.y) / tan_a
+        hor_delta_x = hor_delta_y / tan_a
 
-        if block_type == "wall":
-            hor_x = x_hor
-            hor_y = y_hor
-            hor_depth = (hor_y - player.y) / sin_a
-            hor_type = "wall"
-            break
+        for _ in range(MAX_DEPTH):
+            if sin_a > 0:
+                y_check = y_hor
+            else:
+                y_check = y_hor - 1
 
-        if block_type == "door":
-            door = get_door(x_hor, y_check)
-            door_hit = cast_ray_to_door(player, angle, door)
+            block_type = get_block_type(x_hor, y_check)
 
-            if door_hit:
-                hor_x, hor_y, hor_depth = door_hit
-                hor_type = "door"
+            if block_type == "wall":
+                hor_x = x_hor
+                hor_y = y_hor
+                hor_depth = (hor_y - player.y) / sin_a
+                hor_type = "wall"
                 break
 
-        x_hor += hor_delta_x
-        y_hor += hor_delta_y
+            if block_type == "door":
+                door = get_door(x_hor, y_check)
+                door_hit = cast_ray_to_door(player, angle, door)
+
+                if door_hit:
+                    hor_x, hor_y, hor_depth = door_hit
+                    hor_type = "door"
+                    break
+
+            x_hor += hor_delta_x
+            y_hor += hor_delta_y
 
     if vert_depth < hor_depth:
         return vert_x, vert_y, vert_depth, 'vert', vert_type
@@ -297,6 +297,28 @@ def ray_casting(screen, player):
             pygame.draw.line(screen, RED, (player.x, player.y), (hit_x, hit_y), 2)
             pygame.draw.circle(screen, RED, (hit_x, hit_y), 5)
 
+# Работа с игроком
+
+def player_shoot(player, enemies):
+    target = None
+    max_depth = float('inf')
+
+    for enemy in enemies:
+        if enemy.health <= 0:
+            continue
+
+        if enemy.near_crosshair(player):
+            depth = enemy.get_depth(player)
+
+            if depth < max_depth:
+                max_depth = depth
+                target = enemy
+
+    if target:
+        target.take_damage(player.weapon.damage)
+        return True
+    
+    return False
 
 # Debug-отрисовка
 
