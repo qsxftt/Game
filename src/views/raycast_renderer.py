@@ -1,76 +1,9 @@
-from math import sin, cos, tan
 import pygame
+from math import cos, sin, tan
+from src.core.config import *
+from src.systems.door_system import get_door
+from src.systems.map_system import get_block_type
 
-from config import *
-
-
-# Работа с клетками карты
-
-def get_cell(x, y):
-    '''
-    Возвращает координаты клетки карты по переданным координатам
-    '''
-    endX = x // block_size * block_size
-    endY = y // block_size * block_size
-
-    return endX, endY
-
-
-def get_front_cell(player):
-    '''
-    Возвращает координаты клетки, находящейся перед игроком
-    '''
-    front_x = player.x + cos(player.angle) * block_size
-    front_y = player.y + sin(player.angle) * block_size
-
-    cell = get_cell(front_x, front_y)
-
-    return cell
-
-
-# Проверки блоков и препятствий
-
-def is_wall(x, y):
-    '''
-    Проверяет, является ли клетка препятствием для движения
-    Обычные стены всегда считаются препятствием
-    Дверь считается препятствием, пока её open_progress меньше 0.8
-    '''
-    cell = get_cell(x, y)
-
-    if cell in block_map:
-        return True
-
-    if cell in doors:
-        door = doors[cell]
-        return door.open_progress < 0.8
-
-    return False
-
-
-def get_block_type(x, y):
-    '''
-    Возвращает тип блока в указанной клетке карты
-    '''
-    cell = get_cell(x, y)
-
-    if cell in block_map:
-        return 'wall'
-
-    if cell in doors and doors[cell].open_progress < 1.0:
-        return 'door'
-
-    return None
-
-
-# Работа с цветом
-
-def apply_shade(color, shade):
-    '''
-    Возвращает затемнённую версию переданного цвета
-    shade работает как коэффициент яркости
-    '''
-    return tuple(int(channel * shade) for channel in color)
 
 def apply_shade_texture(texture_column, shade):
     shade *= 255
@@ -78,37 +11,6 @@ def apply_shade_texture(texture_column, shade):
     texture_column_copy.fill((shade, shade, shade), special_flags=pygame.BLEND_MULT)
 
     return texture_column_copy
-
-# Работа с дверями
-
-def get_door(x, y):
-    '''
-    Возвращает объект двери по переданным координатам
-    '''
-    cell = get_cell(x, y)
-    return doors.get(cell)
-
-
-def open_door(player):
-    '''
-    Пытается открыть дверь, находящуюся перед игроком
-    Если перед игроком есть дверь, вызывается её метод open()
-    '''
-    cell = get_front_cell(player)
-
-    if cell in doors:
-        return doors[cell].open()
-
-    return False
-
-
-def update_doors():
-    '''
-    Обновляет состояние всех дверей на карте
-    '''
-    for door in doors.values():
-        door.update()
-
 
 def cast_ray_to_door(player, angle, door):
     '''
@@ -137,9 +39,6 @@ def cast_ray_to_door(player, angle, door):
             return x1, hit_y, depth
 
     return None
-
-
-# Ray casting
 
 def cast_single_ray(player, angle):
     '''
@@ -296,31 +195,6 @@ def ray_casting(screen, player):
         if DEBUG:
             pygame.draw.line(screen, RED, (player.x, player.y), (hit_x, hit_y), 2)
             pygame.draw.circle(screen, RED, (hit_x, hit_y), 5)
-
-# Работа с игроком
-
-def player_shoot(player, enemies):
-    target = None
-    max_depth = float('inf')
-
-    for enemy in enemies:
-        if enemy.health <= 0:
-            continue
-
-        if enemy.near_crosshair(player):
-            depth = enemy.get_depth(player)
-
-            if depth < max_depth:
-                max_depth = depth
-                target = enemy
-
-    if target:
-        target.take_damage(player.weapon.damage)
-        return True
-    
-    return False
-
-# Debug-отрисовка
 
 def draw_map(screen, player):
     '''

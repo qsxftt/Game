@@ -1,6 +1,7 @@
 import pygame
-from config import *
-from func import cast_single_ray, is_wall
+from src.core.config import *
+from src.views.raycast_renderer import cast_single_ray
+from src.systems.collision_system import is_wall
 from math import atan2, pi
 
 class Enemy:
@@ -137,51 +138,6 @@ class Enemy:
                 self.frame_walk_cooldown = self.frame_walk_count
 
         self.move(player)
-
-    def get_frame(self, texture, status='walk'):
-        if status == 'walk':
-            frame_count = self.frame_walk_count
-        elif status == 'attack':
-            frame_count = self.frame_attack_count
-
-        frame_width = texture.get_width() / frame_count
-        frame_height = texture.get_height()
-
-        if status == 'attack':
-            frame_index = round((1 - self.attack_cooldown / self.attack_delay) * (frame_count - 1))
-        elif status == 'walk':
-            frame_index = self.frame_walk_count - self.frame_walk_cooldown
-
-        x = frame_width * frame_index
-        frame = texture.subsurface(x, 0, frame_width, frame_height)
-
-        return frame, frame_width, frame_height
-
-    
-    def draw(self, screen, player):
-        if not self.is_visible(player):
-            return False
-
-        if not self.alive:
-            return False
-        
-        if not self.is_in_fov(player):
-            return False
-        
-        if self.attack_cooldown > 0:
-            frame, frame_width, frame_height = self.get_frame(self.texture_attack, 'attack')
-        else:
-            frame, frame_width, frame_height = self.get_frame(self.texture_walk, 'walk')
-
-        depth = self.get_depth(player)
-        screen_x = self.get_screen_x(player)
-        enemy_height = int(block_size * SCREEN_DISTANCE / depth) * 0.75
-        enemy_width = (frame_width * enemy_height / frame_height)
-        self.radius = enemy_width // 2
-
-        frame = pygame.transform.scale(frame, (enemy_width, enemy_height))
-
-        screen.blit(frame, (screen_x - enemy_width // 2, HEIGHT_HALF - enemy_height // 2))
 
     def draw_debug(self, screen):
         if not self.alive:

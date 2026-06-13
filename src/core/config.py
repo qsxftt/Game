@@ -1,5 +1,5 @@
 from math import pi, tan
-from door import Door
+from src.models.door import Door
 import pygame
 
 

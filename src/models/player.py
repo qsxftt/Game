@@ -1,8 +1,8 @@
-import pygame
 from math import *
-from config import *
-from weapon import Pistol
-from func import is_wall, open_door
+from src.core.config import *
+from src.models.weapon import Pistol
+from src.systems.door_system import open_door
+from src.systems.collision_system import is_wall
 
 class Player:
     def __init__(self):
@@ -24,11 +24,9 @@ class Player:
             and not is_wall(x, y - self.radius)
         )
 
-    def move(self):
-        keys = pygame.key.get_pressed()
+    def update(self, actions):
         sin_a = sin(self.angle)
         cos_a = cos(self.angle)
-        self.weapon.update()
 
         shot_fired = False
 
@@ -38,34 +36,34 @@ class Player:
         dx = 0
         dy = 0
 
-        if keys[pygame.K_w]:
+        if actions['W']:
             dx += cos_a * self.speed
             dy += sin_a * self.speed
-        if keys[pygame.K_s]:
+        if actions['S']:
             dx -= cos_a * self.speed
             dy -= sin_a * self.speed
-        if keys[pygame.K_a]:
+        if actions['A']:
             dx += sin_a * self.speed
             dy -= cos_a * self.speed
-        if keys[pygame.K_d]:
+        if actions['D']:
             dx -= sin_a * self.speed
             dy += cos_a * self.speed
-        if keys[pygame.K_LEFT]:
+        if actions['left']:
             self.angle -= 0.01 * self.speed 
-        if keys[pygame.K_RIGHT]:
+        if actions['right']:
             self.angle += 0.01 * self.speed
 
         self.angle %= 2 * pi
 
-        if keys[pygame.K_e] and self.cooldown == 0:
+        if actions['E'] and self.cooldown == 0:
             if open_door(self):
                 self.cooldown = self.delay
 
-        if keys[pygame.K_SPACE]:
+        if actions['space']:
             if self.weapon.shoot():
                 shot_fired = True
 
-        if keys[pygame.K_r]:
+        if actions['R']:
             self.weapon.reload()
         
         if self.can_move(self.x + dx, self.y):
