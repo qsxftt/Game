@@ -1,20 +1,17 @@
-from src.core.config import *
-from math import cos, sin
+"""Система управления дверями."""
+
+from src.core.config import doors
 from src.systems.map_system import get_cell, get_front_cell
 
+
 def get_door(x, y):
-    '''
-    Возвращает объект двери по переданным координатам
-    '''
+    """Возвращает дверь в клетке, содержащей координаты x/y."""
     cell = get_cell(x, y)
     return doors.get(cell)
 
 
 def open_door(player):
-    '''
-    Пытается открыть дверь, находящуюся перед игроком
-    Если перед игроком есть дверь, вызывается её метод open()
-    '''
+    """Пытается открыть дверь в клетке перед игроком."""
     cell = get_front_cell(player)
 
     if cell in doors:
@@ -24,8 +21,6 @@ def open_door(player):
 
 
 def update_doors():
-    '''
-    Обновляет состояние всех дверей на карте
-    '''
+    """Обновляет состояние всех дверей текущей карты."""
     for door in doors.values():
         door.update()

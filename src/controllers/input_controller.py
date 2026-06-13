@@ -1,8 +1,13 @@
+"""Контроллер ввода игрока."""
+
 import pygame
 
 
 class InputController:
+    """Считывает клавиатуру и превращает её состояние в словарь действий."""
+
     def get_actions(self):
+        """Возвращает действия игрока за текущий кадр."""
         keys = pygame.key.get_pressed()
 
         actions = {

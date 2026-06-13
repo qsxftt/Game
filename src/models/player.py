@@ -1,11 +1,18 @@
-from math import *
-from src.core.config import *
+"""Модель игрока."""
+
+from math import cos, pi, sin
+
+from src.core.config import HEIGHT, PLAYER_RADIUS, WIDTH
 from src.models.weapon import Pistol
-from src.systems.door_system import open_door
 from src.systems.collision_system import is_wall
+from src.systems.door_system import open_door
+
 
 class Player:
+    """Игрок: позиция, здоровье, угол камеры и текущее оружие."""
+
     def __init__(self):
+        """Создаёт игрока в центре текущего экрана."""
         self.x = WIDTH // 2
         self.y = HEIGHT // 2
         self.health = 100
@@ -17,6 +24,7 @@ class Player:
         self.weapon = Pistol()
 
     def can_move(self, x, y):
+        """Проверяет, может ли игрок занять позицию с учётом радиуса."""
         return (
             not is_wall(x + self.radius, y)
             and not is_wall(x, y + self.radius)
@@ -25,6 +33,7 @@ class Player:
         )
 
     def update(self, actions):
+        """Обрабатывает действия игрока за кадр и возвращает факт выстрела."""
         sin_a = sin(self.angle)
         cos_a = cos(self.angle)
 
@@ -49,7 +58,7 @@ class Player:
             dx -= sin_a * self.speed
             dy += cos_a * self.speed
         if actions['left']:
-            self.angle -= 0.01 * self.speed 
+            self.angle -= 0.01 * self.speed
         if actions['right']:
             self.angle += 0.01 * self.speed
 
@@ -65,11 +74,11 @@ class Player:
 
         if actions['R']:
             self.weapon.reload()
-        
+
         if self.can_move(self.x + dx, self.y):
-                self.x += dx
+            self.x += dx
 
         if self.can_move(self.x, self.y + dy):
             self.y += dy
-        
+
         return shot_fired

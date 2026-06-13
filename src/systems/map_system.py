@@ -1,11 +1,12 @@
+"""Система запросов к сетке карты."""
+
 from math import cos, sin
-from src.core.config import *
+
+from src.core.config import block_map, block_size, doors
 
 
 def get_cell(x, y):
-    '''
-    Возвращает координаты клетки карты по переданным координатам
-    '''
+    """Возвращает левый верхний угол клетки, содержащей координаты x/y."""
     endX = x // block_size * block_size
     endY = y // block_size * block_size
 
@@ -13,9 +14,7 @@ def get_cell(x, y):
 
 
 def get_front_cell(player):
-    '''
-    Возвращает координаты клетки, находящейся перед игроком
-    '''
+    """Возвращает клетку на расстоянии одного блока перед игроком."""
     front_x = player.x + cos(player.angle) * block_size
     front_y = player.y + sin(player.angle) * block_size
 
@@ -23,10 +22,9 @@ def get_front_cell(player):
 
     return cell
 
+
 def get_block_type(x, y):
-    '''
-    Возвращает тип блока в указанной клетке карты
-    '''
+    """Возвращает тип блока в точке: 'wall', 'door' или None."""
     cell = get_cell(x, y)
 
     if cell in block_map:

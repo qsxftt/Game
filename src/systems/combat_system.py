@@ -1,4 +1,8 @@
+"""Система боя."""
+
+
 def player_shoot(player, enemies):
+    """Обрабатывает попадание выстрела игрока по ближайшему врагу в прицеле."""
     target = None
     max_depth = float('inf')
 
@@ -16,5 +20,5 @@ def player_shoot(player, enemies):
     if target:
         target.take_damage(player.weapon.damage)
         return True
-    
+
     return False

@@ -1,24 +1,48 @@
-import pygame
+"""Ray casting renderer и debug-отрисовка карты."""
+
 from math import cos, sin, tan
-from src.core.config import *
+
+import pygame
+
+from src.core.config import (
+    DEBUG,
+    DELTA_RAY,
+    DOOR_TEXTURE,
+    GRAY,
+    GREEN,
+    HEIGHT,
+    HEIGHT_HALF,
+    HALF_FOV,
+    MAX_DEPTH,
+    NUM_RAYS,
+    RED,
+    SCALE,
+    SCREEN_DISTANCE,
+    WALL_TEXTURE,
+    YELLOW,
+    block_map,
+    block_size,
+    doors,
+)
 from src.systems.door_system import get_door
 from src.systems.map_system import get_block_type
 
 
 def apply_shade_texture(texture_column, shade):
+    """Возвращает затемнённую копию вертикальной колонки текстуры."""
     shade *= 255
     texture_column_copy = texture_column.copy()
     texture_column_copy.fill((shade, shade, shade), special_flags=pygame.BLEND_MULT)
 
     return texture_column_copy
 
-def cast_ray_to_door(player, angle, door):
-    '''
-    Проверяет пересечение луча с движущейся дверной перегородкой
 
-    Дверь рассматривается не как целая клетка, а как тонкий отрезок
-    который может смещаться при открытии
-    '''
+def cast_ray_to_door(player, angle, door):
+    """Проверяет пересечение луча с движущейся дверной панелью.
+
+    Дверь считается не целой клеткой, а тонким отрезком, который смещается
+    во время открытия. Это позволяет ray casting рисовать открывающуюся дверь.
+    """
     sin_a = sin(angle)
     cos_a = cos(angle)
 
@@ -40,18 +64,19 @@ def cast_ray_to_door(player, angle, door):
 
     return None
 
-def cast_single_ray(player, angle):
-    '''
-    Выпускает один луч и ищет ближайшее столкновение со стеной или дверью
 
-    Луч проверяет пересечения с вертикальными и горизонтальными линиями сетки карты
-    После этого выбирается ближайшее найденное попадание
-    '''
+def cast_single_ray(player, angle):
+    """Выпускает один луч и возвращает ближайшее столкновение.
+
+    Луч отдельно проверяет пересечения с вертикальными и горизонтальными
+    линиями сетки, а затем выбирает ближайшее найденное попадание.
+    Возвращает: hit_x, hit_y, depth, side, block_type.
+    """
     sin_a = sin(angle)
     cos_a = cos(angle)
     tan_a = tan(angle)
 
-    # Пересечения с вертикальными линиями сетки
+    # Пересечения с вертикальными линиями сетки.
     vert_x = 0
     vert_y = 0
     vert_type = None
@@ -94,7 +119,7 @@ def cast_single_ray(player, angle):
         x_vert += vert_delta_x
         y_vert += vert_delta_y
 
-    # Пересечения с горизонтальными линиями сетки
+    # Пересечения с горизонтальными линиями сетки.
     hor_x = 0
     hor_y = 0
     hor_type = None
@@ -144,13 +169,7 @@ def cast_single_ray(player, angle):
 
 
 def ray_casting(screen, player):
-    """
-    Выпускает веер лучей от игрока и рисует 3D сцену
-
-    Каждый луч ищет ближайшее столкновение со стеной или дверью
-    По расстоянию до столкновения вычисляется высота вертикальной полоски
-    Также применяется затемнение по расстоянию и затемнение горизонтальных сторон
-    """
+    """Рисует псевдо-3D стены и двери через веер лучей от игрока."""
     start = player.angle - HALF_FOV
 
     for ray in range(NUM_RAYS):
@@ -169,6 +188,7 @@ def ray_casting(screen, player):
         else:
             texture = WALL_TEXTURE
 
+        # Убирает fish-eye и делает расстояние перпендикулярным экрану.
         depth *= cos(player.angle - ray_angle)
 
         wall_height = int(block_size * SCREEN_DISTANCE / depth)
@@ -189,17 +209,15 @@ def ray_casting(screen, player):
             texture_column = apply_shade_texture(texture_column, shade)
             texture_column = pygame.transform.scale(texture_column, (SCALE, HEIGHT))
 
-
         screen.blit(texture_column, (wall_x, wall_y))
 
         if DEBUG:
             pygame.draw.line(screen, RED, (player.x, player.y), (hit_x, hit_y), 2)
             pygame.draw.circle(screen, RED, (hit_x, hit_y), 5)
 
+
 def draw_map(screen, player):
-    '''
-    Рисует debug-карту сверху
-    '''
+    """Рисует debug-карту сверху: стены, двери и позицию игрока."""
     for x, y in block_map:
         pygame.draw.rect(screen, GRAY, (x, y, block_size, block_size), 2)
 

@@ -1,8 +1,15 @@
+"""Renderer оружия игрока."""
+
 import pygame
-from src.core.config import *
+
+from src.core.config import HEIGHT_HALF, WIDTH
+
 
 class WeaponRender:
+    """Рисует оружие от первого лица."""
+
     def get_frame(self, weapon, texture, status=None):
+        """Возвращает текущий кадр анимации оружия."""
         frame_count = weapon.frame_count
         frame_width = texture.get_width() // frame_count
         frame_height = texture.get_height()
@@ -20,6 +27,7 @@ class WeaponRender:
         return frame, frame_width, frame_height
 
     def draw(self, screen, weapon):
+        """Рисует оружие с учётом текущей анимации."""
         if weapon.shoot_cooldown > 0:
             frame, frame_width, frame_height = self.get_frame(weapon, weapon.texture, 'shoot')
         elif weapon.reload_cooldown > 0:
