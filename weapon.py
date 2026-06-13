@@ -94,7 +94,7 @@ class Weapon:
 class Pistol(Weapon):
     def __init__(self):
         super().__init__()
-        self.damage = 15
+        self.damage = 35
         self.ammo = 10
         self.magazine_size = 10
         self.shoot_delay = 20

@@ -15,7 +15,11 @@ class Enemy:
         self.attack_delay = 0
         self.attack_cooldown = 0
         self.attack_distance = 0
-        self.texture = None
+        self.frame_walk_cooldown = 0
+        self.frame_walk_count = 0
+        self.frame_attack_count = 0
+        self.texture_walk = None
+        self.texture_attack = None
         
 
     def get_depth(self, player):
@@ -120,10 +124,39 @@ class Enemy:
         return True
 
     def update(self, player):
+        if not self.alive:
+            return False
+         
         if self.attack_cooldown > 0:
             self.attack_cooldown -= 1
 
+        if self.frame_walk_cooldown > 0:
+            self.frame_walk_cooldown -= 1
+
+            if self.frame_walk_cooldown == 0:
+                self.frame_walk_cooldown = self.frame_walk_count
+
         self.move(player)
+
+    def get_frame(self, texture, status='walk'):
+        if status == 'walk':
+            frame_count = self.frame_walk_count
+        elif status == 'attack':
+            frame_count = self.frame_attack_count
+
+        frame_width = texture.get_width() / frame_count
+        frame_height = texture.get_height()
+
+        if status == 'attack':
+            frame_index = round((1 - self.attack_cooldown / self.attack_delay) * (frame_count - 1))
+        elif status == 'walk':
+            frame_index = self.frame_walk_count - self.frame_walk_cooldown
+
+        x = frame_width * frame_index
+        frame = texture.subsurface(x, 0, frame_width, frame_height)
+
+        return frame, frame_width, frame_height
+
     
     def draw(self, screen, player):
         if not self.is_visible(player):
@@ -135,15 +168,17 @@ class Enemy:
         if not self.is_in_fov(player):
             return False
         
+        if self.attack_cooldown > 0:
+            frame, frame_width, frame_height = self.get_frame(self.texture_attack, 'attack')
+        else:
+            frame, frame_width, frame_height = self.get_frame(self.texture_walk, 'walk')
+
         depth = self.get_depth(player)
         screen_x = self.get_screen_x(player)
-        enemy_height = int(block_size * SCREEN_DISTANCE / depth)
-        frame_width = self.texture.get_width()
-        frame_height = self.texture.get_height()
+        enemy_height = int(block_size * SCREEN_DISTANCE / depth) * 0.75
         enemy_width = (frame_width * enemy_height / frame_height)
         self.radius = enemy_width // 2
 
-        frame = self.texture.subsurface(0, 0, frame_width, frame_height)
         frame = pygame.transform.scale(frame, (enemy_width, enemy_height))
 
         screen.blit(frame, (screen_x - enemy_width // 2, HEIGHT_HALF - enemy_height // 2))
@@ -161,9 +196,13 @@ class Dwarf(Enemy):
         self.health = 100
         self.damage = 10
         self.speed = 2
-        self.attack_distance = 50
+        self.attack_distance = 100
         self.attack_delay = 20
-        self.texture = ENEMY1_TEXTURE
+        self.frame_attack_count = 8
+        self.frame_walk_cooldown = 8
+        self.frame_walk_count = 4
+        self.texture_walk = ENEMY1_TEXTURE
+        self.texture_attack = ENEMY12_TEXTURE
 
     
 
