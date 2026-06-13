@@ -8,10 +8,10 @@ from math import pi, tan
 
 import pygame
 
-from src.models.door import Door
+from src.models.level import Level
 
 
-DEBUG = False
+DEBUG = True
 
 # Экран
 WIDTH = 1200
@@ -40,50 +40,19 @@ ENEMY12_TEXTURE = pygame.image.load('assets/enemies/ATTACK.png')
 block_size = 100
 text_map = [
     'WWWWWWWWWWWW',
+    'W........T.W',
+    'W...P......W',
     'W..........W',
     'W..........W',
-    'W..........W',
-    'W..........W',
-    'W......WWDWW',
+    'W..E...WWDWW',
     'W......D...W',
     'WWWWWWWWWWWW',
 ]
 
-block_map = set()
-door_positions = []
-doors = {}
+current_level = Level(block_size, text_map)
 
-
-def get_orient_door(x, y):
-    """Определяет ориентацию двери по соседним стенам."""
-    left = (x - block_size, y) in block_map
-    right = (x + block_size, y) in block_map
-    up = (x, y - block_size) in block_map
-    down = (x, y + block_size) in block_map
-
-    if left and right:
-        return "hor"
-
-    if up and down:
-        return "vert"
-
-    return "vert"
-
-
-y_block = 0
-for row in text_map:
-    x_block = 0
-    for tile in row:
-        if tile == 'W':
-            block_map.add((x_block, y_block))
-        elif tile == 'D':
-            door_positions.append((x_block, y_block))
-        x_block += block_size
-    y_block += block_size
-
-for x, y in door_positions:
-    orient = get_orient_door(x, y)
-    doors[(x, y)] = Door(x, y, orient, block_size)
+block_map = current_level.block_map
+doors = current_level.doors
 
 # Трассировка лучей
 FOV = pi / 3

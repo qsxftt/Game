@@ -23,6 +23,7 @@ from src.core.config import (
     block_map,
     block_size,
     doors,
+    current_level
 )
 from src.systems.door_system import get_door
 from src.systems.map_system import get_block_type
@@ -235,3 +236,6 @@ def draw_map(screen, player):
         pygame.draw.rect(screen, color, rect)
 
     pygame.draw.circle(screen, RED, (player.x, player.y), 10)
+    x, y = current_level.terminal_pos
+    x, y = x + block_size // 2, y + block_size // 2
+    pygame.draw.circle(screen, (77, 150, 9), (x, y), 10)

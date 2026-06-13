@@ -3,7 +3,7 @@
 import pygame
 
 from src.controllers.input_controller import InputController
-from src.core.config import DEBUG, FPS, HEIGHT, HEIGHT_HALF, WIDTH
+from src.core.config import DEBUG, FPS, HEIGHT, HEIGHT_HALF, WIDTH, current_level
 from src.models.enemy import Dwarf
 from src.models.player import Player
 from src.systems.combat_system import player_shoot
@@ -12,6 +12,7 @@ from src.views.hud_renderer import HUDrender
 from src.views.raycast_renderer import draw_map, ray_casting
 from src.views.sprite_renderer import SpriteRender
 from src.views.weapon_renderer import WeaponRender
+from src.systems.sector_system import all_enemies_dead, activate_terminal
 
 
 class GameController:
@@ -30,18 +31,17 @@ class GameController:
         self.weaponrender = WeaponRender()
         self.spriterender = SpriteRender()
         self.clock = pygame.time.Clock()
-        self.player = Player()
+        self.player = Player(*current_level.player_start)
         self.inputcon = InputController()
-        self.enemies = [
-            Dwarf(300, 200)
-        ]
+        self.enemies = [Dwarf(x, y) for x, y in current_level.enemies_pos]
+        self.sector_clean = False
         self.running = True
 
     def update(self):
         """Обновляет состояние игры за один кадр."""
         actions = self.inputcon.get_actions()
         self.player.weapon.update()
-        shot_fired = self.player.update(actions)
+        shot_fired, interact_pressed = self.player.update(actions)
         update_doors()
 
         for enemy in self.enemies:
@@ -53,6 +53,15 @@ class GameController:
         if self.player.health <= 0:
             print('Game Over')
             self.running = False
+
+        if not self.sector_clean and all_enemies_dead(self.enemies):
+            print('Сектор зачищен')
+            self.sector_clean = True
+
+        if self.sector_clean and interact_pressed:
+            activate_terminal(self.player)
+            
+
 
     def render(self):
         """Рисует мир, врагов, оружие, HUD и debug-слой."""

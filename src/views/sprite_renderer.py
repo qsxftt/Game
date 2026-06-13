@@ -21,7 +21,7 @@ class SpriteRender:
         if status == 'attack':
             frame_index = round((1 - enemy.attack_cooldown / enemy.attack_delay) * (frame_count - 1))
         elif status == 'walk':
-            frame_index = enemy.frame_walk_count - enemy.frame_walk_cooldown
+            frame_index = round((1 - enemy.frame_walk_cooldown / enemy.frame_walk_delay) * (frame_count - 1))
 
         x = frame_width * frame_index
         frame = texture.subsurface(x, 0, frame_width, frame_height)

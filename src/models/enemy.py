@@ -37,6 +37,7 @@ class Enemy:
         self.attack_cooldown = 0
         self.attack_distance = 0
         self.frame_walk_cooldown = 0
+        self.frame_walk_delay = 0
         self.frame_walk_count = 0
         self.frame_attack_count = 0
         self.texture_walk = None
@@ -165,8 +166,8 @@ class Enemy:
         if self.frame_walk_cooldown > 0:
             self.frame_walk_cooldown -= 1
 
-            if self.frame_walk_cooldown == 0:
-                self.frame_walk_cooldown = self.frame_walk_count
+        if self.frame_walk_cooldown == 0:
+            self.frame_walk_cooldown = self.frame_walk_delay
 
         self.move(player)
 
@@ -190,7 +191,7 @@ class Dwarf(Enemy):
         self.attack_distance = 100
         self.attack_delay = 20
         self.frame_attack_count = 8
-        self.frame_walk_cooldown = 8
+        self.frame_walk_delay = 25
         self.frame_walk_count = 4
         self.texture_walk = ENEMY1_TEXTURE
         self.texture_attack = ENEMY12_TEXTURE

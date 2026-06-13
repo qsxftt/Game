@@ -11,10 +11,10 @@ from src.systems.door_system import open_door
 class Player:
     """Игрок: позиция, здоровье, угол камеры и текущее оружие."""
 
-    def __init__(self):
+    def __init__(self, x, y):
         """Создаёт игрока в центре текущего экрана."""
-        self.x = WIDTH // 2
-        self.y = HEIGHT // 2
+        self.x = x
+        self.y = y
         self.health = 100
         self.angle = 0
         self.speed = 5
@@ -38,6 +38,7 @@ class Player:
         cos_a = cos(self.angle)
 
         shot_fired = False
+        interact_pressed = False
 
         if self.cooldown > 0:
             self.cooldown -= 1
@@ -68,6 +69,8 @@ class Player:
             if open_door(self):
                 self.cooldown = self.delay
 
+            interact_pressed = True
+
         if actions['space']:
             if self.weapon.shoot():
                 shot_fired = True
@@ -81,4 +84,4 @@ class Player:
         if self.can_move(self.x, self.y + dy):
             self.y += dy
 
-        return shot_fired
+        return shot_fired, interact_pressed
