@@ -38,7 +38,6 @@ class Player:
         cos_a = cos(self.angle)
 
         shot_fired = False
-        interact_pressed = False
 
         if self.cooldown > 0:
             self.cooldown -= 1
@@ -69,8 +68,6 @@ class Player:
             if open_door(self, level):
                 self.cooldown = self.delay
 
-            interact_pressed = True
-
         if actions['space']:
             if self.weapon.shoot():
                 shot_fired = True
@@ -84,4 +81,4 @@ class Player:
         if self.can_move(self.x, self.y + dy, level):
             self.y += dy
 
-        return shot_fired, interact_pressed
+        return shot_fired

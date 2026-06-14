@@ -5,6 +5,10 @@ import pygame
 
 class InputController:
     """Считывает клавиатуру и превращает её состояние в словарь действий."""
+    def __init__(self):
+        self.E = False
+        self.R = False
+        self.SPACE = False
 
     def get_actions(self):
         """Возвращает действия игрока за текущий кадр."""
@@ -17,9 +21,25 @@ class InputController:
             'D': keys[pygame.K_d],
             'left': keys[pygame.K_LEFT],
             'right': keys[pygame.K_RIGHT],
-            'E': keys[pygame.K_e],
-            'space': keys[pygame.K_SPACE],
-            'R': keys[pygame.K_r]
+            'E': self.E,
+            'space': self.SPACE,
+            'R': self.R
         }
-
+        
+        self.E = False
+        self.R = False
+        self.SPACE = False
+        
         return actions
+    
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_e:
+                self.E = True
+            if event.key == pygame.K_r:
+                self.R = True
+            if event.key == pygame.K_SPACE:
+                self.SPACE = True
+
+            
+

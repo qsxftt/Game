@@ -11,7 +11,7 @@ import pygame
 from src.models.level import Level
 
 
-DEBUG = True
+DEBUG = False
 
 # Экран
 WIDTH = 1200

@@ -35,7 +35,9 @@ class GameController:
         self.inputcon = InputController()
         self.sector_index = 0
         self.load_sector(self.sector_index)
+        self.font = pygame.font.SysFont('Arial', 52)
         self.running = True
+        self.game_state = 'playing'
 
     def load_sector(self, sector_index):
         level = Level(block_size, sector_maps[sector_index])
@@ -48,8 +50,14 @@ class GameController:
     def update(self):
         """Обновляет состояние игры за один кадр."""
         actions = self.inputcon.get_actions()
+        if self.game_state == 'sector_clear':
+            if actions['E']:
+                self.game_state = 'playing'
+                self.go_to_next_sector()
+            return
+
         self.player.weapon.update()
-        shot_fired, interact_pressed = self.player.update(actions, self.current_level)
+        shot_fired = self.player.update(actions, self.current_level)
         update_doors(self.current_level)
 
         for enemy in self.enemies:
@@ -60,27 +68,30 @@ class GameController:
 
         if self.player.health <= 0:
             print('Game Over')
+            self.game_state = 'game_over'
             self.running = False
 
         if not self.sector_clean and all_enemies_dead(self.enemies):
             print('Сектор зачищен')
             self.sector_clean = True
 
-        if interact_pressed and not self.terminal_activated:
+        if actions['E'] and not self.terminal_activated:
             if activate_terminal(self.player, self.current_level):
                 if self.sector_clean:
                     print('Терминал активироан')
-                    self.terminal_activated = True 
-                    self.sector_index += 1
-                    if self.sector_index < len(sector_maps):
-                        self.load_sector(self.sector_index)  
-                    else:
-                        print('Победа')
-                        self.running = False
+                    self.terminal_activated = True
+                    self.game_state = 'sector_clear'
                 else:
                     print('сектор еще не зачишен')
                        
-
+    def go_to_next_sector(self):
+        self.sector_index += 1
+        if self.sector_index < len(sector_maps):
+            self.load_sector(self.sector_index)  
+        else:
+            print('Победа')
+            self.game_state = 'final_victory'
+            self.running = False
 
     def render(self):
         """Рисует мир, врагов, оружие, HUD и debug-слой."""
@@ -92,6 +103,14 @@ class GameController:
         self.weaponrender.draw(self.screen, self.player.weapon)
         self.hud.draw_hud(self.screen, self.player)
         self.hud.draw_crossfire(self.screen)
+
+        if self.game_state == 'sector_clear':
+            self.screen.fill((0, 0, 0))
+            title = self.font.render('СЕКТОР ЗАЧИЩЕН', True, (0, 255, 0))
+            hint = self.font.render('нажми Е чтобы продолжить', True, (0, 255, 0))
+
+            self.screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
+            self.screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40)))
 
         if DEBUG:
             draw_map(self.screen, self.player, self.current_level)
@@ -107,6 +126,7 @@ class GameController:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                self.inputcon.handle_event(event)
 
             self.update()
             self.render()

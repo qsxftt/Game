@@ -189,7 +189,7 @@ class Dwarf(Enemy):
         self.damage = 10
         self.speed = 2
         self.attack_distance = 100
-        self.attack_delay = 20
+        self.attack_delay = 50
         self.frame_attack_count = 8
         self.frame_walk_delay = 25
         self.frame_walk_count = 4
