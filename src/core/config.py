@@ -38,7 +38,7 @@ ENEMY12_TEXTURE = pygame.image.load('assets/enemies/ATTACK.png')
 
 # Карта
 block_size = 100
-text_map = [
+text_map_1 = [
     'WWWWWWWWWWWW',
     'W........T.W',
     'W...P......W',
@@ -49,7 +49,22 @@ text_map = [
     'WWWWWWWWWWWW',
 ]
 
-current_level = Level(block_size, text_map)
+text_map_2 = [
+    'WWWWWWWWWWWW',
+    'W.E.W....T.W',
+    'W...W......W',
+    'WWWDW......W',
+    'W..........W',
+    'W........P.W',
+    'W..........W',
+    'WWWWWWWWWWWW',
+]
+
+sector_maps = [
+    text_map_1,
+    text_map_2
+]
+
 
 
 # Трассировка лучей

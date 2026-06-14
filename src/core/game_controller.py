@@ -3,7 +3,7 @@
 import pygame
 
 from src.controllers.input_controller import InputController
-from src.core.config import DEBUG, FPS, HEIGHT, HEIGHT_HALF, WIDTH, current_level
+from src.core.config import DEBUG, FPS, HEIGHT, HEIGHT_HALF, WIDTH, block_size, sector_maps
 from src.models.enemy import Dwarf
 from src.models.player import Player
 from src.systems.combat_system import player_shoot
@@ -13,6 +13,7 @@ from src.views.raycast_renderer import draw_map, ray_casting
 from src.views.sprite_renderer import SpriteRender
 from src.views.weapon_renderer import WeaponRender
 from src.systems.sector_system import all_enemies_dead, activate_terminal
+from src.models.level import Level
 
 
 class GameController:
@@ -28,15 +29,20 @@ class GameController:
 
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.hud = HUDrender()
-        self.current_level = current_level
         self.weaponrender = WeaponRender()
         self.spriterender = SpriteRender()
         self.clock = pygame.time.Clock()
-        self.player = Player(*self.current_level.player_start)
         self.inputcon = InputController()
+        self.sector_index = 0
+        self.load_sector(self.sector_index)
+        self.running = True
+
+    def load_sector(self, sector_index):
+        level = Level(block_size, sector_maps[sector_index])
+        self.current_level = level
+        self.player = Player(*self.current_level.player_start)
         self.enemies = [Dwarf(x, y) for x, y in self.current_level.enemies_pos]
         self.sector_clean = False
-        self.running = True
         self.terminal_activated = False
 
     def update(self):
@@ -60,10 +66,20 @@ class GameController:
             print('Сектор зачищен')
             self.sector_clean = True
 
-        if self.sector_clean and interact_pressed and not self.terminal_activated:
+        if interact_pressed and not self.terminal_activated:
             if activate_terminal(self.player, self.current_level):
-                print('Терминал активироан')
-                self.terminal_activated = True          
+                if self.sector_clean:
+                    print('Терминал активироан')
+                    self.terminal_activated = True 
+                    self.sector_index += 1
+                    if self.sector_index < len(sector_maps):
+                        self.load_sector(self.sector_index)  
+                    else:
+                        print('Победа')
+                        self.running = False
+                else:
+                    print('сектор еще не зачишен')
+                       
 
 
     def render(self):
