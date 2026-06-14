@@ -28,27 +28,29 @@ class GameController:
 
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.hud = HUDrender()
+        self.current_level = current_level
         self.weaponrender = WeaponRender()
         self.spriterender = SpriteRender()
         self.clock = pygame.time.Clock()
-        self.player = Player(*current_level.player_start)
+        self.player = Player(*self.current_level.player_start)
         self.inputcon = InputController()
-        self.enemies = [Dwarf(x, y) for x, y in current_level.enemies_pos]
+        self.enemies = [Dwarf(x, y) for x, y in self.current_level.enemies_pos]
         self.sector_clean = False
         self.running = True
+        self.terminal_activated = False
 
     def update(self):
         """Обновляет состояние игры за один кадр."""
         actions = self.inputcon.get_actions()
         self.player.weapon.update()
-        shot_fired, interact_pressed = self.player.update(actions)
-        update_doors()
+        shot_fired, interact_pressed = self.player.update(actions, self.current_level)
+        update_doors(self.current_level)
 
         for enemy in self.enemies:
-            enemy.update(self.player)
+            enemy.update(self.player, self.current_level)
 
         if shot_fired:
-            player_shoot(self.player, self.enemies)
+            player_shoot(self.player, self.enemies, self.current_level)
 
         if self.player.health <= 0:
             print('Game Over')
@@ -58,24 +60,25 @@ class GameController:
             print('Сектор зачищен')
             self.sector_clean = True
 
-        if self.sector_clean and interact_pressed:
-            activate_terminal(self.player)
-            
+        if self.sector_clean and interact_pressed and not self.terminal_activated:
+            if activate_terminal(self.player, self.current_level):
+                print('Терминал активироан')
+                self.terminal_activated = True          
 
 
     def render(self):
         """Рисует мир, врагов, оружие, HUD и debug-слой."""
         pygame.draw.rect(self.screen, (66, 170, 255), (0, 0, WIDTH, HEIGHT_HALF))
         pygame.draw.rect(self.screen, (25, 25, 25), (0, HEIGHT_HALF, WIDTH, HEIGHT_HALF))
-        ray_casting(self.screen, self.player)
+        ray_casting(self.screen, self.player, self.current_level)
 
-        self.spriterender.draw_enemies(self.enemies, self.screen, self.player)
+        self.spriterender.draw_enemies(self.enemies, self.screen, self.player, self.current_level)
         self.weaponrender.draw(self.screen, self.player.weapon)
         self.hud.draw_hud(self.screen, self.player)
         self.hud.draw_crossfire(self.screen)
 
         if DEBUG:
-            draw_map(self.screen, self.player)
+            draw_map(self.screen, self.player, self.current_level)
             for enemy in self.enemies:
                 enemy.draw_debug(self.screen)
 

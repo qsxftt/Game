@@ -1,7 +1,7 @@
 """Система боя."""
 
 
-def player_shoot(player, enemies):
+def player_shoot(player, enemies, level):
     """Обрабатывает попадание выстрела игрока по ближайшему врагу в прицеле."""
     target = None
     max_depth = float('inf')
@@ -10,7 +10,7 @@ def player_shoot(player, enemies):
         if enemy.health <= 0:
             continue
 
-        if enemy.near_crosshair(player):
+        if enemy.near_crosshair(player, level):
             depth = enemy.get_depth(player)
 
             if depth < max_depth:

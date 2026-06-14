@@ -82,10 +82,10 @@ class Enemy:
 
         return WIDTH_HALF + delta_angle / DELTA_RAY * SCALE
 
-    def is_visible(self, player):
+    def is_visible(self, player, level):
         """Проверяет, не перекрыт ли враг стеной или закрытой дверью."""
         angle = self.get_angle(player)
-        hit_x, hit_y, wall_depth, side, block_type = cast_single_ray(player, angle)
+        hit_x, hit_y, wall_depth, side, block_type = cast_single_ray(player, angle, level)
         enemy_depth = self.get_depth(player)
 
         return enemy_depth < wall_depth
@@ -98,12 +98,12 @@ class Enemy:
             self.health = 0
             self.alive = False
 
-    def near_crosshair(self, player):
+    def near_crosshair(self, player, level):
         """Проверяет, находится ли враг достаточно близко к прицелу."""
         if not self.alive:
             return False
 
-        if not self.is_visible(player):
+        if not self.is_visible(player, level):
             return False
 
         if not self.is_in_fov(player):
@@ -113,16 +113,16 @@ class Enemy:
 
         return abs(screen_x - WIDTH_HALF) < self.radius
 
-    def can_move(self, x, y):
+    def can_move(self, x, y, level):
         """Проверяет, может ли враг занять указанную позицию."""
         return (
-            not is_wall(x + 15, y)
-            and not is_wall(x, y + 15)
-            and not is_wall(x - 15, y)
-            and not is_wall(x, y - 15)
+            not is_wall(x + 15, y, level)
+            and not is_wall(x, y + 15, level)
+            and not is_wall(x - 15, y, level)
+            and not is_wall(x, y - 15, level)
         )
 
-    def move(self, player):
+    def move(self, player, level):
         """Двигает врага к игроку или атакует при достаточной близости."""
         dx = player.x - self.x
         dy = player.y - self.y
@@ -139,10 +139,10 @@ class Enemy:
         dx = dx / depth * self.speed
         dy = dy / depth * self.speed
 
-        if self.can_move(self.x + dx, self.y):
+        if self.can_move(self.x + dx, self.y, level):
             self.x += dx
 
-        if self.can_move(self.x, self.y + dy):
+        if self.can_move(self.x, self.y + dy, level):
             self.y += dy
 
     def attack(self, player):
@@ -155,7 +155,7 @@ class Enemy:
 
         return True
 
-    def update(self, player):
+    def update(self, player, level):
         """Обновляет cooldown'ы и поведение врага за один кадр."""
         if not self.alive:
             return False
@@ -169,7 +169,7 @@ class Enemy:
         if self.frame_walk_cooldown == 0:
             self.frame_walk_cooldown = self.frame_walk_delay
 
-        self.move(player)
+        self.move(player, level)
 
     def draw_debug(self, screen):
         """Рисует debug-кружок врага на мини-карте."""

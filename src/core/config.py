@@ -51,8 +51,6 @@ text_map = [
 
 current_level = Level(block_size, text_map)
 
-block_map = current_level.block_map
-doors = current_level.doors
 
 # Трассировка лучей
 FOV = pi / 3

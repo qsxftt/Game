@@ -20,10 +20,7 @@ from src.core.config import (
     SCREEN_DISTANCE,
     WALL_TEXTURE,
     YELLOW,
-    block_map,
-    block_size,
-    doors,
-    current_level
+    block_size
 )
 from src.systems.door_system import get_door
 from src.systems.map_system import get_block_type
@@ -66,7 +63,7 @@ def cast_ray_to_door(player, angle, door):
     return None
 
 
-def cast_single_ray(player, angle):
+def cast_single_ray(player, angle, level):
     """Выпускает один луч и возвращает ближайшее столкновение.
 
     Луч отдельно проверяет пересечения с вертикальными и горизонтальными
@@ -99,7 +96,7 @@ def cast_single_ray(player, angle):
         else:
             x_check = x_vert - 1
 
-        block_type = get_block_type(x_check, y_vert)
+        block_type = get_block_type(x_check, y_vert, level)
 
         if block_type == "wall":
             vert_x = x_vert
@@ -109,7 +106,7 @@ def cast_single_ray(player, angle):
             break
 
         if block_type == "door":
-            door = get_door(x_check, y_vert)
+            door = get_door(x_check, y_vert, level)
             door_hit = cast_ray_to_door(player, angle, door)
 
             if door_hit:
@@ -142,7 +139,7 @@ def cast_single_ray(player, angle):
             else:
                 y_check = y_hor - 1
 
-            block_type = get_block_type(x_hor, y_check)
+            block_type = get_block_type(x_hor, y_check, level)
 
             if block_type == "wall":
                 hor_x = x_hor
@@ -152,7 +149,7 @@ def cast_single_ray(player, angle):
                 break
 
             if block_type == "door":
-                door = get_door(x_hor, y_check)
+                door = get_door(x_hor, y_check, level)
                 door_hit = cast_ray_to_door(player, angle, door)
 
                 if door_hit:
@@ -169,13 +166,13 @@ def cast_single_ray(player, angle):
         return hor_x, hor_y, hor_depth, 'hor', hor_type
 
 
-def ray_casting(screen, player):
+def ray_casting(screen, player, level):
     """Рисует псевдо-3D стены и двери через веер лучей от игрока."""
     start = player.angle - HALF_FOV
 
     for ray in range(NUM_RAYS):
         ray_angle = start + ray * DELTA_RAY
-        hit_x, hit_y, depth, side, block_type = cast_single_ray(player, ray_angle)
+        hit_x, hit_y, depth, side, block_type = cast_single_ray(player, ray_angle, level)
         shade = max(30, 255 - (depth // 3)) / 255
 
         if side == 'vert':
@@ -217,12 +214,12 @@ def ray_casting(screen, player):
             pygame.draw.circle(screen, RED, (hit_x, hit_y), 5)
 
 
-def draw_map(screen, player):
+def draw_map(screen, player, level):
     """Рисует debug-карту сверху: стены, двери и позицию игрока."""
-    for x, y in block_map:
+    for x, y in level.block_map:
         pygame.draw.rect(screen, GRAY, (x, y, block_size, block_size), 2)
 
-    for cell, door in doors.items():
+    for cell, door in level.doors.items():
         x, y = cell
 
         if door.state == 'opening' or door.state == 'closing':
@@ -236,6 +233,6 @@ def draw_map(screen, player):
         pygame.draw.rect(screen, color, rect)
 
     pygame.draw.circle(screen, RED, (player.x, player.y), 10)
-    x, y = current_level.terminal_pos
+    x, y = level.terminal_pos
     x, y = x + block_size // 2, y + block_size // 2
     pygame.draw.circle(screen, (77, 150, 9), (x, y), 10)

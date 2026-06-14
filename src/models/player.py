@@ -23,16 +23,16 @@ class Player:
         self.delay = 20
         self.weapon = Pistol()
 
-    def can_move(self, x, y):
+    def can_move(self, x, y, level):
         """Проверяет, может ли игрок занять позицию с учётом радиуса."""
         return (
-            not is_wall(x + self.radius, y)
-            and not is_wall(x, y + self.radius)
-            and not is_wall(x - self.radius, y)
-            and not is_wall(x, y - self.radius)
+            not is_wall(x + self.radius, y, level)
+            and not is_wall(x, y + self.radius, level)
+            and not is_wall(x - self.radius, y, level)
+            and not is_wall(x, y - self.radius, level)
         )
 
-    def update(self, actions):
+    def update(self, actions, level):
         """Обрабатывает действия игрока за кадр и возвращает факт выстрела."""
         sin_a = sin(self.angle)
         cos_a = cos(self.angle)
@@ -66,7 +66,7 @@ class Player:
         self.angle %= 2 * pi
 
         if actions['E'] and self.cooldown == 0:
-            if open_door(self):
+            if open_door(self, level):
                 self.cooldown = self.delay
 
             interact_pressed = True
@@ -78,10 +78,10 @@ class Player:
         if actions['R']:
             self.weapon.reload()
 
-        if self.can_move(self.x + dx, self.y):
+        if self.can_move(self.x + dx, self.y, level):
             self.x += dx
 
-        if self.can_move(self.x, self.y + dy):
+        if self.can_move(self.x, self.y + dy, level):
             self.y += dy
 
         return shot_fired, interact_pressed

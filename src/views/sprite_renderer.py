@@ -28,9 +28,9 @@ class SpriteRender:
 
         return frame, frame_width, frame_height
 
-    def draw(self, enemy, screen, player):
+    def draw(self, enemy, screen, player, level):
         """Рисует одного врага, если он жив, видим и находится в FOV."""
-        if not enemy.is_visible(player):
+        if not enemy.is_visible(player, level):
             return False
 
         if not enemy.alive:
@@ -55,7 +55,7 @@ class SpriteRender:
         frame = pygame.transform.scale(frame, (enemy_width, enemy_height))
         screen.blit(frame, (screen_x - enemy_width // 2, HEIGHT_HALF - enemy_height // 2))
 
-    def draw_enemies(self, enemies, screen, player):
+    def draw_enemies(self, enemies, screen, player, level):
         """Рисует всех врагов текущего уровня."""
         for enemy in enemies:
-            self.draw(enemy, screen, player)
+            self.draw(enemy, screen, player, level)

@@ -2,7 +2,7 @@
 
 from math import cos, sin
 
-from src.core.config import block_map, block_size, doors
+from src.core.config import block_size
 
 
 def get_cell(x, y):
@@ -23,14 +23,14 @@ def get_front_cell(player):
     return cell
 
 
-def get_block_type(x, y):
+def get_block_type(x, y, level):
     """Возвращает тип блока в точке: 'wall', 'door' или None."""
     cell = get_cell(x, y)
 
-    if cell in block_map:
+    if cell in level.block_map:
         return 'wall'
 
-    if cell in doors and doors[cell].open_progress < 1.0:
+    if cell in level.doors and level.doors[cell].open_progress < 1.0:
         return 'door'
 
     return None
