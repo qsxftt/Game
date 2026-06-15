@@ -3,9 +3,10 @@ class GameState:
     SECTOR_CLEAR = 'sector_clear'
     GAME_OVER = 'game_over'
     FINAL_VICTORY = 'final_victory'
+    MAIN_MENU = 'main_menu'
 
     def __init__(self):
-        self.mode = GameState.PLAYING
+        self.mode = GameState.MAIN_MENU
         self.sector_index = 0
         self.sector_clean = False
         self.terminal_activated = False

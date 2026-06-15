@@ -49,7 +49,11 @@ class GameController:
     def update(self):
         """Обновляет состояние игры за один кадр."""
         actions = self.inputcon.get_actions()
-        if self.state.mode == GameState.SECTOR_CLEAR:
+
+        if self.state.mode == GameState.MAIN_MENU:
+            self.update_main_menu(actions)
+
+        elif self.state.mode == GameState.SECTOR_CLEAR:
             self.update_sector_clear(actions)
         
         elif self.state.mode == GameState.GAME_OVER:
@@ -60,6 +64,10 @@ class GameController:
 
         elif self.state.mode == GameState.PLAYING:
             self.update_playing(actions)
+
+    def update_main_menu(self, actions):
+        if actions['E']:
+            self.state.mode = GameState.PLAYING
                     
     def update_sector_clear(self, actions):
         if actions['E']:
@@ -131,7 +139,9 @@ class GameController:
         self.hud.draw_crossfire(self.screen)
 
     def render_state_message(self):
-        if self.state.mode == GameState.SECTOR_CLEAR:
+        if self.state.mode == GameState.MAIN_MENU:
+            self.draw_center_message('ГЛАВНОЕ МЕНЮ', 'нажми Е чтобы начать играть', (0, 255, 0))
+        elif self.state.mode == GameState.SECTOR_CLEAR:
             self.draw_center_message('СЕКТОР ЗАЧИЩЕН', 'нажми E чтобы продолжить', (0, 255, 0))
         elif self.state.mode == GameState.GAME_OVER:
             self.draw_center_message('ИГРА ОКОНЧЕНА', 'нажмите E чтобы выйти', (255, 0, 0))
