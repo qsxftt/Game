@@ -11,6 +11,7 @@ class Level:
         self.player_start = None
         self.enemies_pos = []
         self.terminal_pos = None
+        self.pickups_pos = []
 
         self.build()
 
@@ -45,6 +46,10 @@ class Level:
                     self.enemies_pos.append((x_block + self.block_size // 2, y_block + self.block_size // 2))
                 elif tile == 'T':
                     self.terminal_pos = (x_block, y_block)
+                elif tile == 'H':
+                    self.pickups_pos.append((x_block + self.block_size // 2, y_block + self.block_size // 2, 'medkit'))
+                elif tile == 'A':
+                    self.pickups_pos.append((x_block + self.block_size // 2, y_block + self.block_size // 2, 'ammo'))
                 x_block += self.block_size
 
             y_block += self.block_size

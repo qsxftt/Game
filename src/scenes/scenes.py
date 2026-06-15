@@ -22,16 +22,20 @@ class BaseScene:
         pass
 
 class PlayingScene(BaseScene):
-    def __init__(self, state, scene_manager, weaponrender, spriterender, hud):
+    def __init__(self, state, scene_manager, weaponrender, spriterender, hud, pickuprender):
         super().__init__(state, scene_manager)
         self.weaponrender = weaponrender
         self.spriterender = spriterender
         self.hud = hud
+        self.pickuprender = pickuprender
 
     def update(self, actions):
         self.state.player.weapon.update()
         shot_fired = self.state.player.update(actions, self.state.current_level)
         update_doors(self.state.current_level)
+
+        for pickup in self.state.pickups:
+            pickup.update(self.state.player)
 
         for enemy in self.state.enemies:
             enemy.update(self.state.player, self.state.current_level)
@@ -61,6 +65,7 @@ class PlayingScene(BaseScene):
         pygame.draw.rect(screen, (25, 25, 25), (0, HEIGHT_HALF, WIDTH, HEIGHT_HALF))
         ray_casting(screen, self.state.player, self.state.current_level)
 
+        self.pickuprender.draw_pickups(self.state.pickups, screen, self.state.player, self.state.current_level)
         self.spriterender.draw_enemies(self.state.enemies, screen, self.state.player, self.state.current_level)
         self.weaponrender.draw(screen, self.state.player.weapon)
         self.hud.draw_hud(screen, self.state.player)

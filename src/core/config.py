@@ -36,14 +36,16 @@ PISTOL_TEXTURE = pygame.image.load('assets/weapons/Pistol.png')
 PISTOLR_TEXTURE = pygame.image.load('assets/weapons/Pistolreload.png')
 ENEMY1_TEXTURE = pygame.image.load('assets/enemies/FLYING.png')
 ENEMY12_TEXTURE = pygame.image.load('assets/enemies/ATTACK.png')
+MEDKIT_TEXTURE = pygame.image.load('assets/pickups/medkit.png')
+AMMO_TEXTURE = pygame.image.load('assets/pickups/ammo.png')
 
 # Карта
 block_size = 100
 text_map_1 = [
     'WWWWWWWWWWWW',
-    'W..........W',
+    'W.......H..W',
     'W...P......W',
-    'T..........W',
+    'T.......A..W',
     'W..........W',
     'W..E...WWDWW',
     'W......D...W',

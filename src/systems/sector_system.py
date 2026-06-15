@@ -2,6 +2,7 @@ from src.systems.map_system import get_front_cell
 from src.models.level import Level
 from src.models.player import Player
 from src.models.enemy import Dwarf
+from src.models.pickup import MedKit, Ammo
 from src.core.config import *
 
 def all_enemies_dead(enemies):
@@ -20,7 +21,14 @@ def load_sector(state):
     state.current_level = level
     state.player = Player(*state.current_level.player_start)
     state.enemies = [Dwarf(x, y) for x, y in state.current_level.enemies_pos]
+    state.pickups = []
     state.reset_sector_flags()
+
+    for x, y, pickup_type in state.current_level.pickups_pos:
+        if pickup_type == 'medkit':
+            state.pickups.append(MedKit(x, y))
+        elif pickup_type == 'ammo':
+            state.pickups.append(Ammo(x, y))
 
 def go_to_next_sector(state):
     state.sector_index += 1

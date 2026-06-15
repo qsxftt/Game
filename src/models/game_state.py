@@ -12,6 +12,7 @@ class GameState:
         self.current_level = None
         self.player = None
         self.enemies = []
+        self.pickups = []
         self.running = True
 
     def reset_sector_flags(self):
