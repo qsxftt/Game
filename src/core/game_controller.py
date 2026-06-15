@@ -49,22 +49,28 @@ class GameController:
     def update(self):
         """Обновляет состояние игры за один кадр."""
         actions = self.inputcon.get_actions()
-        if self.state.mode == 'sector_clear':
-            if actions['E']:
-                self.state.mode = 'playing'
-                self.go_to_next_sector()
-            return
+        if self.state.mode == GameState.SECTOR_CLEAR:
+            self.update_sector_clear(actions)
         
-        if self.state.mode == 'game_over':
-            if actions['E']:
-                self.running = False
-            return
+        elif self.state.mode == GameState.GAME_OVER:
+            self.update_exit_scene(actions)
         
-        if self.state.mode == 'final_victory':
-            if actions['E']:
-                self.running = False
-            return
+        elif self.state.mode == GameState.FINAL_VICTORY:
+            self.update_exit_scene(actions)
 
+        elif self.state.mode == GameState.PLAYING:
+            self.update_playing(actions)
+                    
+    def update_sector_clear(self, actions):
+        if actions['E']:
+            self.state.mode = GameState.PLAYING
+            self.go_to_next_sector()
+    
+    def update_exit_scene(self, actions):
+        if actions['E']:
+            self.running = False
+    
+    def update_playing(self, actions):
         self.state.player.weapon.update()
         shot_fired = self.state.player.update(actions, self.state.current_level)
         update_doors(self.state.current_level)
@@ -77,7 +83,7 @@ class GameController:
 
         if self.state.player.health <= 0:
             print('Game Over')
-            self.state.mode = 'game_over'
+            self.state.mode = GameState.GAME_OVER
 
         if not self.state.sector_clean and all_enemies_dead(self.state.enemies):
             print('Сектор зачищен')
@@ -88,20 +94,33 @@ class GameController:
                 if self.state.sector_clean:
                     print('Терминал активироан')
                     self.state.terminal_activated = True
-                    self.state.mode = 'sector_clear'
+                    self.state.mode = GameState.SECTOR_CLEAR
                 else:
                     print('сектор еще не зачишен')
-                       
+
     def go_to_next_sector(self):
         self.state.sector_index += 1
         if self.state.sector_index < len(sector_maps):
             self.load_sector(self.state.sector_index)  
         else:
             print('Победа')
-            self.state.mode = 'final_victory'
+            self.state.mode = GameState.FINAL_VICTORY
 
     def render(self):
         """Рисует мир, врагов, оружие, HUD и debug-слой."""
+        if self.state.mode == GameState.PLAYING:
+            self.render_world()
+
+            if DEBUG:
+                self.render_debug()
+
+
+        self.render_state_message()
+
+        pygame.display.flip()
+        pygame.display.set_caption(f'{self.clock.get_fps()}')
+
+    def render_world(self):
         pygame.draw.rect(self.screen, (66, 170, 255), (0, 0, WIDTH, HEIGHT_HALF))
         pygame.draw.rect(self.screen, (25, 25, 25), (0, HEIGHT_HALF, WIDTH, HEIGHT_HALF))
         ray_casting(self.screen, self.state.player, self.state.current_level)
@@ -111,29 +130,18 @@ class GameController:
         self.hud.draw_hud(self.screen, self.state.player)
         self.hud.draw_crossfire(self.screen)
 
-        if DEBUG:
-            draw_map(self.screen, self.state.player, self.state.current_level)
-            for enemy in self.state.enemies:
-                enemy.draw_debug(self.screen)
+    def render_state_message(self):
+        if self.state.mode == GameState.SECTOR_CLEAR:
+            self.draw_center_message('СЕКТОР ЗАЧИЩЕН', 'нажми E чтобы продолжить', (0, 255, 0))
+        elif self.state.mode == GameState.GAME_OVER:
+            self.draw_center_message('ИГРА ОКОНЧЕНА', 'нажмите E чтобы выйти', (255, 0, 0))
+        elif self.state.mode == GameState.FINAL_VICTORY:
+            self.draw_center_message('ПОБЕДА', 'нажмите E чтобы выйти', (0, 255, 0))
 
-        if self.state.mode == 'sector_clear':
-            title = 'СЕКТОР ЗАЧИЩЕН'
-            hint = 'нажми Е чтобы продолжить'
-            color = (0, 255, 0)
-            self.draw_center_message(title, hint, color)
-        elif self.state.mode == 'game_over':
-            title = 'ИГРА ОКОНЧЕНА'
-            hint = 'нажмите E чтобы выйти'
-            color = (255, 0, 0)
-            self.draw_center_message(title, hint, color)
-        elif self.state.mode == 'final_victory':
-            title = 'ПОБЕДА'
-            hint = 'нажмите E чтобы выйти'
-            color = (0, 255, 0)
-            self.draw_center_message(title, hint, color)
-
-        pygame.display.flip()
-        pygame.display.set_caption(f'{self.clock.get_fps()}')
+    def render_debug(self):
+        draw_map(self.screen, self.state.player, self.state.current_level)
+        for enemy in self.state.enemies:
+            enemy.draw_debug(self.screen)
 
     def draw_center_message(self, title_text, hint_text, color):
         self.screen.fill((0, 0, 0))

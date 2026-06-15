@@ -1,8 +1,11 @@
-from src.models.player import Player
-
 class GameState:
+    PLAYING = 'playing'
+    SECTOR_CLEAR = 'sector_clear'
+    GAME_OVER = 'game_over'
+    FINAL_VICTORY = 'final_victory'
+
     def __init__(self):
-        self.mode = 'playing'
+        self.mode = GameState.PLAYING
         self.sector_index = 0
         self.sector_clean = False
         self.terminal_activated = False
