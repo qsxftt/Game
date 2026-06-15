@@ -104,21 +104,24 @@ class GameController:
         self.hud.draw_hud(self.screen, self.player)
         self.hud.draw_crossfire(self.screen)
 
-        if self.game_state == 'sector_clear':
-            self.screen.fill((0, 0, 0))
-            title = self.font.render('СЕКТОР ЗАЧИЩЕН', True, (0, 255, 0))
-            hint = self.font.render('нажми Е чтобы продолжить', True, (0, 255, 0))
-
-            self.screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
-            self.screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40)))
-
         if DEBUG:
             draw_map(self.screen, self.player, self.current_level)
             for enemy in self.enemies:
                 enemy.draw_debug(self.screen)
 
+        if self.game_state == 'sector_clear':
+            self.draw_sector_clear()
+
         pygame.display.flip()
         pygame.display.set_caption(f'{self.clock.get_fps()}')
+
+    def draw_sector_clear(self):
+        self.screen.fill((0, 0, 0))
+        title = self.font.render('СЕКТОР ЗАЧИЩЕН', True, (0, 255, 0))
+        hint = self.font.render('нажми Е чтобы продолжить', True, (0, 255, 0))
+
+        self.screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
+        self.screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40)))
 
     def run(self):
         """Запускает игровой цикл и закрывает pygame после выхода."""

@@ -17,5 +17,8 @@ def is_wall(x, y, level):
     if cell in level.doors:
         door = level.doors[cell]
         return door.open_progress < 0.8
+    
+    if cell == level.terminal_pos:
+        return True
 
     return False

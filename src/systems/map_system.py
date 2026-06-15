@@ -32,5 +32,8 @@ def get_block_type(x, y, level):
 
     if cell in level.doors and level.doors[cell].open_progress < 1.0:
         return 'door'
+    
+    if cell == level.terminal_pos:
+        return 'terminal'
 
     return None

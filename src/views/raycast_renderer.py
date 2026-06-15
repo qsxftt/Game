@@ -19,6 +19,7 @@ from src.core.config import (
     SCALE,
     SCREEN_DISTANCE,
     WALL_TEXTURE,
+    TERMINAL_TEXTURE,
     YELLOW,
     block_size
 )
@@ -98,11 +99,11 @@ def cast_single_ray(player, angle, level):
 
         block_type = get_block_type(x_check, y_vert, level)
 
-        if block_type == "wall":
+        if block_type == "wall" or block_type == 'terminal':
             vert_x = x_vert
             vert_y = y_vert
             vert_depth = (vert_x - player.x) / cos_a
-            vert_type = "wall"
+            vert_type = block_type
             break
 
         if block_type == "door":
@@ -141,11 +142,11 @@ def cast_single_ray(player, angle, level):
 
             block_type = get_block_type(x_hor, y_check, level)
 
-            if block_type == "wall":
+            if block_type == "wall"  or block_type == 'terminal':
                 hor_x = x_hor
                 hor_y = y_hor
                 hor_depth = (hor_y - player.y) / sin_a
-                hor_type = "wall"
+                hor_type = block_type
                 break
 
             if block_type == "door":
@@ -183,6 +184,8 @@ def ray_casting(screen, player, level):
 
         if block_type == 'door':
             texture = DOOR_TEXTURE
+        elif block_type == 'terminal':
+            texture = TERMINAL_TEXTURE
         else:
             texture = WALL_TEXTURE
 

@@ -31,6 +31,7 @@ WHITE = (255, 255, 255)
 # Текстуры
 WALL_TEXTURE = pygame.image.load('assets/textures/wall.png')
 DOOR_TEXTURE = pygame.image.load('assets/textures/door.png')
+TERMINAL_TEXTURE = pygame.image.load('assets/textures/terminal.png')
 PISTOL_TEXTURE = pygame.image.load('assets/weapons/Pistol.png')
 PISTOLR_TEXTURE = pygame.image.load('assets/weapons/Pistolreload.png')
 ENEMY1_TEXTURE = pygame.image.load('assets/enemies/FLYING.png')
@@ -40,9 +41,9 @@ ENEMY12_TEXTURE = pygame.image.load('assets/enemies/ATTACK.png')
 block_size = 100
 text_map_1 = [
     'WWWWWWWWWWWW',
-    'W........T.W',
-    'W...P......W',
     'W..........W',
+    'W...P......W',
+    'T..........W',
     'W..........W',
     'W..E...WWDWW',
     'W......D...W',
@@ -50,8 +51,8 @@ text_map_1 = [
 ]
 
 text_map_2 = [
-    'WWWWWWWWWWWW',
-    'W.E.W....T.W',
+    'WWWWWWWWWTWW',
+    'W.E.W......W',
     'W...W......W',
     'WWWDW......W',
     'W..........W',
