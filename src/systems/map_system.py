@@ -1,4 +1,4 @@
-"""Система запросов к сетке карты."""
+"""Запросы к клеточной карте и общие утилиты для координат."""
 
 from math import cos, sin
 
@@ -24,7 +24,7 @@ def get_front_cell(player):
 
 
 def get_block_type(x, y, level):
-    """Возвращает тип блока в точке: 'wall', 'door' или None."""
+    """Возвращает тип блока в точке: wall, door, terminal или None."""
     cell = get_cell(x, y)
 
     if cell in level.block_map:
@@ -32,14 +32,14 @@ def get_block_type(x, y, level):
 
     if cell in level.doors and level.doors[cell].open_progress < 1.0:
         return 'door'
-    
+
     if cell == level.terminal_pos:
         return 'terminal'
 
     return None
 
+
 def get_sprite_sorted(pickups, enemies, player):
+    """Возвращает pickups и enemies, отсортированные от дальних к ближним."""
     sprites = pickups + enemies
     return sorted(sprites, key=lambda sprite: sprite.get_depth(player), reverse=True)
-    
-

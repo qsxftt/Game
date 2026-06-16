@@ -1,13 +1,13 @@
 """Модели оружия."""
 
-from src.core.config import PISTOLR_TEXTURE, PISTOL_TEXTURE
+from src.core.config import PISTOL_TEXTURE, PISTOLR_TEXTURE
 
 
 class Weapon:
     """Базовое оружие: урон, патроны, cooldown и перезарядка."""
 
     def __init__(self):
-        """Создаёт пустое оружие, которое настраивается наследником."""
+        """Создает пустое оружие, которое настраивается наследником."""
         self.damage = 0
         self.ammo = 0
         self.magazine_size = 0

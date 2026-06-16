@@ -20,6 +20,6 @@ def open_door(player, level):
 
 
 def update_doors(level):
-    """Обновляет состояние всех дверей текущей карты."""
+    """Обновляет состояние всех дверей текущего уровня."""
     for door in level.doors.values():
         door.update()

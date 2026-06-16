@@ -1,4 +1,4 @@
-"""Renderer HUD'а игрока."""
+"""Renderer HUD игрока."""
 
 import pygame
 
@@ -9,7 +9,7 @@ class HUDrender:
     """Рисует здоровье, патроны и прицел."""
 
     def __init__(self):
-        """Создаёт шрифт HUD."""
+        """Создает шрифт HUD."""
         self.font = pygame.font.SysFont('Arial', 32)
 
     def draw_hud(self, screen, player):

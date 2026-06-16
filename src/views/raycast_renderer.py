@@ -18,17 +18,17 @@ from src.core.config import (
     RED,
     SCALE,
     SCREEN_DISTANCE,
-    WALL_TEXTURE,
     TERMINAL_TEXTURE,
+    WALL_TEXTURE,
     YELLOW,
-    block_size
+    block_size,
 )
 from src.systems.door_system import get_door
 from src.systems.map_system import get_block_type
 
 
 def apply_shade_texture(texture_column, shade):
-    """Возвращает затемнённую копию вертикальной колонки текстуры."""
+    """Возвращает затемненную копию вертикальной колонки текстуры."""
     shade *= 255
     texture_column_copy = texture_column.copy()
     texture_column_copy.fill((shade, shade, shade), special_flags=pygame.BLEND_MULT)
@@ -39,22 +39,22 @@ def apply_shade_texture(texture_column, shade):
 def cast_ray_to_door(player, angle, door):
     """Проверяет пересечение луча с движущейся дверной панелью.
 
-    Дверь считается не целой клеткой, а тонким отрезком, который смещается
-    во время открытия. Это позволяет ray casting рисовать открывающуюся дверь.
+    Дверь считается не целой клеткой, а тонким отрезком, который смещается во
+    время открытия. Это позволяет ray casting рисовать открывающуюся дверь.
     """
     sin_a = sin(angle)
     cos_a = cos(angle)
 
     orient, x1, y1, x2, y2 = door.get_panel_segment()
 
-    if orient == "hor":
+    if orient == 'hor':
         depth = (y1 - player.y) / sin_a
         hit_x = player.x + cos_a * depth
 
         if depth > 0 and x1 <= hit_x <= x2:
             return hit_x, y1, depth
 
-    if orient == "vert":
+    if orient == 'vert':
         depth = (x1 - player.x) / cos_a
         hit_y = player.y + sin_a * depth
 
@@ -79,7 +79,7 @@ def cast_single_ray(player, angle, level):
     vert_x = 0
     vert_y = 0
     vert_type = None
-    vert_depth = float("inf")
+    vert_depth = float('inf')
 
     if cos_a > 0:
         x_vert = (player.x // block_size) * block_size + block_size
@@ -99,20 +99,20 @@ def cast_single_ray(player, angle, level):
 
         block_type = get_block_type(x_check, y_vert, level)
 
-        if block_type == "wall" or block_type == 'terminal':
+        if block_type == 'wall' or block_type == 'terminal':
             vert_x = x_vert
             vert_y = y_vert
             vert_depth = (vert_x - player.x) / cos_a
             vert_type = block_type
             break
 
-        if block_type == "door":
+        if block_type == 'door':
             door = get_door(x_check, y_vert, level)
             door_hit = cast_ray_to_door(player, angle, door)
 
             if door_hit:
                 vert_x, vert_y, vert_depth = door_hit
-                vert_type = "door"
+                vert_type = 'door'
                 break
 
         x_vert += vert_delta_x
@@ -122,7 +122,8 @@ def cast_single_ray(player, angle, level):
     hor_x = 0
     hor_y = 0
     hor_type = None
-    hor_depth = float("inf")
+    hor_depth = float('inf')
+
     if tan_a != 0:
         if sin_a > 0:
             y_hor = (player.y // block_size) * block_size + block_size
@@ -142,20 +143,20 @@ def cast_single_ray(player, angle, level):
 
             block_type = get_block_type(x_hor, y_check, level)
 
-            if block_type == "wall"  or block_type == 'terminal':
+            if block_type == 'wall' or block_type == 'terminal':
                 hor_x = x_hor
                 hor_y = y_hor
                 hor_depth = (hor_y - player.y) / sin_a
                 hor_type = block_type
                 break
 
-            if block_type == "door":
+            if block_type == 'door':
                 door = get_door(x_hor, y_check, level)
                 door_hit = cast_ray_to_door(player, angle, door)
 
                 if door_hit:
                     hor_x, hor_y, hor_depth = door_hit
-                    hor_type = "door"
+                    hor_type = 'door'
                     break
 
             x_hor += hor_delta_x
@@ -168,7 +169,7 @@ def cast_single_ray(player, angle, level):
 
 
 def ray_casting(screen, player, level):
-    """Рисует псевдо-3D стены и двери через веер лучей от игрока."""
+    """Рисует псевдо-3D стены, двери и терминал через веер лучей."""
     start = player.angle - HALF_FOV
 
     for ray in range(NUM_RAYS):
@@ -218,7 +219,7 @@ def ray_casting(screen, player, level):
 
 
 def draw_map(screen, player, level):
-    """Рисует debug-карту сверху: стены, двери и позицию игрока."""
+    """Рисует debug-карту сверху: стены, двери, терминал и игрока."""
     for x, y in level.block_map:
         pygame.draw.rect(screen, GRAY, (x, y, block_size, block_size), 2)
 

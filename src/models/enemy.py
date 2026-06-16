@@ -20,12 +20,12 @@ from src.views.raycast_renderer import cast_single_ray
 class Enemy:
     """Базовый враг.
 
-    Временно содержит часть логики видимости и расчёта screen_x. Позже это
-    можно вынести в VisibilitySystem, чтобы модель не зависела от renderer'а.
+    Временно содержит часть логики видимости и расчета screen_x. Позже это можно
+    вынести в VisibilitySystem, чтобы модель меньше зависела от ray casting.
     """
 
     def __init__(self, x, y):
-        """Создаёт базового врага в координатах карты."""
+        """Создает базового врага в координатах карты."""
         self.x = x
         self.y = y
         self.health = 0
@@ -83,7 +83,7 @@ class Enemy:
         return WIDTH_HALF + delta_angle / DELTA_RAY * SCALE
 
     def is_visible(self, player, level):
-        """Проверяет, не перекрыт ли враг стеной или закрытой дверью."""
+        """Проверяет, не перекрыт ли враг стеной, дверью или терминалом."""
         angle = self.get_angle(player)
         hit_x, hit_y, wall_depth, side, block_type = cast_single_ray(player, angle, level)
         enemy_depth = self.get_depth(player)
@@ -91,7 +91,7 @@ class Enemy:
         return enemy_depth < wall_depth
 
     def take_damage(self, damage):
-        """Наносит врагу урон и помечает его мёртвым при нуле здоровья."""
+        """Наносит врагу урон и помечает его мертвым при нуле здоровья."""
         self.health -= damage
 
         if self.health <= 0:
@@ -183,7 +183,7 @@ class Dwarf(Enemy):
     """Конкретный тип врага с параметрами и текстурами."""
 
     def __init__(self, x, y):
-        """Создаёт врага Dwarf с заданными характеристиками."""
+        """Создает врага Dwarf с заданными характеристиками."""
         super().__init__(x, y)
         self.health = 100
         self.damage = 10

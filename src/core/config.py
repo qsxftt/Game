@@ -1,14 +1,8 @@
-"""Глобальные настройки и временные данные текущего прототипа.
-
-Пока здесь лежит не только конфигурация, но и статичная карта с дверями.
-Позже карту лучше перенести в Level, а текстуры — в отдельный assets-модуль.
-"""
+"""Глобальные настройки, константы и загружаемые ресурсы игры."""
 
 from math import pi, tan
 
 import pygame
-
-from src.models.level import Level
 
 
 DEBUG = False
@@ -42,8 +36,6 @@ AMMO_TEXTURE = pygame.image.load('assets/pickups/ammo.png')
 # Карта
 block_size = 100
 TOTAL_SECTORS = 5
-
-
 
 # Трассировка лучей
 FOV = pi / 3

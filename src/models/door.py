@@ -5,7 +5,7 @@ class Door:
     """Дверь с простым FSM: closed -> opening -> open -> closing."""
 
     def __init__(self, x, y, orient, block_size):
-        """Создаёт дверь в клетке карты."""
+        """Создает дверь в клетке карты."""
         self.x = x
         self.y = y
         self.orient = orient
@@ -51,34 +51,34 @@ class Door:
         """Возвращает прямоугольник текущей дверной панели для debug-карты."""
         offset = self.block_size * self.open_progress
 
-        if self.orient == "hor":
+        if self.orient == 'hor':
             return (
                 self.x + offset,
                 self.y + self.block_size // 2 - thickness // 2,
                 self.block_size - offset,
-                thickness
+                thickness,
             )
 
         return (
             self.x + self.block_size // 2 - thickness // 2,
             self.y + offset,
             thickness,
-            self.block_size - offset
+            self.block_size - offset,
         )
 
     def get_panel_segment(self):
         """Возвращает отрезок дверной панели для проверки пересечения лучом."""
         offset = self.block_size * self.open_progress
 
-        if self.orient == "hor":
+        if self.orient == 'hor':
             y = self.y + self.block_size // 2
             x1 = self.x + offset
             x2 = self.x + self.block_size
 
-            return "hor", x1, y, x2, y
+            return 'hor', x1, y, x2, y
 
         x = self.x + self.block_size // 2
         y1 = self.y + offset
         y2 = self.y + self.block_size
 
-        return "vert", x, y1, x, y2
+        return 'vert', x, y1, x, y2

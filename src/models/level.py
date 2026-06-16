@@ -1,8 +1,13 @@
+"""Модель уровня, собранная из текстовой карты."""
+
 from src.models.door import Door
 
 
 class Level:
+    """Хранит стены, двери, старт игрока, врагов, терминал и ресурсы уровня."""
+
     def __init__(self, block_size, text_map):
+        """Создает уровень и сразу разбирает текстовую карту."""
         self.block_size = block_size
         self.text_map = text_map
         self.block_map = set()
@@ -15,23 +20,10 @@ class Level:
 
         self.build()
 
-    def get_orient_door(self, x, y):
-        """Определяет ориентацию двери по соседним стенам."""
-        left = (x - self.block_size, y) in self.block_map
-        right = (x + self.block_size, y) in self.block_map
-        up = (x, y - self.block_size) in self.block_map
-        down = (x, y + self.block_size) in self.block_map
-
-        if left and right:
-            return "hor"
-
-        if up and down:
-            return "vert"
-
-        return "vert"
-
     def build(self):
+        """Переводит символы текстовой карты в игровые координаты и объекты."""
         y_block = 0
+
         for row in self.text_map:
             x_block = 0
 
@@ -50,6 +42,7 @@ class Level:
                     self.pickups_pos.append((x_block + self.block_size // 2, y_block + self.block_size // 2, 'medkit'))
                 elif tile == 'A':
                     self.pickups_pos.append((x_block + self.block_size // 2, y_block + self.block_size // 2, 'ammo'))
+
                 x_block += self.block_size
 
             y_block += self.block_size
@@ -57,5 +50,18 @@ class Level:
         for x, y in self.door_positions:
             orient = self.get_orient_door(x, y)
             self.doors[(x, y)] = Door(x, y, orient, self.block_size)
-        
 
+    def get_orient_door(self, x, y):
+        """Определяет ориентацию двери по соседним стенам."""
+        left = (x - self.block_size, y) in self.block_map
+        right = (x + self.block_size, y) in self.block_map
+        up = (x, y - self.block_size) in self.block_map
+        down = (x, y + self.block_size) in self.block_map
+
+        if left and right:
+            return 'hor'
+
+        if up and down:
+            return 'vert'
+
+        return 'vert'

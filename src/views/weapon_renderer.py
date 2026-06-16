@@ -27,7 +27,7 @@ class WeaponRender:
         return frame, frame_width, frame_height
 
     def draw(self, screen, weapon):
-        """Рисует оружие с учётом текущей анимации."""
+        """Рисует оружие с учетом текущей анимации."""
         if weapon.shoot_cooldown > 0:
             frame, frame_width, frame_height = self.get_frame(weapon, weapon.texture, 'shoot')
         elif weapon.reload_cooldown > 0:
@@ -35,7 +35,7 @@ class WeaponRender:
         else:
             frame, frame_width, frame_height = self.get_frame(weapon, weapon.texture)
 
-        screen_width = (frame_width * HEIGHT_HALF / frame_height)
+        screen_width = frame_width * HEIGHT_HALF / frame_height
         frame = pygame.transform.scale(frame, (screen_width, HEIGHT_HALF))
 
         screen.blit(frame, (WIDTH - screen_width, HEIGHT_HALF))

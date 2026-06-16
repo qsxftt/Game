@@ -4,20 +4,27 @@ import pygame
 
 from src.controllers.input_controller import InputController
 from src.core.config import FPS, HEIGHT, WIDTH
+from src.core.scene_manager import SceneManager
+from src.models.game_state import GameState
+from src.scenes.scenes import (
+    FinalVictoryScene,
+    GameOverScene,
+    MainMenuScene,
+    PlayingScene,
+    SectorClearScene,
+)
+from src.systems.sector_system import load_sector
 from src.views.hud_renderer import HUDrender
+from src.views.pickup_renderer import PickupRender
 from src.views.sprite_renderer import SpriteRender
 from src.views.weapon_renderer import WeaponRender
-from src.systems.sector_system import load_sector
-from src.models.game_state import GameState
-from src.core.scene_manager import SceneManager
-from src.views.pickup_renderer import PickupRender
-from src.scenes.scenes import *
+
 
 class GameController:
     """Собирает игру и управляет циклом update/render."""
 
     def __init__(self):
-        """Инициализирует pygame, окно и основные объекты прототипа."""
+        """Инициализирует pygame, окно, состояние, renderers и сцены."""
         pygame.init()
 
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -32,7 +39,17 @@ class GameController:
         load_sector(self.state)
 
         self.scene_manager.register(GameState.MAIN_MENU, MainMenuScene(self.state, self.scene_manager))
-        self.scene_manager.register(GameState.PLAYING, PlayingScene(self.state, self.scene_manager, self.weaponrender, self.spriterender, self.hud, self.pickuprender))
+        self.scene_manager.register(
+            GameState.PLAYING,
+            PlayingScene(
+                self.state,
+                self.scene_manager,
+                self.weaponrender,
+                self.spriterender,
+                self.hud,
+                self.pickuprender,
+            ),
+        )
         self.scene_manager.register(GameState.SECTOR_CLEAR, SectorClearScene(self.state, self.scene_manager))
         self.scene_manager.register(GameState.GAME_OVER, GameOverScene(self.state, self.scene_manager))
         self.scene_manager.register(GameState.FINAL_VICTORY, FinalVictoryScene(self.state, self.scene_manager))

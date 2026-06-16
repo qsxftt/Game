@@ -2,7 +2,7 @@
 
 from math import cos, pi, sin
 
-from src.core.config import HEIGHT, PLAYER_RADIUS, WIDTH
+from src.core.config import PLAYER_RADIUS
 from src.models.weapon import Pistol
 from src.systems.collision_system import is_wall
 from src.systems.door_system import open_door
@@ -12,7 +12,7 @@ class Player:
     """Игрок: позиция, здоровье, угол камеры и текущее оружие."""
 
     def __init__(self, x, y):
-        """Создаёт игрока в центре текущего экрана."""
+        """Создает игрока в переданных координатах мира."""
         self.x = x
         self.y = y
         self.health = 100
@@ -24,7 +24,7 @@ class Player:
         self.weapon = Pistol()
 
     def can_move(self, x, y, level):
-        """Проверяет, может ли игрок занять позицию с учётом радиуса."""
+        """Проверяет, может ли игрок занять позицию с учетом радиуса."""
         return (
             not is_wall(x + self.radius, y, level)
             and not is_wall(x, y + self.radius, level)

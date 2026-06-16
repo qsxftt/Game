@@ -4,8 +4,10 @@ import pygame
 
 
 class InputController:
-    """Считывает клавиатуру и превращает её состояние в словарь действий."""
+    """Считывает клавиатуру и превращает ее состояние в словарь действий."""
+
     def __init__(self):
+        """Создает флаги одноразовых нажатий."""
         self.E = False
         self.R = False
         self.SPACE = False
@@ -23,16 +25,17 @@ class InputController:
             'right': keys[pygame.K_RIGHT],
             'E': self.E,
             'space': self.SPACE,
-            'R': self.R
+            'R': self.R,
         }
-        
+
         self.E = False
         self.R = False
         self.SPACE = False
-        
+
         return actions
-    
+
     def handle_event(self, event):
+        """Запоминает одноразовые действия по событию KEYDOWN."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_e:
                 self.E = True
@@ -40,6 +43,3 @@ class InputController:
                 self.R = True
             if event.key == pygame.K_SPACE:
                 self.SPACE = True
-
-            
-
