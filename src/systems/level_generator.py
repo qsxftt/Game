@@ -1,4 +1,5 @@
 from random import randint as rnd
+from src.systems.level_validation import validate_level
 
 
 class LevelGenerator:
@@ -10,6 +11,15 @@ class LevelGenerator:
         self.ammo_count = ammo_count
 
     def generate(self):
+        for _ in range(100):
+            text_map = self.build_map()
+
+            if validate_level(text_map):
+                return text_map
+            
+        raise RuntimeError('Ошибка генерации карты')
+    
+    def build_map(self):
         grid = self.create_empty_grid()
 
         player_x, player_y = self.get_empty_cell(grid)
