@@ -91,7 +91,7 @@ class MedKit(Pickup):
         self.amount = 10
         self.frame_count = 1
         self.animation_speed = 20
-        self.pickup_radius = 15
+        self.pickup_radius = 50
         self.type = 'medkit'
         self.texture = MEDKIT_TEXTURE
 
@@ -101,6 +101,6 @@ class Ammo(Pickup):
         self.amount = 10
         self.frame_count = 1
         self.animation_speed = 20
-        self.pickup_radius = 15
+        self.pickup_radius = 50
         self.type = 'ammo'
         self.texture = AMMO_TEXTURE

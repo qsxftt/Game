@@ -44,10 +44,10 @@ class SpriteRender:
         else:
             frame, frame_width, frame_height = self.get_frame(enemy, enemy.texture_walk, 'walk')
 
-        depth = enemy.get_depth(player)
+        depth = max(enemy.get_depth(player), 50)
         screen_x = enemy.get_screen_x(player)
-        enemy_height = int(block_size * SCREEN_DISTANCE / depth) * 0.75
-        enemy_width = (frame_width * enemy_height / frame_height)
+        enemy_height = int(block_size * SCREEN_DISTANCE / depth * 0.75)
+        enemy_width = int(frame_width * enemy_height / frame_height)
 
         # Временный технический долг: combat использует enemy.radius для попадания.
         enemy.radius = enemy_width // 2

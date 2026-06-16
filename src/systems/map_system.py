@@ -37,3 +37,9 @@ def get_block_type(x, y, level):
         return 'terminal'
 
     return None
+
+def get_sprite_sorted(pickups, enemies, player):
+    sprites = pickups + enemies
+    return sorted(sprites, key=lambda sprite: sprite.get_depth(player), reverse=True)
+    
+

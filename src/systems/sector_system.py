@@ -3,6 +3,7 @@ from src.models.level import Level
 from src.models.player import Player
 from src.models.enemy import Dwarf
 from src.models.pickup import MedKit, Ammo
+from src.systems.level_generator import LevelGenerator
 from src.core.config import *
 
 def all_enemies_dead(enemies):
@@ -17,7 +18,9 @@ def activate_terminal(player, level):
     return False
 
 def load_sector(state):
-    level = Level(block_size, sector_maps[state.sector_index])
+    generator = create_generator_for_sector(state.sector_index)
+    text_map = generator.generate()
+    level = Level(block_size, text_map)
     state.current_level = level
     state.player = Player(*state.current_level.player_start)
     state.enemies = [Dwarf(x, y) for x, y in state.current_level.enemies_pos]
@@ -32,8 +35,17 @@ def load_sector(state):
 
 def go_to_next_sector(state):
     state.sector_index += 1
-    if state.sector_index < len(sector_maps):
+    if state.sector_index < TOTAL_SECTORS:
         load_sector(state)
         return True 
     else:
         return False
+    
+def create_generator_for_sector(sector_index):
+    return LevelGenerator(
+        width=12 + sector_index * 2,
+        height=8 + sector_index,
+        enemy_count=1 + sector_index,
+        medkit_count=1,
+        ammo_count=1 + sector_index
+    )

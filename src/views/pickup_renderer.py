@@ -26,10 +26,10 @@ class PickupRender:
         
         frame, frame_width, frame_height = self.get_frame(pickup)
 
-        depth = pickup.get_depth(player)
+        depth = max(pickup.get_depth(player), 50)
         screen_x = pickup.get_screen_x(player)
-        pickup_height = int(block_size * SCREEN_DISTANCE / depth) * 0.5
-        pickup_width = frame_width * pickup_height / frame_height
+        pickup_height = int(block_size * SCREEN_DISTANCE / depth * 0.5)
+        pickup_width = int(frame_width * pickup_height / frame_height)
 
         frame = pygame.transform.scale(frame, (pickup_width, pickup_height))
         screen.blit(frame, (screen_x - pickup_width // 2, (HEIGHT - pickup_height // 2) * 0.53))

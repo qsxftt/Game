@@ -41,39 +41,14 @@ AMMO_TEXTURE = pygame.image.load('assets/pickups/ammo.png')
 
 # Карта
 block_size = 100
-text_map_1 = [
-    'WWWWWWWWWWWW',
-    'W.......H..W',
-    'W...P......W',
-    'T.......A..W',
-    'W..........W',
-    'W..E...WWDWW',
-    'W......D...W',
-    'WWWWWWWWWWWW',
-]
-
-text_map_2 = [
-    'WWWWWWWWWTWW',
-    'W.E.W......W',
-    'W...W......W',
-    'WWWDW......W',
-    'W..........W',
-    'W........P.W',
-    'W..........W',
-    'WWWWWWWWWWWW',
-]
-
-sector_maps = [
-    text_map_1,
-    text_map_2
-]
+TOTAL_SECTORS = 5
 
 
 
 # Трассировка лучей
 FOV = pi / 3
 HALF_FOV = FOV / 2
-MAX_DEPTH = WIDTH // block_size
+MAX_DEPTH = 30
 NUM_RAYS = 120
 DELTA_RAY = FOV / (NUM_RAYS - 1)
 SCALE = WIDTH // NUM_RAYS

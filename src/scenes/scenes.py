@@ -5,6 +5,8 @@ from src.systems.sector_system import go_to_next_sector, all_enemies_dead, activ
 from src.systems.door_system import update_doors
 from src.systems.combat_system import player_shoot
 from src.views.raycast_renderer import ray_casting, draw_map
+from src.systems.map_system import get_sprite_sorted
+from src.models.pickup import Pickup
 
 
 class BaseScene:
@@ -65,8 +67,13 @@ class PlayingScene(BaseScene):
         pygame.draw.rect(screen, (25, 25, 25), (0, HEIGHT_HALF, WIDTH, HEIGHT_HALF))
         ray_casting(screen, self.state.player, self.state.current_level)
 
-        self.pickuprender.draw_pickups(self.state.pickups, screen, self.state.player, self.state.current_level)
-        self.spriterender.draw_enemies(self.state.enemies, screen, self.state.player, self.state.current_level)
+        sprites = get_sprite_sorted(self.state.pickups, self.state.enemies, self.state.player)
+        for sprite in sprites:
+            if isinstance(sprite, Pickup):
+                self.pickuprender.draw(sprite, screen, self.state.player, self.state.current_level)
+            else:
+                self.spriterender.draw(sprite, screen, self.state.player, self.state.current_level)
+
         self.weaponrender.draw(screen, self.state.player.weapon)
         self.hud.draw_hud(screen, self.state.player)
         self.hud.draw_crossfire(screen)
