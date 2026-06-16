@@ -43,9 +43,10 @@ def go_to_next_sector(state):
     
 def create_generator_for_sector(sector_index):
     return LevelGenerator(
-        width=12 + sector_index * 2,
-        height=8 + sector_index,
+        width=18 + sector_index * 2,
+        height=12 + sector_index,
         enemy_count=1 + sector_index,
         medkit_count=1,
-        ammo_count=1 + sector_index
+        ammo_count=1 + sector_index,
+        room_count=3 + sector_index
     )
