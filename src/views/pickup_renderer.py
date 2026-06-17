@@ -41,8 +41,3 @@ class PickupRender:
 
         frame = pygame.transform.scale(frame, (pickup_width, pickup_height))
         screen.blit(frame, (screen_x - pickup_width // 2, (HEIGHT - pickup_height // 2) * 0.53))
-
-    def draw_pickups(self, pickups, screen, player, level):
-        """Рисует все ресурсы текущего уровня."""
-        for pickup in pickups:
-            self.draw(pickup, screen, player, level)

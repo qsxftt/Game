@@ -27,7 +27,7 @@ def activate_terminal(player, level):
 def load_sector(state):
     """Генерирует сектор и пересоздает состояние игрока, врагов и ресурсов."""
     generator = create_generator_for_sector(state.sector_index)
-    text_map = generator.generate()
+    text_map = generator.generate_bsp()
     level = Level(block_size, text_map)
 
     state.current_level = level
@@ -57,10 +57,13 @@ def go_to_next_sector(state):
 def create_generator_for_sector(sector_index):
     """Создает генератор с параметрами сложности для указанного сектора."""
     return LevelGenerator(
-        width=18 + sector_index * 2,
-        height=12 + sector_index,
+        width=24 + sector_index * 2,
+        height=20 + sector_index,
         enemy_count=1 + sector_index,
         medkit_count=1,
         ammo_count=1 + sector_index,
-        room_count=3 + sector_index,
+        min_room_size=3,
+        max_room_size=5 + sector_index,
+        bsp_max_depth=2 + sector_index // 2,
+        bsp_min_leaf_size=8
     )

@@ -20,48 +20,191 @@ class Room:
 
         return center_x, center_y
 
-    def intersects(self, other, margin=0):
-        """Проверяет пересечение с другой комнатой с дополнительным отступом."""
-        return (
-            self.x - margin < other.x + other.width
-            and self.x + self.width + margin > other.x
-            and self.y - margin < other.y + other.height
-            and self.y + self.height + margin > other.y
-        )
+
+class BSPNode:
+    """Узел BSP-дерева: прямоугольная область карты, которую можно разделить."""
+
+    def __init__(self, x, y, width, height, depth=0):
+        """Сохраняет область узла, его глубину и ссылки на дочерние узлы."""
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.depth = depth
+
+        self.left = None
+        self.right = None
+        self.room = None
+
+    def is_leaf(self):
+        """Возвращает True, если узел больше не разделен на дочерние области."""
+        return self.left is None and self.right is None
+
+    def can_split(self, min_leaf_size):
+        """Проверяет, достаточно ли узел большой для следующего разделения."""
+        return self.width >= min_leaf_size * 2 or self.height >= min_leaf_size * 2
+
+    def choose_split(self):
+        """Выбирает направление разделения: вертикальное или горизонтальное."""
+        if self.width > self.height:
+            return 'vert'
+
+        if self.height > self.width:
+            return 'hor'
+
+        if rnd(0, 1) == 0:
+            return 'vert'
+
+        return 'hor'
+
+    def split(self, min_leaf_size):
+        """Делит текущий узел на два дочерних узла, если места достаточно."""
+        if not self.can_split(min_leaf_size):
+            return False
+
+        split_type = self.choose_split()
+
+        if split_type == 'vert':
+            split_x = rnd(min_leaf_size, self.width - min_leaf_size)
+
+            self.left = BSPNode(
+                self.x,
+                self.y,
+                split_x,
+                self.height,
+                self.depth + 1
+            )
+
+            self.right = BSPNode(
+                self.x + split_x,
+                self.y,
+                self.width - split_x,
+                self.height,
+                self.depth + 1
+            )
+
+            return True
+
+        if split_type == 'hor':
+            split_y = rnd(min_leaf_size, self.height - min_leaf_size)
+
+            self.left = BSPNode(
+                self.x,
+                self.y,
+                self.width,
+                split_y,
+                self.depth + 1
+            )
+
+            self.right = BSPNode(
+                self.x,
+                self.y + split_y,
+                self.width,
+                self.height - split_y,
+                self.depth + 1
+            )
+
+            return True
+
+        return False
+
+    def split_recursive(self, max_depth, min_leaf_size):
+        """Рекурсивно делит узел, пока не достигнут лимит глубины или размера."""
+        if self.depth >= max_depth:
+            return
+
+        if not self.split(min_leaf_size):
+            return
+
+        self.left.split_recursive(max_depth, min_leaf_size)
+        self.right.split_recursive(max_depth, min_leaf_size)
+
+    def get_leaves(self):
+        """Возвращает все конечные узлы BSP-дерева."""
+        if self.is_leaf():
+            return [self]
+
+        leaves = []
+        leaves += self.left.get_leaves()
+        leaves += self.right.get_leaves()
+
+        return leaves
+
+    def create_room_inside(self, min_room_size, max_room_size):
+        """Создает комнату внутри области узла с отступом от границ."""
+        room_width = rnd(min_room_size, min(max_room_size, self.width - 2))
+        room_height = rnd(min_room_size, min(max_room_size, self.height - 2))
+
+        room_x = rnd(self.x + 1, self.x + self.width - room_width - 1)
+        room_y = rnd(self.y + 1, self.y + self.height - room_height - 1)
+
+        self.room = Room(room_x, room_y, room_width, room_height)
+
+        return self.room
+
+    def get_room(self):
+        """Возвращает комнату этого узла или первую найденную комнату ниже по дереву."""
+        if self.room:
+            return self.room
+
+        if self.left:
+            room = self.left.get_room()
+            if room:
+                return room
+
+        if self.right:
+            room = self.right.get_room()
+            if room:
+                return room
+
+        return None
 
 
 class LevelGenerator:
     """Создает текстовую карту сектора: комнаты, коридоры, игрока и объекты."""
-
-    def __init__(self, width=12, height=8, enemy_count=1, medkit_count=1, ammo_count=1, room_count=3):
+    def __init__(
+        self,
+        width=12,
+        height=8,
+        enemy_count=1,
+        medkit_count=1,
+        ammo_count=1,
+        min_room_size=4,
+        max_room_size=6,
+        bsp_max_depth=3,
+        bsp_min_leaf_size=8
+    ):
         """Сохраняет параметры генерации текущего сектора."""
         self.width = width
         self.height = height
         self.enemy_count = enemy_count
         self.medkit_count = medkit_count
         self.ammo_count = ammo_count
-        self.room_count = room_count
+        self.min_room_size = min_room_size
+        self.max_room_size = max_room_size
+        self.bsp_max_depth = bsp_max_depth
+        self.bsp_min_leaf_size = bsp_min_leaf_size
 
     # Основной процесс генерации
 
-    def generate(self):
-        """Пробует собрать валидную карту и возвращает ее в текстовом виде."""
+    def generate_bsp(self):
+        """Пробует создать валидную BSP-карту и возвращает ее в текстовом виде."""
         for _ in range(100):
-            text_map = self.build_map()
+            text_map = self.build_bsp_map()
 
             if validate_level(text_map):
                 return text_map
 
         raise RuntimeError('Ошибка генерации карты')
 
-    def build_map(self):
-        """Создает одну карту без повторных попыток валидации."""
+    def build_bsp_map(self):
+        """Создает одну BSP-карту без повторных попыток валидации."""
         grid = self.create_filled_grid()
 
-        rooms = self.create_rooms(grid, self.room_count)
-        self.connect_rooms(grid, rooms)
+        self.create_bsp_rooms(grid, self.bsp_max_depth, self.bsp_min_leaf_size)
 
         player_x, player_y = self.get_empty_cell(grid)
+        self.place_door(grid)
         self.set_tile(grid, player_x, player_y, 'P')
         self.place_terminal(grid)
         self.place_far_tiles(grid, player_x, player_y, 'E', self.enemy_count)
@@ -86,42 +229,23 @@ class LevelGenerator:
 
         return grid
 
-    def create_empty_grid(self):
-        """Создает старую тестовую сетку: стены по краям, пол внутри."""
-        grid = []
+    # Создание комнат через BSP
 
-        for y in range(self.height):
-            row = []
+    def create_bsp_rooms(self, grid, max_depth=3, min_leaf_size=8):
+        """Создает BSP-дерево, вырезает комнаты в листьях и соединяет их."""
+        root = BSPNode(0, 0, self.width, self.height)
+        root.split_recursive(max_depth, min_leaf_size)
 
-            for x in range(self.width):
-                if x == 0 or y == 0 or x == self.width - 1 or y == self.height - 1:
-                    row.append('W')
-                else:
-                    row.append('.')
+        rooms = []
 
-            grid.append(row)
+        for leaf in root.get_leaves():
+            room = leaf.create_room_inside(self.min_room_size, self.max_room_size)
+            rooms.append(room)
+            self.create_room(grid, room)
 
-        return grid
+        self.connect_bsp_rooms(grid, root)
 
-    # Создание комнат
-
-    def create_random_room(self):
-        """Создает случайную комнату, которая помещается внутри границ карты."""
-        room_width = rnd(4, 6)
-        room_height = rnd(4, 6)
-
-        x = rnd(1, self.width - room_width - 1)
-        y = rnd(1, self.height - room_height - 1)
-
-        return Room(x, y, room_width, room_height)
-
-    def room_intersects_any(self, new_room, rooms):
-        """Проверяет, пересекается ли новая комната с уже созданными комнатами."""
-        for room in rooms:
-            if new_room.intersects(room, margin=1):
-                return True
-
-        return False
+        return rooms
 
     def create_room(self, grid, room):
         """Вырезает комнату в сетке, заменяя стены на пол."""
@@ -129,67 +253,115 @@ class LevelGenerator:
             for x in range(room.x, room.x + room.width):
                 self.set_tile(grid, x, y, '.')
 
-    def create_rooms(self, grid, room_count, max_attempts=100):
-        """Пытается создать нужное количество непересекающихся комнат."""
-        rooms = []
+    # Соединение комнат коридорами
 
-        for _ in range(max_attempts):
-            if len(rooms) >= room_count:
-                break
-
-            room = self.create_random_room()
-
-            if not self.room_intersects_any(room, rooms):
-                rooms.append(room)
-                self.create_room(grid, room)
-
-        return rooms
-
-    # Соединение комнат
-
-    def connect_rooms(self, grid, rooms):
-        """Соединяет комнаты коридорами через ближайшие уже подключенные комнаты."""
-        if len(rooms) < 2:
+    def connect_bsp_rooms(self, grid, node):
+        """Соединяет комнаты из соседних веток BSP-дерева."""
+        if node.is_leaf():
             return
 
-        connected_rooms = [rooms[0]]
+        self.connect_bsp_rooms(grid, node.left)
+        self.connect_bsp_rooms(grid, node.right)
 
-        for room in rooms[1:]:
-            nearest_room = self.get_nearest_room(room, connected_rooms)
-            self.create_corridor(grid, room, nearest_room)
-            connected_rooms.append(room)
+        left_room = node.left.get_room()
+        right_room = node.right.get_room()
+
+        if left_room and right_room:
+            self.create_corridor(grid, left_room, right_room)
 
     def create_corridor(self, grid, start, end):
         """Создает Г-образный коридор между центрами двух комнат."""
         start_x, start_y = start.get_center()
         end_x, end_y = end.get_center()
 
-        for x in range(min(start_x, end_x), max(start_x, end_x) + 1):
-            self.set_tile(grid, x, start_y, '.')
+        if rnd(0, 1) == 0:
+            for x in range(min(start_x, end_x), max(start_x, end_x) + 1):
+                self.set_corridor_tile(grid, x, start_y)
 
-        for y in range(min(start_y, end_y), max(start_y, end_y) + 1):
-            self.set_tile(grid, end_x, y, '.')
+            for y in range(min(start_y, end_y), max(start_y, end_y) + 1):
+                self.set_corridor_tile(grid, end_x, y)
+        else:
+            for y in range(min(start_y, end_y), max(start_y, end_y) + 1):
+                self.set_corridor_tile(grid, start_x, y)
 
-    def get_room_distance(self, room1, room2):
-        """Возвращает расстояние между центрами двух комнат."""
-        x1, y1 = room1.get_center()
-        x2, y2 = room2.get_center()
+            for x in range(min(start_x, end_x), max(start_x, end_x) + 1):
+                self.set_corridor_tile(grid, x, end_y)
 
-        return self.get_cell_distance(x1, y1, x2, y2)
+    def set_corridor_tile(self, grid, x, y):
+        """Помечает клетку коридора как C, если на этом месте была стена."""
+        if grid[y][x] == 'W':
+            self.set_tile(grid, x, y, 'C')
 
-    def get_nearest_room(self, room, rooms):
-        """Ищет ближайшую комнату из переданного списка."""
-        nearest_room = rooms[0]
-        nearest_distance = self.get_room_distance(room, nearest_room)
+    # Размещение объектов
 
-        for other_room in rooms[1:]:
-            distance = self.get_room_distance(room, other_room)
+    def place_door(self, grid):
+        """Ставит двери в подходящие клетки коридоров."""
+        doors = []
 
-            if distance < nearest_distance:
-                nearest_room = other_room
-                nearest_distance = distance
+        for y in range(1, self.height - 1):
+            for x in range(1, self.width - 1):
+                if self.can_place_door(grid, x, y):
+                    doors.append((x, y))
 
-        return nearest_room
+        for x, y in doors:
+            self.set_tile(grid, x, y, 'D')
+
+    def place_terminal(self, grid):
+        """Ставит терминал в стену рядом ровно с одной свободной клеткой."""
+        while True:
+            wall_x, wall_y = self.get_wall_cell(grid)
+            if self.can_place_terminal(grid, wall_x, wall_y):
+                self.set_tile(grid, wall_x, wall_y, 'T')
+                return
+
+    def place_random_tiles(self, grid, tile, count):
+        """Ставит несколько тайлов в случайные свободные клетки комнат."""
+        for _ in range(count):
+            self.set_tile(grid, *self.get_empty_cell(grid), tile)
+
+    def place_far_tiles(self, grid, x, y, tile, count):
+        """Ставит несколько тайлов на расстоянии от указанной клетки."""
+        for _ in range(count):
+            self.set_tile(grid, *self.get_far_cell(grid, x, y), tile)
+
+    # Проверки размещения объектов
+
+    def can_place_door(self, grid, x, y):
+        """Проверяет, подходит ли клетка коридора для двери."""
+        if grid[y][x] != 'C':
+            return False
+
+        up = grid[y - 1][x]
+        down = grid[y + 1][x]
+        left = grid[y][x - 1]
+        right = grid[y][x + 1]
+
+        if up == 'W' and down == 'W' and (left == '.' or right == '.'):
+            return True
+
+        if left == 'W' and right == 'W' and (up == '.' or down == '.'):
+            return True
+
+        return False
+
+    def can_place_terminal(self, grid, wall_x, wall_y):
+        """Проверяет, можно ли поставить терминал в выбранную стену."""
+        near = [
+            (wall_x + 1, wall_y),
+            (wall_x - 1, wall_y),
+            (wall_x, wall_y + 1),
+            (wall_x, wall_y - 1),
+        ]
+        count = 0
+
+        for x, y in near:
+            if 0 <= x < self.width and 0 <= y < self.height:
+                if grid[y][x] in ('D', 'C'):
+                    return False
+                if self.is_empty(grid, x, y):
+                    count += 1
+
+        return count == 1
 
     # Работа с клетками
 
@@ -198,11 +370,11 @@ class LevelGenerator:
         grid[y][x] = tile
 
     def is_empty(self, grid, x, y):
-        """Проверяет, является ли клетка свободным полом."""
+        """Проверяет, является ли клетка свободным полом комнаты."""
         return grid[y][x] == '.'
 
     def get_empty_cell(self, grid):
-        """Возвращает случайную свободную клетку."""
+        """Возвращает случайную свободную клетку комнаты."""
         while True:
             x = rnd(1, self.width - 2)
             y = rnd(1, self.height - 2)
@@ -217,42 +389,6 @@ class LevelGenerator:
             if grid[y][x] == 'W':
                 return x, y
 
-    # Размещение объектов
-
-    def place_random_tiles(self, grid, tile, count):
-        """Ставит несколько тайлов в случайные свободные клетки."""
-        for _ in range(count):
-            self.set_tile(grid, *self.get_empty_cell(grid), tile)
-
-    def place_far_tiles(self, grid, x, y, tile, count):
-        """Ставит несколько тайлов на расстоянии от указанной клетки."""
-        for _ in range(count):
-            self.set_tile(grid, *self.get_far_cell(grid, x, y), tile)
-
-    def place_terminal(self, grid):
-        """Ставит терминал в стену, рядом с которой есть свободная клетка."""
-        while True:
-            wall_x, wall_y = self.get_wall_cell(grid)
-            if self.can_place_terminal(grid, wall_x, wall_y):
-                self.set_tile(grid, wall_x, wall_y, 'T')
-                return
-
-    def can_place_terminal(self, grid, wall_x, wall_y):
-        """Проверяет, можно ли поставить терминал в выбранную стену."""
-        near = [
-            (wall_x + 1, wall_y),
-            (wall_x - 1, wall_y),
-            (wall_x, wall_y + 1),
-            (wall_x, wall_y - 1),
-        ]
-
-        for x, y in near:
-            if 0 <= x < self.width and 0 <= y < self.height:
-                if self.is_empty(grid, x, y):
-                    return True
-
-        return False
-
     # Расстояния
 
     def get_cell_distance(self, x1, y1, x2, y2):
@@ -260,7 +396,7 @@ class LevelGenerator:
         return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
     def get_far_cell(self, grid, x, y, min_distance=4):
-        """Ищет случайную свободную клетку не ближе заданной дистанции."""
+        """Ищет свободную клетку не ближе заданной дистанции."""
         while True:
             x1, y1 = self.get_empty_cell(grid)
 

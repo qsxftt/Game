@@ -7,7 +7,7 @@ def get_walkable_cells(text_map):
 
     for y, row in enumerate(text_map):
         for x, tile in enumerate(row):
-            if tile in ('.', 'P', 'E', 'H', 'A'):
+            if tile in ('.', 'P', 'E', 'H', 'A', 'C', 'D'):
                 walkable.add((x, y))
 
     return walkable
@@ -36,7 +36,7 @@ def find_all_tiles(text_map, target_tile):
 
 
 def get_neighbors(cell):
-    """Возвращает четыре соседние клетки без диагоналей."""
+    """Возвращает четыре соседние клетки"""
     x, y = cell
 
     return [
@@ -105,6 +105,10 @@ def validate_level(text_map):
     enemies = find_all_tiles(text_map, 'E')
     medkits = find_all_tiles(text_map, 'H')
     ammos = find_all_tiles(text_map, 'A')
+    doors = find_all_tiles(text_map, 'D')
+
+    if not all_pos_reachable(doors, reachable):
+        return False
 
     if not all_pos_reachable(enemies, reachable):
         return False

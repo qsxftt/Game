@@ -55,7 +55,3 @@ class SpriteRender:
         frame = pygame.transform.scale(frame, (enemy_width, enemy_height))
         screen.blit(frame, (screen_x - enemy_width // 2, HEIGHT_HALF - enemy_height // 2))
 
-    def draw_enemies(self, enemies, screen, player, level):
-        """Рисует всех врагов текущего уровня."""
-        for enemy in enemies:
-            self.draw(enemy, screen, player, level)
