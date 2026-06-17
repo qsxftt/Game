@@ -27,7 +27,7 @@ def activate_terminal(player, level):
 def load_sector(state):
     """Генерирует сектор и пересоздает состояние игрока, врагов и ресурсов."""
     generator = create_generator_for_sector(state.sector_index)
-    text_map = generator.generate_bsp()
+    text_map = generator.generate()
     level = Level(block_size, text_map)
 
     state.current_level = level

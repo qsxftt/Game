@@ -187,7 +187,7 @@ class LevelGenerator:
 
     # Основной процесс генерации
 
-    def generate_bsp(self):
+    def generate(self):
         """Пробует создать валидную BSP-карту и возвращает ее в текстовом виде."""
         for _ in range(100):
             text_map = self.build_bsp_map()
@@ -271,8 +271,7 @@ class LevelGenerator:
 
     def create_corridor(self, grid, start, end):
         """Создает Г-образный коридор между центрами двух комнат."""
-        start_x, start_y = start.get_center()
-        end_x, end_y = end.get_center()
+        start_x, start_y, end_x, end_y = self.get_corridor_points(start, end)
 
         if rnd(0, 1) == 0:
             for x in range(min(start_x, end_x), max(start_x, end_x) + 1):
@@ -292,6 +291,32 @@ class LevelGenerator:
         if grid[y][x] == 'W':
             self.set_tile(grid, x, y, 'C')
 
+    def get_corridor_points(self, start, end):
+        start_center_x, start_center_y = start.get_center()
+        end_center_x, end_center_y = end.get_center()
+
+        dx = end_center_x - start_center_x
+        dy = end_center_y - start_center_y
+
+        if abs(dx) >= abs(dy):
+            if dx > 0:
+                start_x = start.x + start.width
+                end_x = end.x - 1
+            else:
+                start_x = start.x - 1
+                end_x = end.x + end.width
+
+            return start_x, start_center_y, end_x, end_center_y
+        
+        if dy > 0:
+            start_y = start.y + start.height
+            end_y = end.y - 1
+        else:
+            start_y = start.y - 1
+            end_y = end.y + end.height
+
+        return start_center_x, start_y, end_center_x, end_y
+
     # Размещение объектов
 
     def place_door(self, grid):
@@ -301,7 +326,8 @@ class LevelGenerator:
         for y in range(1, self.height - 1):
             for x in range(1, self.width - 1):
                 if self.can_place_door(grid, x, y):
-                    doors.append((x, y))
+                    if not self.is_near_door(doors, x, y):
+                        doors.append((x, y))
 
         for x, y in doors:
             self.set_tile(grid, x, y, 'D')
@@ -362,6 +388,14 @@ class LevelGenerator:
                     count += 1
 
         return count == 1
+    
+    def is_near_door(self, doors, x, y, min_distance=3):
+        for door_x, door_y in doors:
+            if self.get_cell_distance(door_x, door_y, x, y) < min_distance:
+                return True
+            
+        return False
+
 
     # Работа с клетками
 
