@@ -43,3 +43,9 @@ def get_sprite_sorted(pickups, enemies, player):
     """Возвращает pickups и enemies, отсортированные от дальних к ближним."""
     sprites = pickups + enemies
     return sorted(sprites, key=lambda sprite: sprite.get_depth(player), reverse=True)
+
+def world_to_grid(x, y):
+    return int(x // block_size), int(y // block_size)
+
+def grid_to_world(x, y):
+    return x * block_size + block_size // 2, y * block_size + block_size // 2

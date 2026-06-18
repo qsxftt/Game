@@ -15,6 +15,7 @@ from src.core.config import (
 )
 from src.systems.collision_system import is_wall
 from src.views.raycast_renderer import cast_single_ray
+from src.systems.enemy_ai_system import get_next_path_point, get_target_cell, update_path
 
 
 class Enemy:
@@ -42,6 +43,14 @@ class Enemy:
         self.frame_attack_count = 0
         self.texture_walk = None
         self.texture_attack = None
+
+        self.state = 'idle'
+        self.path = []
+        self.path_update_delay = 30
+        self.path_update_cooldown = 0
+        self.vision_distance = 500
+        self.last_seen_player_cell = None
+
 
     def get_depth(self, player):
         """Возвращает расстояние от врага до игрока."""
@@ -135,9 +144,32 @@ class Enemy:
         if depth <= self.attack_distance:
             self.attack(player)
             return False
+        
+        target_cell = get_target_cell(self, player, level)
 
-        dx = dx / depth * self.speed
-        dy = dy / depth * self.speed
+        if not target_cell:
+            return False
+        
+        if self.path_update_cooldown == 0:
+            update_path(self, target_cell, level)
+
+        target_point = get_next_path_point(self)
+
+        if target_point is None:
+            return False
+        
+        target_x, target_y = target_point
+        
+        dx = target_x - self.x
+        dy = target_y - self.y
+
+        move_depth = (dx ** 2 + dy ** 2) ** 0.5
+
+        if move_depth == 0:
+            return False
+
+        dx = dx / move_depth * self.speed
+        dy = dy / move_depth * self.speed
 
         if self.can_move(self.x + dx, self.y, level):
             self.x += dx
@@ -168,6 +200,9 @@ class Enemy:
 
         if self.frame_walk_cooldown == 0:
             self.frame_walk_cooldown = self.frame_walk_delay
+
+        if self.path_update_cooldown > 0:
+            self.path_update_cooldown -= 1
 
         self.move(player, level)
 
