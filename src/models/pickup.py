@@ -1,16 +1,10 @@
 """Модели подбираемых ресурсов."""
 
-from math import atan2, pi
-
 from src.core.config import (
     AMMO_TEXTURE,
-    DELTA_RAY,
-    HALF_FOV,
     MEDKIT_TEXTURE,
-    SCALE,
-    WIDTH_HALF,
 )
-from src.views.raycast_renderer import cast_single_ray
+from src.systems.visibility_system import get_depth
 
 
 class Pickup:
@@ -39,59 +33,12 @@ class Pickup:
 
         self.pickup_item(player)
 
-    def get_depth(self, player):
-        """Возвращает расстояние от ресурса до игрока."""
-        dx = player.x - self.x
-        dy = player.y - self.y
-
-        return (dx ** 2 + dy ** 2) ** 0.5
-
-    def get_angle(self, player):
-        """Возвращает угол от игрока к ресурсу."""
-        dx = self.x - player.x
-        dy = self.y - player.y
-
-        return atan2(dy, dx)
-
-    def get_delta_angle(self, player):
-        """Возвращает разницу между направлением взгляда игрока и ресурсом."""
-        angle = self.get_angle(player)
-        delta_angle = angle - player.angle
-
-        while delta_angle > pi:
-            delta_angle -= 2 * pi
-
-        while delta_angle < -pi:
-            delta_angle += 2 * pi
-
-        return delta_angle
-
-    def is_in_fov(self, player):
-        """Проверяет, попадает ли ресурс в поле зрения игрока."""
-        delta_angle = self.get_delta_angle(player)
-
-        return abs(delta_angle) < HALF_FOV
-
-    def is_visible(self, player, level):
-        """Проверяет, не перекрыт ли ресурс стеной, дверью или терминалом."""
-        angle = self.get_angle(player)
-        hit_x, hit_y, wall_depth, side, block_type = cast_single_ray(player, angle, level)
-        pickup_depth = self.get_depth(player)
-
-        return pickup_depth < wall_depth
-
-    def get_screen_x(self, player):
-        """Возвращает X-координату ресурса на экране."""
-        delta_angle = self.get_delta_angle(player)
-
-        return WIDTH_HALF + delta_angle / DELTA_RAY * SCALE
-
     def pickup_item(self, player):
         """Применяет эффект ресурса, если игрок подошел достаточно близко."""
         if self.is_pickedup:
             return False
 
-        depth = self.get_depth(player)
+        depth = get_depth(self, player)
 
         if depth <= self.pickup_radius:
             if self.type == 'medkit':

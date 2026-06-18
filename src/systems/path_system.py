@@ -1,9 +1,13 @@
+"""A* поиск пути по текстовой карте уровня."""
+
 from heapq import heappop, heappush
 
 
 WALKABLE_TILES = {'.', 'P', 'E', 'H', 'A', 'C', 'D'}
 
+
 def get_neighbors(cell, text_map):
+    """Возвращает соседние клетки внутри границ карты."""
     x, y = cell
     height = len(text_map)
     width = len(text_map[0])
@@ -23,13 +27,17 @@ def get_neighbors(cell, text_map):
 
     return valid_near
 
+
 def heuristic(a, b):
+    """Возвращает манхэттенское расстояние между двумя клетками."""
     x1, y1 = a
     x2, y2 = b
 
     return abs(x1 - x2) + abs(y1 - y2)
 
+
 def build_path(came_from, start, end):
+    """Восстанавливает путь от старта до цели по словарю came_from."""
     current = end
     path = []
 
@@ -42,7 +50,9 @@ def build_path(came_from, start, end):
 
     return path
 
+
 def find_path(text_map, start, end):
+    """Ищет путь от start до end через проходимые клетки карты."""
     frontier = []
     heappush(frontier, (0, start))
 
@@ -77,8 +87,5 @@ def find_path(text_map, start, end):
 
     if end not in came_from:
         return []
-    
+
     return build_path(came_from, start, end)
-
-
-    

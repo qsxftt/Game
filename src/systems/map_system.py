@@ -3,6 +3,7 @@
 from math import cos, sin
 
 from src.core.config import block_size
+from src.systems.visibility_system import get_depth
 
 
 def get_cell(x, y):
@@ -42,10 +43,13 @@ def get_block_type(x, y, level):
 def get_sprite_sorted(pickups, enemies, player):
     """Возвращает pickups и enemies, отсортированные от дальних к ближним."""
     sprites = pickups + enemies
-    return sorted(sprites, key=lambda sprite: sprite.get_depth(player), reverse=True)
+    return sorted(sprites, key=lambda sprite: get_depth(sprite, player), reverse=True)
 
 def world_to_grid(x, y):
+    """Переводит мировые координаты в координаты клетки текстовой карты."""
     return int(x // block_size), int(y // block_size)
 
+
 def grid_to_world(x, y):
+    """Возвращает центр клетки карты в мировых координатах."""
     return x * block_size + block_size // 2, y * block_size + block_size // 2

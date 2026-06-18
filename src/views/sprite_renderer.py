@@ -3,6 +3,7 @@
 import pygame
 
 from src.core.config import HEIGHT_HALF, SCREEN_DISTANCE, block_size
+from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
 
 
 class SpriteRender:
@@ -30,13 +31,13 @@ class SpriteRender:
 
     def draw(self, enemy, screen, player, level):
         """Рисует одного врага, если он жив, видим и находится в FOV."""
-        if not enemy.is_visible(player, level):
+        if not is_visible(enemy, player, level):
             return False
 
         if not enemy.alive:
             return False
 
-        if not enemy.is_in_fov(player):
+        if not is_in_fov(enemy, player):
             return False
 
         if enemy.attack_cooldown > 0:
@@ -44,8 +45,8 @@ class SpriteRender:
         else:
             frame, frame_width, frame_height = self.get_frame(enemy, enemy.texture_walk, 'walk')
 
-        depth = max(enemy.get_depth(player), 50)
-        screen_x = enemy.get_screen_x(player)
+        depth = max(get_depth(enemy, player), 50)
+        screen_x = get_screen_x(enemy, player)
         enemy_height = int(block_size * SCREEN_DISTANCE / depth * 0.75)
         enemy_width = int(frame_width * enemy_height / frame_height)
 
@@ -54,4 +55,3 @@ class SpriteRender:
 
         frame = pygame.transform.scale(frame, (enemy_width, enemy_height))
         screen.blit(frame, (screen_x - enemy_width // 2, HEIGHT_HALF - enemy_height // 2))
-

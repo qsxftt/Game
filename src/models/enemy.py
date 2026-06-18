@@ -1,20 +1,13 @@
 """Модели врагов."""
 
-from math import atan2, pi
-
 import pygame
 
 from src.core.config import (
-    DELTA_RAY,
     ENEMY12_TEXTURE,
     ENEMY1_TEXTURE,
-    HALF_FOV,
     RED,
-    SCALE,
-    WIDTH_HALF,
 )
 from src.systems.collision_system import is_wall
-from src.views.raycast_renderer import cast_single_ray
 from src.systems.enemy_ai_system import get_next_path_point, get_target_cell, update_path
 
 
@@ -51,54 +44,6 @@ class Enemy:
         self.vision_distance = 500
         self.last_seen_player_cell = None
 
-
-    def get_depth(self, player):
-        """Возвращает расстояние от врага до игрока."""
-        dx = player.x - self.x
-        dy = player.y - self.y
-
-        return (dx ** 2 + dy ** 2) ** 0.5
-
-    def get_angle(self, player):
-        """Возвращает угол от игрока к врагу."""
-        dx = self.x - player.x
-        dy = self.y - player.y
-
-        return atan2(dy, dx)
-
-    def get_delta_angle(self, player):
-        """Возвращает разницу между направлением взгляда игрока и врагом."""
-        angle = self.get_angle(player)
-        delta_angle = angle - player.angle
-
-        while delta_angle > pi:
-            delta_angle -= 2 * pi
-
-        while delta_angle < -pi:
-            delta_angle += 2 * pi
-
-        return delta_angle
-
-    def is_in_fov(self, player):
-        """Проверяет, попадает ли враг в поле зрения игрока."""
-        delta_angle = self.get_delta_angle(player)
-
-        return abs(delta_angle) < HALF_FOV
-
-    def get_screen_x(self, player):
-        """Возвращает X-координату врага на экране."""
-        delta_angle = self.get_delta_angle(player)
-
-        return WIDTH_HALF + delta_angle / DELTA_RAY * SCALE
-
-    def is_visible(self, player, level):
-        """Проверяет, не перекрыт ли враг стеной, дверью или терминалом."""
-        angle = self.get_angle(player)
-        hit_x, hit_y, wall_depth, side, block_type = cast_single_ray(player, angle, level)
-        enemy_depth = self.get_depth(player)
-
-        return enemy_depth < wall_depth
-
     def take_damage(self, damage):
         """Наносит врагу урон и помечает его мертвым при нуле здоровья."""
         self.health -= damage
@@ -106,21 +51,6 @@ class Enemy:
         if self.health <= 0:
             self.health = 0
             self.alive = False
-
-    def near_crosshair(self, player, level):
-        """Проверяет, находится ли враг достаточно близко к прицелу."""
-        if not self.alive:
-            return False
-
-        if not self.is_visible(player, level):
-            return False
-
-        if not self.is_in_fov(player):
-            return False
-
-        screen_x = self.get_screen_x(player)
-
-        return abs(screen_x - WIDTH_HALF) < self.radius
 
     def can_move(self, x, y, level):
         """Проверяет, может ли враг занять указанную позицию."""

@@ -3,6 +3,7 @@
 import pygame
 
 from src.core.config import HEIGHT, SCREEN_DISTANCE, block_size
+from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
 
 
 class PickupRender:
@@ -26,16 +27,16 @@ class PickupRender:
         if pickup.is_pickedup:
             return False
 
-        if not pickup.is_visible(player, level):
+        if not is_visible(pickup, player, level):
             return False
 
-        if not pickup.is_in_fov(player):
+        if not is_in_fov(pickup, player):
             return False
 
         frame, frame_width, frame_height = self.get_frame(pickup)
 
-        depth = max(pickup.get_depth(player), 50)
-        screen_x = pickup.get_screen_x(player)
+        depth = max(get_depth(pickup, player), 50)
+        screen_x = get_screen_x(pickup, player)
         pickup_height = int(block_size * SCREEN_DISTANCE / depth * 0.5)
         pickup_width = int(frame_width * pickup_height / frame_height)
 

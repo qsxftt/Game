@@ -1,7 +1,7 @@
+from heapq import heappush, heappop
 from random import randint as rnd
 
 from src.systems.level_validation import validate_level
-from heapq import heappush, heappop
 
 
 class Room:
