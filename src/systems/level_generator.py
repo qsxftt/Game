@@ -460,7 +460,7 @@ class LevelGenerator:
         valid_near = []
 
         for near_x, near_y in near:
-            if 0 <= near_x < self.width and 0 <= near_y < self.height:
+            if 1 <= near_x < self.width - 1 and 1 <= near_y < self.height - 1:
                 valid_near.append((near_x, near_y))
 
         return valid_near

@@ -1,7 +1,7 @@
 """AI-поведение врагов: выбор цели, путь и следующая точка движения."""
 
 from src.systems.map_system import grid_to_world, world_to_grid
-from src.systems.path_system import find_path
+from src.systems.path_system import find_path, WALKABLE_TILES
 from src.systems.visibility_system import get_depth, is_visible, has_line_of_sight
 from src.systems.door_system import open_door_at_cell
 from random import choice
@@ -59,7 +59,7 @@ def get_random_idle_cell(enemy, level):
         (x, y - 1),
     ]
 
-    free_near = [cell for cell in near if level.text_map[cell[1]][cell[0]] == '.']
+    free_near = [cell for cell in near if level.text_map[cell[1]][cell[0]] in WALKABLE_TILES]
 
     if not free_near:
         return None

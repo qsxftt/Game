@@ -184,3 +184,20 @@ class Dwarf(Enemy):
         self.frame_walk_count = 4
         self.texture_walk = ENEMY1_TEXTURE
         self.texture_attack = ENEMY12_TEXTURE
+
+class Dwarf2(Enemy):
+    """Конкретный тип врага с параметрами и текстурами."""
+
+    def __init__(self, x, y):
+        """Создает врага Dwarf с заданными характеристиками."""
+        super().__init__(x, y)
+        self.health = 200
+        self.damage = 30
+        self.speed = 3
+        self.attack_distance = 100
+        self.attack_delay = 50
+        self.frame_attack_count = 4
+        self.frame_walk_delay = 25
+        self.frame_walk_count = 8
+        self.texture_walk = ENEMY12_TEXTURE
+        self.texture_attack = ENEMY1_TEXTURE

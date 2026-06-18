@@ -3,7 +3,7 @@
 from math import cos, pi, sin
 
 from src.core.config import PLAYER_RADIUS
-from src.models.weapon import Pistol
+from src.models.weapon import Pistol, Shotgun
 from src.systems.collision_system import is_wall
 from src.systems.door_system import open_door
 
@@ -21,7 +21,10 @@ class Player:
         self.radius = PLAYER_RADIUS
         self.cooldown = 0
         self.delay = 20
-        self.weapon = Pistol()
+
+        self.weapons = [Pistol(), Shotgun()]
+        self.weapon_index = 0
+        self.weapon = self.weapons[self.weapon_index]
 
     def can_move(self, x, y, level):
         """Проверяет, может ли игрок занять позицию с учетом радиуса."""
@@ -31,6 +34,15 @@ class Player:
             and not is_wall(x - self.radius, y, level)
             and not is_wall(x, y - self.radius, level)
         )
+    
+    def switch_weapon(self):
+        if self.weapon.shoot_cooldown > 0 or self.weapon.reload_cooldown > 0:
+            return False
+
+        self.weapon_index = (self.weapon_index + 1) % len(self.weapons)
+        self.weapon = self.weapons[self.weapon_index]
+
+        return True
 
     def update(self, actions, level):
         """Обрабатывает действия игрока за кадр и возвращает факт выстрела."""
@@ -61,6 +73,8 @@ class Player:
             self.angle -= 0.01 * self.speed
         if actions['right']:
             self.angle += 0.01 * self.speed
+        if actions['Q']:
+            self.switch_weapon()
 
         self.angle %= 2 * pi
 

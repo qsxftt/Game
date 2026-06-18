@@ -16,8 +16,11 @@ class HUDrender:
         """Рисует здоровье игрока и патроны текущего оружия."""
         ammo_text = self.font.render(f'{player.weapon.ammo}/{player.weapon.reserve_ammo}', True, GREEN)
         hp_text = self.font.render(f'HP: {player.health}', True, GREEN)
+        weapon_text = self.font.render(player.weapon.name, True, GREEN)
+
         screen.blit(ammo_text, (20, 20))
         screen.blit(hp_text, (100, 20))
+        screen.blit(weapon_text, (200, 20))
 
     def draw_crossfire(self, screen):
         """Рисует прицел в центре экрана."""

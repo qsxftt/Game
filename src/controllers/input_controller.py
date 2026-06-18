@@ -10,6 +10,7 @@ class InputController:
         """Создает флаги одноразовых нажатий."""
         self.E = False
         self.R = False
+        self.Q = False
         self.SPACE = False
 
     def get_actions(self):
@@ -21,6 +22,7 @@ class InputController:
             'S': keys[pygame.K_s],
             'A': keys[pygame.K_a],
             'D': keys[pygame.K_d],
+            'Q': self.Q,
             'left': keys[pygame.K_LEFT],
             'right': keys[pygame.K_RIGHT],
             'E': self.E,
@@ -30,6 +32,7 @@ class InputController:
 
         self.E = False
         self.R = False
+        self.Q = False
         self.SPACE = False
 
         return actions
@@ -43,3 +46,5 @@ class InputController:
                 self.R = True
             if event.key == pygame.K_SPACE:
                 self.SPACE = True
+            if event.key == pygame.K_q:
+                self.Q = True

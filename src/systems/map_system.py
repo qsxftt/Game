@@ -16,7 +16,7 @@ def get_cell(x, y):
 
 def get_front_cell(player):
     """Возвращает клетку на расстоянии одного блока перед игроком."""
-    front_x = player.x + cos(player.angle) * block_size
+    front_x = player.x + cos(player.angle) * block_size 
     front_y = player.y + sin(player.angle) * block_size
 
     cell = get_cell(front_x, front_y)

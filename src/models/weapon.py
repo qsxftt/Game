@@ -8,6 +8,7 @@ class Weapon:
 
     def __init__(self):
         """Создает пустое оружие, которое настраивается наследником."""
+        self.name = ''
         self.damage = 0
         self.ammo = 0
         self.magazine_size = 0
@@ -76,6 +77,7 @@ class Pistol(Weapon):
     def __init__(self):
         """Настраивает урон, магазин, задержки и текстуры пистолета."""
         super().__init__()
+        self.name = 'Pistol'
         self.damage = 35
         self.ammo = 10
         self.magazine_size = 10
@@ -85,3 +87,20 @@ class Pistol(Weapon):
         self.frame_count = 5
         self.texture_reload = PISTOLR_TEXTURE
         self.reserve_ammo = 30
+
+class Shotgun(Weapon):
+    """Стартовый пистолет игрока."""
+
+    def __init__(self):
+        """Настраивает урон, магазин, задержки и текстуры пистолета."""
+        super().__init__()
+        self.name = 'Shotgun'
+        self.damage = 50
+        self.ammo = 3
+        self.magazine_size = 3
+        self.shoot_delay = 50
+        self.reload_delay = 60
+        self.texture = PISTOL_TEXTURE
+        self.frame_count = 5
+        self.texture_reload = PISTOLR_TEXTURE
+        self.reserve_ammo = 15 

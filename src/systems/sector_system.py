@@ -1,12 +1,13 @@
 """Логика загрузки и переключения секторов."""
 
 from src.core.config import TOTAL_SECTORS, block_size
-from src.models.enemy import Dwarf
+from src.models.enemy import Dwarf, Dwarf2
 from src.models.level import Level
 from src.models.pickup import Ammo, MedKit
 from src.models.player import Player
 from src.systems.level_generator import LevelGenerator
 from src.systems.map_system import get_front_cell
+from random import choice
 
 
 def all_enemies_dead(enemies):
@@ -30,9 +31,10 @@ def load_sector(state):
     text_map = generator.generate()
     level = Level(block_size, text_map)
 
+    enemy_classes = [Dwarf, Dwarf2]
     state.current_level = level
     state.player = Player(*state.current_level.player_start)
-    state.enemies = [Dwarf(x, y) for x, y in state.current_level.enemies_pos]
+    state.enemies = [choice(enemy_classes)(x, y) for x, y in state.current_level.enemies_pos]
     state.pickups = []
     state.reset_sector_flags()
 
