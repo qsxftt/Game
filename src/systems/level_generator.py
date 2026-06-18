@@ -1,6 +1,7 @@
 from random import randint as rnd
 
 from src.systems.level_validation import validate_level
+from heapq import heappush, heappop
 
 
 class Room:
@@ -270,52 +271,56 @@ class LevelGenerator:
             self.create_corridor(grid, left_room, right_room)
 
     def create_corridor(self, grid, start, end):
-        """Создает Г-образный коридор между центрами двух комнат."""
-        start_x, start_y, end_x, end_y = self.get_corridor_points(start, end)
+        start_point = start.get_center()
+        end_point = end.get_center()
 
-        if rnd(0, 1) == 0:
-            for x in range(min(start_x, end_x), max(start_x, end_x) + 1):
-                self.set_corridor_tile(grid, x, start_y)
+        for x, y in self.find_corridor_path(grid, start_point, end_point):
+            if grid[y][x] == 'W':
+                self.set_tile(grid, x, y, 'C')
 
-            for y in range(min(start_y, end_y), max(start_y, end_y) + 1):
-                self.set_corridor_tile(grid, end_x, y)
-        else:
-            for y in range(min(start_y, end_y), max(start_y, end_y) + 1):
-                self.set_corridor_tile(grid, start_x, y)
+    def build_corridor_path(self, came_from, start, end):
+        current = end
+        path = []
 
-            for x in range(min(start_x, end_x), max(start_x, end_x) + 1):
-                self.set_corridor_tile(grid, x, end_y)
+        while current != start:
+            path.append(current)
+            current = came_from[current]
 
-    def set_corridor_tile(self, grid, x, y):
-        """Помечает клетку коридора как C, если на этом месте была стена."""
-        if grid[y][x] == 'W':
-            self.set_tile(grid, x, y, 'C')
+        path.append(start)
+        path.reverse()
 
-    def get_corridor_points(self, start, end):
-        start_center_x, start_center_y = start.get_center()
-        end_center_x, end_center_y = end.get_center()
+        return path
+    
+    def find_corridor_path(self, grid, start, end):
+        frontier = []
+        heappush(frontier, (0, start))
 
-        dx = end_center_x - start_center_x
-        dy = end_center_y - start_center_y
+        came_from = {}
+        cost_so_far = {}
 
-        if abs(dx) >= abs(dy):
-            if dx > 0:
-                start_x = start.x + start.width
-                end_x = end.x - 1
-            else:
-                start_x = start.x - 1
-                end_x = end.x + end.width
+        came_from[start] = None
+        cost_so_far[start] = 0
 
-            return start_x, start_center_y, end_x, end_center_y
-        
-        if dy > 0:
-            start_y = start.y + start.height
-            end_y = end.y - 1
-        else:
-            start_y = start.y - 1
-            end_y = end.y + end.height
+        while frontier:
+            current_priority, current = heappop(frontier)
 
-        return start_center_x, start_y, end_center_x, end_y
+            if current_priority > cost_so_far[current]:
+                continue
+
+            if current == end:
+                break
+
+            for next_cell in self.get_neighbors(*current):
+                next_x, next_y = next_cell
+                new_cost = cost_so_far[current] + self.get_corridor_cost(grid, next_x, next_y)
+
+                if next_cell not in cost_so_far or new_cost < cost_so_far[next_cell]:
+                    cost_so_far[next_cell] = new_cost
+                    heappush(frontier, (new_cost, next_cell))
+                    came_from[next_cell] = current
+
+        return self.build_corridor_path(came_from, start, end)
+    
 
     # Размещение объектов
 
@@ -424,6 +429,58 @@ class LevelGenerator:
                 return x, y
 
     # Расстояния
+
+    def is_near_room(self, grid, x, y):
+        near = [
+            (x + 1, y),
+            (x - 1, y),
+            (x, y + 1),
+            (x, y - 1),
+            (x + 1, y + 1),
+            (x - 1, y - 1),
+            (x + 1, y - 1),
+            (x - 1, y + 1),
+        ]
+
+        for near_x, near_y in near:
+            if 0 <= near_x < self.width and 0 <= near_y < self.height:
+                if grid[near_y][near_x] == '.':
+                    return True
+                
+        return False
+
+    def get_neighbors(self, x, y):
+        near = [
+            (x + 1, y),
+            (x - 1, y),
+            (x, y + 1),
+            (x, y - 1),
+        ]
+
+        valid_near = []
+
+        for near_x, near_y in near:
+            if 0 <= near_x < self.width and 0 <= near_y < self.height:
+                valid_near.append((near_x, near_y))
+
+        return valid_near
+    
+    def get_corridor_cost(self, grid, x, y):
+        tile = grid[y][x]
+
+        if tile == 'W':
+            if self.is_near_room(grid, x, y):
+                return 40
+            
+            return 5
+        
+        if tile == 'C':
+            return 1
+        
+        if tile == '.':
+            return 50
+        
+        return 100
 
     def get_cell_distance(self, x1, y1, x2, y2):
         """Возвращает евклидово расстояние между двумя клетками."""
