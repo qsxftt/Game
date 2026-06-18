@@ -2,7 +2,7 @@
 
 from src.systems.map_system import grid_to_world, world_to_grid
 from src.systems.path_system import find_path
-from src.systems.visibility_system import get_depth, is_visible
+from src.systems.visibility_system import get_depth, is_visible, has_line_of_sight
 
 
 def can_see_player(enemy, player, level):
@@ -34,20 +34,20 @@ def get_target_cell(enemy, player, level):
     enemy.state = 'idle'
     return None
 
-
-def trim_path(enemy):
-    """Удаляет из пути уже пройденные клетки."""
+def get_next_path_point(enemy, level):
+    """Возвращает мировые координаты следующей точки пути."""
     current_cell = world_to_grid(enemy.x, enemy.y)
 
     while enemy.path and enemy.path[0] == current_cell:
         enemy.path.pop(0)
 
-
-def get_next_path_point(enemy):
-    """Возвращает мировые координаты следующей точки пути."""
-    trim_path(enemy)
-
     if not enemy.path:
         return None
 
+    for cell in reversed(enemy.path[:4]):
+        x, y = grid_to_world(*cell)
+
+        if has_line_of_sight(enemy.x, enemy.y, x, y, level):
+            return x, y
+        
     return grid_to_world(*enemy.path[0])

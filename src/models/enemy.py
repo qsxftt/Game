@@ -9,6 +9,7 @@ from src.core.config import (
 )
 from src.systems.collision_system import is_wall
 from src.systems.enemy_ai_system import get_next_path_point, get_target_cell, update_path
+from src.systems.visibility_system import get_depth
 
 
 class Enemy:
@@ -63,16 +64,7 @@ class Enemy:
 
     def move(self, player, level):
         """Двигает врага к игроку или атакует при достаточной близости."""
-        dx = player.x - self.x
-        dy = player.y - self.y
-
-        depth = (dx ** 2 + dy ** 2) ** 0.5
-
-        if depth == 0:
-            return False
-
-        if depth <= self.attack_distance:
-            self.attack(player)
+        if self.try_attack(player):
             return False
         
         target_cell = get_target_cell(self, player, level)
@@ -83,13 +75,16 @@ class Enemy:
         if self.path_update_cooldown == 0:
             update_path(self, target_cell, level)
 
-        target_point = get_next_path_point(self)
+        target_point = get_next_path_point(self, level)
 
         if target_point is None:
             return False
         
         target_x, target_y = target_point
         
+        return self.move_to_point(target_x, target_y, level)
+
+    def move_to_point(self, target_x, target_y, level):
         dx = target_x - self.x
         dy = target_y - self.y
 
@@ -106,6 +101,17 @@ class Enemy:
 
         if self.can_move(self.x, self.y + dy, level):
             self.y += dy
+
+        return True
+
+    def try_attack(self, player):
+        depth = get_depth(self, player)
+
+        if depth > self.attack_distance:
+            return False
+        
+        self.attack(player)
+        return True
 
     def attack(self, player):
         """Наносит урон игроку, если cooldown атаки закончился."""

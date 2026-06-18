@@ -58,3 +58,26 @@ def is_visible(obj, player, level):
     obj_depth = get_depth(obj, player)
 
     return obj_depth < wall_depth
+
+def has_line_of_sight(x1, y1, x2, y2, level, step=10):
+    from src.systems.map_system import get_block_type
+
+    dx = x2 - x1
+    dy = y2 - y1
+    distance = (dx ** 2 + dy ** 2) ** 0.5
+
+    if distance == 0:
+        return True
+
+    steps = int(distance / step)
+
+    for i in range(1, steps + 1):
+        check_x = x1 + dx / steps * i
+        check_y = y1 + dy / steps * i
+
+        if get_block_type(check_x, check_y, level):
+            return False
+
+    return True
+
+
