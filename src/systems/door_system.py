@@ -18,6 +18,11 @@ def open_door(player, level):
 
     return False
 
+def open_door_at_cell(cell, level):
+    if cell in level.doors:
+        return level.doors[cell].open()
+
+    return False
 
 def update_doors(level):
     """Обновляет состояние всех дверей текущего уровня."""

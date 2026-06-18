@@ -8,7 +8,7 @@ from src.core.config import (
     RED,
 )
 from src.systems.collision_system import is_wall
-from src.systems.enemy_ai_system import get_next_path_point, get_target_cell, update_path
+from src.systems.enemy_ai_system import get_next_path_point, get_target_cell, update_path, update_enemy_state, open_next_door
 from src.systems.visibility_system import get_depth
 
 
@@ -45,6 +45,10 @@ class Enemy:
         self.vision_distance = 500
         self.last_seen_player_cell = None
 
+        self.idle_target_cell = None
+        self.idle_wait_cooldown = 0
+        self.idle_wait_delay = 60
+
     def take_damage(self, damage):
         """Наносит врагу урон и помечает его мертвым при нуле здоровья."""
         self.health -= damage
@@ -64,7 +68,7 @@ class Enemy:
 
     def move(self, player, level):
         """Двигает врага к игроку или атакует при достаточной близости."""
-        if self.try_attack(player):
+        if self.state == 'attack':
             return False
         
         target_cell = get_target_cell(self, player, level)
@@ -75,9 +79,18 @@ class Enemy:
         if self.path_update_cooldown == 0:
             update_path(self, target_cell, level)
 
+        open_next_door(self, level)
+
         target_point = get_next_path_point(self, level)
 
         if target_point is None:
+            if self.state == 'search':
+                self.last_seen_player_cell = None
+
+            if self.state == 'idle':
+                self.idle_target_cell = None
+                self.idle_wait_cooldown = self.idle_wait_delay
+
             return False
         
         target_x, target_y = target_point
@@ -139,6 +152,11 @@ class Enemy:
 
         if self.path_update_cooldown > 0:
             self.path_update_cooldown -= 1
+
+        if self.idle_wait_cooldown > 0:
+            self.idle_wait_cooldown -= 1
+
+        update_enemy_state(self, player, level)
 
         self.move(player, level)
 
