@@ -55,17 +55,26 @@ def go_to_next_sector(state):
 
     return False
 
-
 def create_generator_for_sector(sector_index):
     """Создает генератор с параметрами сложности для указанного сектора."""
+    i = min(sector_index, 4)
+
+    widths = [20, 24, 28, 32, 36]
+    heights = [16, 18, 20, 22, 24]
+    enemies = [1, 3, 5, 7, 10]
+    ammos = [2, 3, 4, 5, 6]
+    medkits = [1, 1, 2, 2, 3]
+    max_room_sizes = [5, 5, 6, 7, 8]
+    bsp_depths = [2, 2, 3, 3, 3]
+
     return LevelGenerator(
-        width=24 + sector_index * 2,
-        height=20 + sector_index,
-        enemy_count=1 + sector_index,
-        medkit_count=1,
-        ammo_count=1 + sector_index,
+        width=widths[i],
+        height=heights[i],
+        enemy_count=enemies[i],
+        medkit_count=medkits[i],
+        ammo_count=ammos[i],
         min_room_size=3,
-        max_room_size=5 + sector_index,
-        bsp_max_depth=2 + sector_index // 2,
+        max_room_size=max_room_sizes[i],
+        bsp_max_depth=bsp_depths[i],
         bsp_min_leaf_size=8
     )

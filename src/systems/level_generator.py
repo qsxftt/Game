@@ -470,15 +470,15 @@ class LevelGenerator:
 
         if tile == 'W':
             if self.is_near_room(grid, x, y):
-                return 40
+                return 30
             
-            return 5
+            return 12
         
         if tile == 'C':
             return 1
         
         if tile == '.':
-            return 50
+            return 25
         
         return 100
 
