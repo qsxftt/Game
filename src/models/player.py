@@ -35,6 +35,10 @@ class Player:
             and not is_wall(x, y - self.radius, level)
         )
     
+    def set_start_pos(self, x, y):
+        self.x = x
+        self.y = y
+    
     def switch_weapon(self):
         if self.weapon.shoot_cooldown > 0 or self.weapon.reload_cooldown > 0:
             return False

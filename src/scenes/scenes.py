@@ -92,6 +92,7 @@ class PlayingScene(BaseScene):
         self.weaponrender.draw(screen, self.state.player.weapon)
         self.hud.draw_hud(screen, self.state.player)
         self.hud.draw_crossfire(screen)
+        self.hud.draw_minimap(screen, self.state.player, self.state.enemies, self.state.current_level)
 
         if DEBUG:
             draw_map(screen, self.state.player, self.state.current_level)

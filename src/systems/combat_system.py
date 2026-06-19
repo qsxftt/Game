@@ -16,6 +16,9 @@ def player_shoot(player, enemies, level):
         if enemy_near_crosshair(enemy, player, level):
             depth = get_depth(enemy, player)
 
+            if depth > player.weapon.attack_distance:
+                continue
+
             if depth < max_depth:
                 max_depth = depth
                 target = enemy

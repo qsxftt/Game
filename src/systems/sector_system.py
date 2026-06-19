@@ -33,7 +33,10 @@ def load_sector(state):
 
     enemy_classes = [Dwarf, Dwarf2]
     state.current_level = level
-    state.player = Player(*state.current_level.player_start)
+    if not state.player:
+        state.player = Player(*state.current_level.player_start)
+    else:
+        state.player.set_start_pos(*state.current_level.player_start)
     state.enemies = [choice(enemy_classes)(x, y) for x, y in state.current_level.enemies_pos]
     state.pickups = []
     state.reset_sector_flags()

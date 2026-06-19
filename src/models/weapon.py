@@ -13,6 +13,7 @@ class Weapon:
         self.ammo = 0
         self.magazine_size = 0
         self.reserve_ammo = 0
+        self.attack_distance = 0
 
         self.shoot_delay = 0
         self.shoot_cooldown = 0
@@ -87,6 +88,7 @@ class Pistol(Weapon):
         self.frame_count = 5
         self.texture_reload = PISTOLR_TEXTURE
         self.reserve_ammo = 30
+        self.attack_distance = 1200
 
 class Shotgun(Weapon):
     """Стартовый пистолет игрока."""
@@ -104,3 +106,4 @@ class Shotgun(Weapon):
         self.frame_count = 5
         self.texture_reload = PISTOLR_TEXTURE
         self.reserve_ammo = 15 
+        self.attack_distance = 300
