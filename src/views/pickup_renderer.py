@@ -26,11 +26,11 @@ class PickupRender:
         """Рисует один ресурс, если он не подобран, видим и находится в FOV."""
         if pickup.is_pickedup:
             return False
-
-        if not is_visible(pickup, player, level):
+        
+        if not is_in_fov(pickup, player):
             return False
 
-        if not is_in_fov(pickup, player):
+        if not is_visible(pickup, player, level):
             return False
 
         frame, frame_width, frame_height = self.get_frame(pickup)

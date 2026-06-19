@@ -49,12 +49,12 @@ class HUDrender:
 
         # Стены двери терминал
 
-        map_object = [(level.block_map, (100, 100, 100)), (level.doors.keys(), (180, 150, 50))]
+        map_objects = [(level.block_map, (100, 100, 100)), (level.doors.keys(), (180, 150, 50))]
 
         if level.terminal_pos is not None:
-            map_object.append(([level.terminal_pos], (100, 100, 100)))
+            map_objects.append(([level.terminal_pos], (100, 100, 100)))
 
-        for map_obj, color in map_object:
+        for map_obj, color in map_objects:
             for obj_x, obj_y in map_obj:
                 dx = obj_x - player.x
                 dy = obj_y - player.y

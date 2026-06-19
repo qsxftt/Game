@@ -18,6 +18,7 @@ from src.views.hud_renderer import HUDrender
 from src.views.pickup_renderer import PickupRender
 from src.views.sprite_renderer import SpriteRender
 from src.views.weapon_renderer import WeaponRender
+from src.views.raycast_renderer import convert_textures
 
 
 class GameController:
@@ -28,6 +29,7 @@ class GameController:
         pygame.init()
 
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        convert_textures()
         self.hud = HUDrender()
         self.weaponrender = WeaponRender()
         self.spriterender = SpriteRender()

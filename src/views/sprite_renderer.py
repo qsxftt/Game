@@ -31,13 +31,13 @@ class SpriteRender:
 
     def draw(self, enemy, screen, player, level):
         """Рисует одного врага, если он жив, видим и находится в FOV."""
-        if not is_visible(enemy, player, level):
-            return False
-
         if not enemy.alive:
             return False
 
         if not is_in_fov(enemy, player):
+            return False
+        
+        if not is_visible(enemy, player, level):
             return False
 
         if enemy.attack_cooldown > 0:

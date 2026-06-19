@@ -35,6 +35,14 @@ def apply_shade_texture(texture_column, shade):
 
     return texture_column_copy
 
+def convert_textures():
+    """Преобразует непрозрачные текстуры в формат экрана для быстрого blit."""
+    global WALL_TEXTURE, DOOR_TEXTURE, TERMINAL_TEXTURE
+
+    WALL_TEXTURE = WALL_TEXTURE.convert()
+    DOOR_TEXTURE = DOOR_TEXTURE.convert()
+    TERMINAL_TEXTURE = TERMINAL_TEXTURE.convert()
+
 
 def cast_ray_to_door(player, angle, door):
     """Проверяет пересечение луча с движущейся дверной панелью.
