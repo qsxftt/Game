@@ -31,7 +31,6 @@ class HUDrender:
 
     def draw_minimap(self, screen, player, enemies, level):
         ui_scale = min(screen.get_width() / self.base_width, screen.get_height() / self.base_height)
-
         cell_size = int(self.minimap_base_cell_size * ui_scale)
         minimap_size = (self.minimap_radius * 2 + 1) * cell_size
         margin = int(20 * ui_scale)
@@ -39,72 +38,74 @@ class HUDrender:
         x = screen.get_width() - minimap_size - margin
         y = margin
 
-        player_x, player_y = world_to_grid(player.x, player.y)
+        minimap_surf = pygame.Surface((minimap_size, minimap_size))
+        minimap_surf.fill((0, 0, 0))
 
-        pygame.draw.rect(screen, (0, 0, 0), (x, y, minimap_size, minimap_size))
+        center_x = minimap_size // 2
+        center_y = minimap_size // 2
 
-        for offset_y in range(-self.minimap_radius, self.minimap_radius + 1):
-            for offset_x in range(-self.minimap_radius, self.minimap_radius + 1):
-                map_x = player_x + offset_x
-                map_y = player_y + offset_y
+        map_scale = cell_size / level.block_size
+        max_dist = (self.minimap_radius + 1.5) * level.block_size
 
-                if not (0 <= map_y < len(level.text_map)):
-                    continue
-                if not (0 <= map_x < len(level.text_map[map_y])):
-                    continue
+        # Стены двери терминал
 
-                tile = level.text_map[map_y][map_x]
+        map_object = [(level.block_map, (100, 100, 100)), (level.doors.keys(), (180, 150, 50))]
 
-                if tile in ('W', 'T'):
-                    color = (100, 100, 100)
-                elif tile == 'D':
-                    color = (180, 150, 40)
-                else:
-                    continue
+        if level.terminal_pos is not None:
+            map_object.append(([level.terminal_pos], (100, 100, 100)))
 
-                cell_x = x + (offset_x + self.minimap_radius) * cell_size
-                cell_y = y + (offset_y + self.minimap_radius) * cell_size
+        for map_obj, color in map_object:
+            for obj_x, obj_y in map_obj:
+                dx = obj_x - player.x
+                dy = obj_y - player.y
 
-                pygame.draw.rect(screen, color, (cell_x, cell_y, cell_size, cell_size))
+                if abs(dx) < max_dist and abs(dy) < max_dist:
+                    cell_x = round(center_x + dx * map_scale)
+                    cell_y = round(center_y + dy * map_scale)
+
+                    pygame.draw.rect(minimap_surf, color, (cell_x, cell_y, cell_size, cell_size))
+
+        # Враги
 
         for enemy in enemies:
-            if not enemy.alive:
+            if not enemy.alive or not is_visible(enemy, player, level):
                 continue
 
-            if not is_visible(enemy, player, level):
-                continue
+            dx = enemy.x - player.x
+            dy = enemy.y - player.y
 
-            enemy_x, enemy_y = world_to_grid(enemy.x, enemy.y)
+            if abs(dx) < max_dist and abs(dy) < max_dist:
+                enemy_x = round(center_x + dx * map_scale)
+                enemy_y = round(center_y + dy * map_scale)
 
-            offset_x = enemy_x - player_x
-            offset_y = enemy_y - player_y
+                pygame.draw.circle(minimap_surf, (255, 0, 0), (enemy_x, enemy_y), max(2, cell_size // 3))
 
-            if abs(offset_x) > self.minimap_radius:
-                continue
-            if abs(offset_y) > self.minimap_radius:
-                continue
+        # Игрок
 
-            enemy_screen_x = x + (offset_x + self.minimap_radius) * cell_size + cell_size // 2
-            enemy_screen_y = y + (offset_y + self.minimap_radius) * cell_size + cell_size // 2
+        direction_x = center_x + cos(player.angle) * cell_size
+        direction_y = center_y + sin(player.angle) * cell_size
+        
+        pygame.draw.line(minimap_surf, (0, 255, 0), (center_x, center_y), (direction_x, direction_y), max(1, int(2 * ui_scale)))
+        pygame.draw.circle(minimap_surf, (0, 255, 0), (center_x, center_y), max(2, cell_size // 3))
 
-            pygame.draw.circle(
-                screen,
-                (255, 0, 0),
-                (enemy_screen_x, enemy_screen_y),
-                max(2, cell_size // 3)
-            )
+        screen.blit(minimap_surf, (x, y))
+
+        blink_color = self.get_radar_border_color(player, level)
+
+        pygame.draw.rect(screen, blink_color, (x, y, minimap_size, minimap_size), max(1, int(5 * ui_scale)))
+
+    def get_radar_border_color(self, player, level):
+        """Возвращает цвет рамки: белый или мигающий зелёный (при приближении к выходу)."""
+        if level.terminal_pos is None:
+            return (255, 255, 255) 
 
         term_x, term_y = level.terminal_pos
         term_x += level.block_size // 2
         term_y += level.block_size // 2
 
-        dx = term_x - player.x
-        dy = term_y - player.y
-
-        distance = (dx ** 2 + dy ** 2) ** 0.5
+        distance = ((term_x - player.x) ** 2 + (term_y - player.y) ** 2) ** 0.5
 
         blink_interval = None
-
         if distance < 300:
             blink_interval = 150
         elif distance < 600:
@@ -112,24 +113,11 @@ class HUDrender:
         elif distance < 900:
             blink_interval = 600
 
-        blink_color = WHITE
-
         if blink_interval is not None:
             if (pygame.time.get_ticks() // blink_interval) % 2 == 0:
-                blink_color = (0, 255, 0)
+                return (0, 255, 0)
 
-
-
-        player_screen_x = x + minimap_size // 2
-        player_screen_y = y + minimap_size // 2
-
-        direction_x = player_screen_x + cos(player.angle) * cell_size
-        direction_y = player_screen_y + sin(player.angle) * cell_size
-        
-        pygame.draw.line(screen, (0, 255, 0), (player_screen_x, player_screen_y), (direction_x, direction_y), max(1, int(2 * ui_scale)))
-        pygame.draw.circle(screen, (0, 255, 0), (player_screen_x, player_screen_y), max(2, cell_size // 2))
-
-        pygame.draw.rect(screen, blink_color, (x, y, minimap_size, minimap_size), max(1, int(5 * ui_scale)))
+        return (255, 255, 255)
 
     def draw_crossfire(self, screen):
         """Рисует прицел в центре экрана."""
