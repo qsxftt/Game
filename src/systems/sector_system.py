@@ -48,6 +48,20 @@ def load_sector(state):
         elif pickup_type == 'ammo':
             state.pickups.append(Ammo(x, y))
 
+def start_new_game(state, game_mode):
+    """Сбрасывает прошлую сессию и создаёт первый сектор."""
+    state.sector_index = 0
+    state.score = 0
+    state.game_mode = game_mode
+
+    state.current_level = None
+    state.player = None
+    state.enemies = []
+    state.pickups = []
+
+    state.reset_sector_flags()
+    load_sector(state)
+
 
 def go_to_next_sector(state):
     """Переходит к следующему сектору или сообщает, что игра дошла до финала."""

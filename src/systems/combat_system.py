@@ -1,7 +1,7 @@
 """Система боя."""
 
-from src.core.config import WIDTH_HALF
-from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
+from math import cos, sin
+from src.systems.visibility_system import get_depth, is_in_fov, is_visible
 
 
 def player_shoot(player, enemies, level):
@@ -34,13 +34,24 @@ def enemy_near_crosshair(enemy, player, level):
     """Проверяет, находится ли враг под прицелом игрока."""
     if not enemy.alive:
         return False
+    
+    if not is_in_fov(enemy, player):
+        return False
 
     if not is_visible(enemy, player, level):
         return False
 
-    if not is_in_fov(enemy, player):
+    dx = enemy.x - player.x
+    dy = enemy.y - player.y
+
+    direction_x = cos(player.angle)
+    direction_y = sin(player.angle)
+
+    forward_distance = (dx * direction_x + dy * direction_y)
+
+    if forward_distance <= 0:
         return False
 
-    screen_x = get_screen_x(enemy, player)
+    side_distance = abs(dx * direction_y - dy * direction_x)
 
-    return abs(screen_x - WIDTH_HALF) < enemy.radius
+    return side_distance <= enemy.hitbox_radius

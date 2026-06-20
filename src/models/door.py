@@ -47,25 +47,6 @@ class Door:
                 self.open_progress = 0.0
                 self.state = 'closed'
 
-    def get_panel_rect(self, thickness=8):
-        """Возвращает прямоугольник текущей дверной панели для debug-карты."""
-        offset = self.block_size * self.open_progress
-
-        if self.orient == 'hor':
-            return (
-                self.x + offset,
-                self.y + self.block_size // 2 - thickness // 2,
-                self.block_size - offset,
-                thickness,
-            )
-
-        return (
-            self.x + self.block_size // 2 - thickness // 2,
-            self.y + offset,
-            thickness,
-            self.block_size - offset,
-        )
-
     def get_panel_segment(self):
         """Возвращает отрезок дверной панели для проверки пересечения лучом."""
         offset = self.block_size * self.open_progress

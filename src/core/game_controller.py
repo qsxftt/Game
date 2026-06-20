@@ -14,7 +14,6 @@ from src.scenes.scenes import (
     SectorClearScene,
     SettingsScene
 )
-from src.systems.sector_system import load_sector
 from src.views.hud_renderer import HUDrender
 from src.views.pickup_renderer import PickupRender
 from src.views.sprite_renderer import SpriteRender
@@ -43,7 +42,6 @@ class GameController:
         self.inputcon = InputController()
         self.state = GameState()
         self.scene_manager = SceneManager()
-        load_sector(self.state)
 
         self.scene_manager.register(GameState.MAIN_MENU, MainMenuScene(self.state, self.scene_manager))
         self.scene_manager.register(GameState.SETTINGS, SettingsScene(self.state, self.scene_manager, self.display_settings))

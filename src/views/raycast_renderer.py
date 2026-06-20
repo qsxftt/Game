@@ -5,22 +5,17 @@ from math import cos, sin, tan
 import pygame
 
 from src.core.config import (
-    DEBUG,
     DELTA_RAY,
     DOOR_TEXTURE,
-    GRAY,
-    GREEN,
     HEIGHT,
     HEIGHT_HALF,
     HALF_FOV,
     MAX_DEPTH,
     NUM_RAYS,
-    RED,
     SCALE,
     SCREEN_DISTANCE,
     TERMINAL_TEXTURE,
     WALL_TEXTURE,
-    YELLOW,
     block_size,
 )
 from src.systems.door_system import get_door
@@ -221,30 +216,3 @@ def ray_casting(screen, player, level):
 
         screen.blit(texture_column, (wall_x, wall_y))
 
-        if DEBUG:
-            pygame.draw.line(screen, RED, (player.x, player.y), (hit_x, hit_y), 2)
-            pygame.draw.circle(screen, RED, (hit_x, hit_y), 5)
-
-
-def draw_map(screen, player, level):
-    """Рисует debug-карту сверху: стены, двери, терминал и игрока."""
-    for x, y in level.block_map:
-        pygame.draw.rect(screen, GRAY, (x, y, block_size, block_size), 2)
-
-    for cell, door in level.doors.items():
-        x, y = cell
-
-        if door.state == 'opening' or door.state == 'closing':
-            color = YELLOW
-        elif door.state == 'open':
-            color = GREEN
-        else:
-            color = RED
-
-        rect = door.get_panel_rect()
-        pygame.draw.rect(screen, color, rect)
-
-    pygame.draw.circle(screen, RED, (player.x, player.y), 10)
-    x, y = level.terminal_pos
-    x, y = x + block_size // 2, y + block_size // 2
-    pygame.draw.circle(screen, (77, 150, 9), (x, y), 10)

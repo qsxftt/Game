@@ -2,14 +2,14 @@
 
 import pygame
 
-from src.core.config import DEBUG, HEIGHT, HEIGHT_HALF, WIDTH
+from src.core.config import HEIGHT, HEIGHT_HALF, WIDTH
 from src.models.game_state import GameState
 from src.models.pickup import Pickup
 from src.systems.combat_system import player_shoot
 from src.systems.door_system import update_doors
 from src.systems.map_system import get_sprite_sorted
-from src.systems.sector_system import activate_terminal, all_enemies_dead, go_to_next_sector
-from src.views.raycast_renderer import draw_map, ray_casting
+from src.systems.sector_system import activate_terminal, all_enemies_dead, go_to_next_sector, start_new_game
+from src.views.raycast_renderer import ray_casting
 from src.systems.score_system import update_score, add_sector_score
 
 
@@ -49,6 +49,7 @@ class PlayingScene(BaseScene):
         """Обновляет игрока, врагов, двери, pickups и условия перехода сцены."""
         if actions['esc']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)
+            return
 
         self.state.player.weapon.update()
         shot_fired = self.state.player.update(actions, self.state.current_level)
@@ -101,10 +102,6 @@ class PlayingScene(BaseScene):
         self.weaponrender.draw(screen, self.state.player.weapon)
         self.hud.draw(screen, self.state)
 
-        if DEBUG:
-            draw_map(screen, self.state.player, self.state.current_level)
-            for enemy in self.state.enemies:
-                enemy.draw_debug(screen)
 
 
 class MainMenuScene(BaseScene):
@@ -134,11 +131,11 @@ class MainMenuScene(BaseScene):
             _, action = self.options[self.selected_index]
 
             if action == GameState.CAMPAIGN:
-                self.state.game_mode = GameState.CAMPAIGN
+                start_new_game(self.state, GameState.CAMPAIGN)
                 self.scene_manager.change_scene(GameState.PLAYING)
 
             elif action == GameState.ENDLESS:
-                self.state.game_mode = GameState.ENDLESS
+                start_new_game(self.state, GameState.ENDLESS)
                 self.scene_manager.change_scene(GameState.PLAYING)
 
             elif action == GameState.SETTINGS:
@@ -267,7 +264,7 @@ class GameOverScene(BaseScene):
     def update(self, actions):
         """Закрывает игру по нажатию E."""
         if actions['E']:
-            self.state.running = False
+            self.scene_manager.change_scene(GameState.MAIN_MENU)
 
     def render(self, screen):
         """Рисует экран поражения."""
@@ -293,7 +290,7 @@ class FinalVictoryScene(BaseScene):
     def update(self, actions):
         """Закрывает игру по нажатию E."""
         if actions['E']:
-            self.state.running = False
+            self.scene_manager.change_scene(GameState.MAIN_MENU)
 
     def render(self, screen):
         """Рисует финальный экран победы."""

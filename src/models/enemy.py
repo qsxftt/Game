@@ -1,11 +1,8 @@
 """Модели врагов."""
 
-import pygame
-
 from src.core.config import (
     ENEMY12_TEXTURE,
     ENEMY1_TEXTURE,
-    RED,
 )
 from src.systems.collision_system import is_wall
 from src.systems.enemy_ai_system import get_next_path_point, get_target_cell, update_path, update_enemy_state, open_next_door
@@ -26,7 +23,7 @@ class Enemy:
         self.health = 0
         self.damage = 0
         self.alive = True
-        self.radius = 0
+        self.hitbox_radius = 0
         self.speed = 0
         self.attack_delay = 0
         self.attack_cooldown = 0
@@ -163,14 +160,6 @@ class Enemy:
 
         self.move(player, level)
 
-    def draw_debug(self, screen):
-        """Рисует debug-кружок врага на мини-карте."""
-        if not self.alive:
-            return False
-
-        pygame.draw.circle(screen, RED, (self.x, self.y), 20)
-
-
 class Dwarf(Enemy):
     """Конкретный тип врага с параметрами и текстурами."""
 
@@ -187,6 +176,7 @@ class Dwarf(Enemy):
         self.frame_walk_count = 4
         self.texture_walk = ENEMY1_TEXTURE
         self.texture_attack = ENEMY12_TEXTURE
+        self.hitbox_radius = 40
 
         self.score_value = 100
 
@@ -206,5 +196,6 @@ class Dwarf2(Enemy):
         self.frame_walk_count = 8
         self.texture_walk = ENEMY12_TEXTURE
         self.texture_attack = ENEMY1_TEXTURE
+        self.hitbox_radius = 40
 
         self.score_value = 200

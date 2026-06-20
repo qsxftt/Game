@@ -50,8 +50,5 @@ class SpriteRender:
         enemy_height = int(block_size * SCREEN_DISTANCE / depth * 0.75)
         enemy_width = int(frame_width * enemy_height / frame_height)
 
-        # Временный технический долг: combat использует enemy.radius для попадания.
-        enemy.radius = enemy_width // 2
-
         frame = pygame.transform.scale(frame, (enemy_width, enemy_height))
         screen.blit(frame, (screen_x - enemy_width // 2, HEIGHT_HALF - enemy_height // 2))

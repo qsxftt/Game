@@ -5,8 +5,6 @@ from math import pi, tan
 import pygame
 
 
-DEBUG = False
-
 # Экран
 WIDTH = 1600
 HEIGHT = 1000
