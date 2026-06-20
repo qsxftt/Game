@@ -1,6 +1,6 @@
 """Модели оружия."""
 
-from src.core.config import PISTOL_TEXTURE, PISTOLR_TEXTURE
+from src.core.config import PISTOL_TEXTURE, PISTOLR_TEXTURE, PISTOL_ICON, SHOTGUN_ICON
 
 
 class Weapon:
@@ -21,6 +21,7 @@ class Weapon:
         self.reload_delay = 0
         self.reload_cooldown = 0
 
+        self.icon = None
         self.texture = None
         self.texture_reload = None
         self.frame_count = 0

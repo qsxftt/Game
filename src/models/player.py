@@ -15,7 +15,8 @@ class Player:
         """Создает игрока в переданных координатах мира."""
         self.x = x
         self.y = y
-        self.health = 100
+        self.max_health = 100
+        self.health = self.max_health
         self.angle = 0
         self.speed = 5
         self.radius = PLAYER_RADIUS

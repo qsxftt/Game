@@ -33,6 +33,9 @@ ENEMY12_TEXTURE = pygame.image.load('assets/enemies/ATTACK.png')
 MEDKIT_TEXTURE = pygame.image.load('assets/pickups/medkit.png')
 AMMO_TEXTURE = pygame.image.load('assets/pickups/ammo.png')
 
+PISTOL_ICON = pygame.image.load('assets/icons/pistol_icon.png')
+SHOTGUN_ICON = pygame.image.load('assets/icons/shotgun_icon.png')
+
 # Карта
 block_size = 100
 TOTAL_SECTORS = 5
@@ -41,7 +44,7 @@ TOTAL_SECTORS = 5
 FOV = pi / 3
 HALF_FOV = FOV / 2
 MAX_DEPTH = 30
-NUM_RAYS = 120
+NUM_RAYS = 240
 DELTA_RAY = FOV / (NUM_RAYS - 1)
 SCALE = WIDTH // NUM_RAYS
 SCREEN_DISTANCE = WIDTH_HALF / tan(HALF_FOV)

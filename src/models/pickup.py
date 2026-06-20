@@ -42,7 +42,7 @@ class Pickup:
 
         if depth <= self.pickup_radius:
             if self.type == 'medkit':
-                player.health = min(100, player.health + self.amount)
+                player.health = min(player.max_health, player.health + self.amount)
             elif self.type == 'ammo':
                 player.weapon.reserve_ammo += self.amount
 

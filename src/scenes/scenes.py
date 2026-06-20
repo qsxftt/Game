@@ -57,7 +57,9 @@ class PlayingScene(BaseScene):
             enemy.update(self.state.player, self.state.current_level)
 
         if shot_fired:
-            player_shoot(self.state.player, self.state.enemies, self.state.current_level)
+            hit = player_shoot(self.state.player, self.state.enemies, self.state.current_level)
+            if hit:
+                self.hud.trigger_hitmark()
 
         if self.state.player.health <= 0:
             print('Game Over')
@@ -66,6 +68,7 @@ class PlayingScene(BaseScene):
         if not self.state.sector_clean and all_enemies_dead(self.state.enemies):
             print('Сектор зачищен')
             self.state.sector_clean = True
+            self.hud.show_message('СЕКТОР ЗАЧИЩЕН')
 
         if actions['E'] and not self.state.terminal_activated:
             if activate_terminal(self.state.player, self.state.current_level):
@@ -90,9 +93,7 @@ class PlayingScene(BaseScene):
                 self.spriterender.draw(sprite, screen, self.state.player, self.state.current_level)
 
         self.weaponrender.draw(screen, self.state.player.weapon)
-        self.hud.draw_hud(screen, self.state.player)
-        self.hud.draw_crossfire(screen)
-        self.hud.draw_minimap(screen, self.state.player, self.state.enemies, self.state.current_level)
+        self.hud.draw(screen, self.state)
 
         if DEBUG:
             draw_map(screen, self.state.player, self.state.current_level)
