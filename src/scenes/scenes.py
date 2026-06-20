@@ -10,6 +10,7 @@ from src.systems.door_system import update_doors
 from src.systems.map_system import get_sprite_sorted
 from src.systems.sector_system import activate_terminal, all_enemies_dead, go_to_next_sector
 from src.views.raycast_renderer import draw_map, ray_casting
+from src.systems.score_system import update_score, add_sector_score
 
 
 class BaseScene:
@@ -61,6 +62,8 @@ class PlayingScene(BaseScene):
             if hit:
                 self.hud.trigger_hitmark()
 
+        update_score(self.state)
+
         if self.state.player.health <= 0:
             print('Game Over')
             self.scene_manager.change_scene(GameState.GAME_OVER)
@@ -73,7 +76,7 @@ class PlayingScene(BaseScene):
         if actions['E'] and not self.state.terminal_activated:
             if activate_terminal(self.state.player, self.state.current_level):
                 if self.state.sector_clean:
-                    print('Терминал активирован')
+                    add_sector_score(self.state)
                     self.state.terminal_activated = True
                     self.scene_manager.change_scene(GameState.SECTOR_CLEAR)
                 else:
@@ -112,16 +115,23 @@ class MainMenuScene(BaseScene):
     def update(self, actions):
         """Запускает игру по нажатию E."""
         if actions['E']:
+            self.state.game_mode = GameState.CAMPAIGN
+            self.scene_manager.change_scene(GameState.PLAYING)
+
+        elif actions['Q']:
+            self.state.game_mode = GameState.ENDLESS
             self.scene_manager.change_scene(GameState.PLAYING)
 
     def render(self, screen):
         """Рисует главное меню."""
         screen.fill((0, 0, 0))
         title = self.font.render('ГЛАВНОЕ МЕНЮ', True, (0, 255, 0))
-        hint = self.font.render('нажми E чтобы начать', True, (0, 255, 0))
+        campaign_hint = self.font.render('E — КАМПАНИЯ', True, (0, 255, 0))
+        endless_hint = self.font.render('Q — БЕСКОНЕЧНЫЙ РЕЖИМ', True, (0, 255, 0))
 
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
-        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40)))
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80)))
+        screen.blit(campaign_hint, campaign_hint.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+        screen.blit(endless_hint, endless_hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70)))
 
 
 class SectorClearScene(BaseScene):
@@ -146,9 +156,11 @@ class SectorClearScene(BaseScene):
 
         title = self.font.render('СЕКТОР ЗАЧИЩЕН', True, (0, 255, 0))
         hint = self.font.render('нажми E чтобы продолжить', True, (0, 255, 0))
+        score = self.font.render(f'СЧЁТ: {self.state.score}', True, (0, 255, 0))
 
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
-        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40)))
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
+        screen.blit(score, score.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70)))
 
 
 class GameOverScene(BaseScene):
@@ -170,9 +182,11 @@ class GameOverScene(BaseScene):
 
         title = self.font.render('ИГРА ОКОНЧЕНА', True, (255, 0, 0))
         hint = self.font.render('нажми E чтобы выйти', True, (255, 0, 0))
+        score = self.font.render(f'СЧЁТ: {self.state.score}', True, (255, 0, 0))
 
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
-        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40)))
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
+        screen.blit(score, score.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70)))
 
 
 class FinalVictoryScene(BaseScene):
@@ -194,6 +208,8 @@ class FinalVictoryScene(BaseScene):
 
         title = self.font.render('ПОБЕДА', True, (0, 255, 0))
         hint = self.font.render('нажми E чтобы выйти', True, (0, 255, 0))
+        score = self.font.render(f'СЧЁТ: {self.state.score}', True, (0, 255, 0))
 
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
-        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40)))
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
+        screen.blit(score, score.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70)))

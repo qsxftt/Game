@@ -6,6 +6,7 @@ import pygame
 
 from src.core.config import TOTAL_SECTORS
 from src.systems.visibility_system import is_visible
+from src.models.game_state import GameState
 
 
 GREEN = (0, 255, 0)
@@ -232,13 +233,14 @@ class HUDrender:
         rect = pygame.Rect(margin, margin, int(390 * scale), int(108 * scale))
         self.draw_panel(screen, rect, scale)
 
+        if state.game_mode == GameState.ENDLESS:
+            sector_text = f'СЕКТОР {state.sector_index + 1}'
+        else:
+            sector_text = f'СЕКТОР {state.sector_index + 1}/{TOTAL_SECTORS}'
+
         enemies_left = sum(enemy.alive for enemy in state.enemies)
-        sector = self.medium_font.render(
-            f'СЕКТОР {state.sector_index + 1}/{TOTAL_SECTORS}', True, GREEN
-        )
-        threats = self.medium_font.render(
-            f'УГРОЗЫ: {enemies_left}', True, RED if enemies_left else GREEN
-        )
+        sector = self.medium_font.render(sector_text, True, GREEN)
+        threats = self.medium_font.render(f'УГРОЗЫ: {enemies_left}', True, RED if enemies_left else GREEN)
 
         if state.terminal_activated:
             task = 'ЗАДАЧА: ТЕРМИНАЛ АКТИВИРОВАН'
@@ -537,16 +539,3 @@ class HUDrender:
         overlay.fill((255, 0, 0, alpha))
         screen.blit(overlay, (0, 0))
 
-    # ------------------------------------------------------------------
-    # Старый HUD до ручного подключения нового
-
-    def draw_hud(self, screen, player):
-        """Рисует старые текстовые показатели без нового интерфейса."""
-        ammo = self.legacy_font.render(
-            f'{player.weapon.ammo}/{player.weapon.reserve_ammo}', True, GREEN
-        )
-        health = self.legacy_font.render(f'HP: {player.health}', True, GREEN)
-        weapon = self.legacy_font.render(player.weapon.name, True, GREEN)
-        screen.blit(ammo, (20, 20))
-        screen.blit(health, (100, 20))
-        screen.blit(weapon, (200, 20))

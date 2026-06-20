@@ -49,6 +49,9 @@ class Enemy:
         self.idle_wait_cooldown = 0
         self.idle_wait_delay = 60
 
+        self.score_value = 0
+        self.score_awarded = False
+
     def take_damage(self, damage):
         """Наносит врагу урон и помечает его мертвым при нуле здоровья."""
         self.health -= damage
@@ -185,6 +188,8 @@ class Dwarf(Enemy):
         self.texture_walk = ENEMY1_TEXTURE
         self.texture_attack = ENEMY12_TEXTURE
 
+        self.score_value = 100
+
 class Dwarf2(Enemy):
     """Конкретный тип врага с параметрами и текстурами."""
 
@@ -201,3 +206,5 @@ class Dwarf2(Enemy):
         self.frame_walk_count = 8
         self.texture_walk = ENEMY12_TEXTURE
         self.texture_attack = ENEMY1_TEXTURE
+
+        self.score_value = 200

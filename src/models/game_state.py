@@ -9,6 +9,8 @@ class GameState:
     GAME_OVER = 'game_over'
     FINAL_VICTORY = 'final_victory'
     MAIN_MENU = 'main_menu'
+    CAMPAIGN = 'campaign'
+    ENDLESS = 'endless'
 
     def __init__(self):
         """Создает начальное состояние игры."""
@@ -20,6 +22,8 @@ class GameState:
         self.enemies = []
         self.pickups = []
         self.running = True
+        self.score = 0
+        self.game_mode = GameState.CAMPAIGN
 
     def reset_sector_flags(self):
         """Сбрасывает флаги, которые относятся только к текущему сектору."""

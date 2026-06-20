@@ -7,6 +7,7 @@ from src.models.pickup import Ammo, MedKit
 from src.models.player import Player
 from src.systems.level_generator import LevelGenerator
 from src.systems.map_system import get_front_cell
+from src.models.game_state import GameState
 from random import choice
 
 
@@ -52,7 +53,7 @@ def go_to_next_sector(state):
     """Переходит к следующему сектору или сообщает, что игра дошла до финала."""
     state.sector_index += 1
 
-    if state.sector_index < TOTAL_SECTORS:
+    if (state.game_mode == GameState.ENDLESS or state.sector_index < TOTAL_SECTORS):
         load_sector(state)
         return True
 
@@ -70,12 +71,18 @@ def create_generator_for_sector(sector_index):
     max_room_sizes = [5, 5, 6, 7, 8]
     bsp_depths = [2, 2, 3, 3, 3]
 
+    extra = max(0, sector_index - 4)
+
+    enemy_count = min(enemies[i] + extra, 25)
+    ammo_count = min(ammos[i] + extra // 2, 12)
+    medkit_count = min(medkits[i] + extra // 4, 6)
+
     return LevelGenerator(
         width=widths[i],
         height=heights[i],
-        enemy_count=enemies[i],
-        medkit_count=medkits[i],
-        ammo_count=ammos[i],
+        enemy_count=enemy_count,
+        medkit_count=medkit_count,
+        ammo_count=ammo_count,
         min_room_size=3,
         max_room_size=max_room_sizes[i],
         bsp_max_depth=bsp_depths[i],
