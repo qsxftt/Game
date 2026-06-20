@@ -11,6 +11,7 @@ class GameState:
     MAIN_MENU = 'main_menu'
     CAMPAIGN = 'campaign'
     ENDLESS = 'endless'
+    SETTINGS = 'settings'
 
     def __init__(self):
         """Создает начальное состояние игры."""

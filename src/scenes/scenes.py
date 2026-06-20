@@ -47,6 +47,9 @@ class PlayingScene(BaseScene):
 
     def update(self, actions):
         """Обновляет игрока, врагов, двери, pickups и условия перехода сцены."""
+        if actions['esc']:
+            self.scene_manager.change_scene(GameState.MAIN_MENU)
+
         self.state.player.weapon.update()
         shot_fired = self.state.player.update(actions, self.state.current_level)
         update_doors(self.state.current_level)
@@ -111,28 +114,118 @@ class MainMenuScene(BaseScene):
         """Создает шрифт главного меню."""
         super().__init__(state, scene_manager)
         self.font = pygame.font.SysFont('Arial', 52)
+        self.options = [
+            ('КАМПАНИЯ', GameState.CAMPAIGN),
+            ('БЕСКОНЕЧНЫЙ РЕЖИМ', GameState.ENDLESS),
+            ('НАСТРОЙКИ', GameState.SETTINGS),
+            ('ВЫХОД', 'exit'),
+        ]
+        self.selected_index = 0
 
     def update(self, actions):
         """Запускает игру по нажатию E."""
-        if actions['E']:
-            self.state.game_mode = GameState.CAMPAIGN
-            self.scene_manager.change_scene(GameState.PLAYING)
+        if actions['up_pressed']:
+            self.selected_index = (self.selected_index - 1) % len(self.options)
 
-        elif actions['Q']:
-            self.state.game_mode = GameState.ENDLESS
-            self.scene_manager.change_scene(GameState.PLAYING)
+        elif actions['down_pressed']:
+            self.selected_index = (self.selected_index + 1) % len(self.options)
+
+        if actions['E']:
+            _, action = self.options[self.selected_index]
+
+            if action == GameState.CAMPAIGN:
+                self.state.game_mode = GameState.CAMPAIGN
+                self.scene_manager.change_scene(GameState.PLAYING)
+
+            elif action == GameState.ENDLESS:
+                self.state.game_mode = GameState.ENDLESS
+                self.scene_manager.change_scene(GameState.PLAYING)
+
+            elif action == GameState.SETTINGS:
+                self.scene_manager.change_scene(GameState.SETTINGS)
+
+            elif action == 'exit':
+                self.state.running = False
 
     def render(self, screen):
         """Рисует главное меню."""
         screen.fill((0, 0, 0))
-        title = self.font.render('ГЛАВНОЕ МЕНЮ', True, (0, 255, 0))
-        campaign_hint = self.font.render('E — КАМПАНИЯ', True, (0, 255, 0))
-        endless_hint = self.font.render('Q — БЕСКОНЕЧНЫЙ РЕЖИМ', True, (0, 255, 0))
+        for index, (label, _) in enumerate(self.options):
+            if index == self.selected_index:
+                color = (0, 255, 0)
+            else:
+                color = (120, 120, 120)
+            text = self.font.render(label, True, color)
+            y = HEIGHT // 2 - 40 + index * 60
+            screen.blit(text, text.get_rect(center=(WIDTH // 2, y)))
 
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80)))
-        screen.blit(campaign_hint, campaign_hint.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
-        screen.blit(endless_hint, endless_hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70)))
+class SettingsScene(BaseScene):
+    def __init__(self, state, scene_manager, display_settings):
+        super().__init__(state, scene_manager)
+        self.display_settings = display_settings
+        self.font = pygame.font.SysFont('Arial', 52)
+        self.selected_index = 0
+        self.options = [
+            'resolution',
+            'fullscreen',
+            'back'
+        ]
 
+    def update(self, actions):
+        if actions['up_pressed']:
+            self.selected_index = (self.selected_index - 1) % len(self.options)
+
+        elif actions['down_pressed']:
+            self.selected_index = (self.selected_index + 1) % len(self.options)
+
+        selected_option = self.options[self.selected_index]
+
+        if selected_option == 'resolution':
+            if actions['left_pressed']:
+                self.display_settings.change_resolution(-1)
+            elif actions['right_pressed'] or actions['E']:
+                self.display_settings.change_resolution(1)
+
+        elif selected_option == 'fullscreen':
+            if (
+                actions['left_pressed']
+                or actions['right_pressed']
+                or actions['E']
+            ):
+                self.display_settings.toggle_fullscreen()
+
+        elif selected_option == 'back' and actions['E']:
+            self.scene_manager.change_scene(GameState.MAIN_MENU)
+
+    def render(self, screen):
+        screen.fill((0, 0, 0))
+
+        width, height = self.display_settings.resolution
+        if self.display_settings.fullscreen:
+            fullscreen = 'ВКЛ'
+        else:
+            fullscreen = 'ВЫКЛ'
+
+        labels = {
+            'resolution': f'РАЗРЕШЕНИЕ: {width}x{height}',
+            'fullscreen': f'ПОЛНЫЙ ЭКРАН: {fullscreen}',
+            'back': 'НАЗАД',
+        }
+
+        title = self.font.render('НАСТРОЙКИ', True, (0, 255, 0))
+
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 140)))
+
+        for index, option in enumerate(self.options):
+            if index == self.selected_index:
+                color = (0, 255, 0)
+            else:
+                color = (120, 120, 120)
+
+            text = self.font.render(labels[option], True, color)
+            y = HEIGHT // 2 - 30 + index * 70
+
+            screen.blit(text, text.get_rect(center=(WIDTH // 2, y)))
 
 class SectorClearScene(BaseScene):
     """Экран между секторами."""
