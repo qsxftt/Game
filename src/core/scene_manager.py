@@ -15,19 +15,36 @@ class SceneManager:
         self.current_scene = None
 
     def register(self, name, scene):
-        '''Регистрирует сцену по строковому имени'''
+        '''Регистрирует сцену по строковому имени
+
+        Args:
+            name: уникальное имя сцены
+            scene: объект регистрируемой сцены
+        '''
         self.scenes[name] = scene
 
     def change_scene(self, name):
-        '''Переключает текущую сцену'''
+        '''Переключает текущую сцену
+
+        Args:
+            name: имя ранее зарегистрированной сцены
+        '''
         self.current_scene = self.scenes[name]
 
     def update(self, actions):
-        '''Обновляет текущую сцену'''
+        '''Обновляет текущую сцену
+
+        Args:
+            actions: словарь действий пользователя
+        '''
         if self.current_scene:
             self.current_scene.update(actions)
 
     def render(self, screen):
-        '''Рисует текущую сцену'''
+        '''Рисует текущую сцену
+
+        Args:
+            screen: внутренняя поверхность игры
+        '''
         if self.current_scene:
             self.current_scene.render(screen)

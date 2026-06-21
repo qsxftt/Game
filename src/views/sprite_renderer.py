@@ -41,7 +41,17 @@ class SpriteRender:
     '''Рисует врагов как псевдо-3D спрайты'''
 
     def get_frame(self, enemy, texture, frame_count, status='walk'):
-        '''Возвращает кадр анимации врага для указанного состояния'''
+        '''Выбирает кадр анимации врага
+
+        Args:
+            enemy: отображаемый враг
+            texture: полоса кадров анимации
+            frame_count: количество кадров в текстуре
+            status: тип проигрываемой анимации
+
+        Returns:
+            Кадр и его исходные размеры
+        '''
         frame_width = texture.get_width() / frame_count
         frame_height = texture.get_height()
 
@@ -61,7 +71,14 @@ class SpriteRender:
         return frame, frame_width, frame_height
 
     def draw(self, enemy, screen, player, level):
-        '''Рисует одного врага, если он жив, видим и находится в FOV'''
+        '''Рисует видимого врага как псевдо-3D спрайт
+
+        Args:
+            enemy: отображаемый враг
+            screen: внутренняя поверхность игры
+            player: модель игрока
+            level: текущий уровень
+        '''
         if not enemy.alive:
             return False
 

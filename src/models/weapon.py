@@ -34,14 +34,22 @@ class Weapon:
                 self.reserve_ammo -= ammo_to
 
     def can_shoot(self):
-        '''Проверяет, может ли оружие выстрелить прямо сейчас'''
+        '''Проверяет возможность выстрела
+
+        Returns:
+            True, если есть патроны и закончились задержки
+        '''
         if self.ammo > 0 and self.shoot_cooldown == 0 and self.reload_cooldown == 0:
             return True
         else:
             return False
 
     def shoot(self):
-        '''Пытается выстрелить и возвращает True при успешном выстреле'''
+        '''Пытается выполнить выстрел
+
+        Returns:
+            True при успешном выстреле, иначе False
+        '''
         if not self.can_shoot():
             return False
 
@@ -51,7 +59,11 @@ class Weapon:
         return True
 
     def reload(self):
-        '''Запускает перезарядку, если она возможна'''
+        '''Запускает перезарядку оружия
+
+        Returns:
+            True при запуске перезарядки, иначе False
+        '''
         if self.ammo == self.magazine_size:
             return False
 
@@ -83,10 +95,10 @@ class Pistol(Weapon):
 
 
 class Shotgun(Weapon):
-    '''Стартовый пистолет игрока'''
+    '''Дробовик игрока'''
 
     def __init__(self):
-        '''Настраивает урон, магазин, задержки и текстуры пистолета'''
+        '''Настраивает характеристики дробовика'''
         super().__init__()
         self.name = 'Shotgun'
         self.damage = 50

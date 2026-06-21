@@ -24,16 +24,29 @@ class BaseScene:
     '''Базовый интерфейс сцены'''
 
     def __init__(self, state, scene_manager):
-        '''Сохраняет общее состояние игры и менеджер сцен'''
+        '''Создает базовую сцену
+
+        Args:
+            state: общее состояние игровой сессии
+            scene_manager: менеджер переключения сцен
+        '''
         self.state = state
         self.scene_manager = scene_manager
 
     def update(self, actions):
-        '''Обновляет сцену за один кадр'''
+        '''Обновляет сцену за один кадр
+
+        Args:
+            actions: словарь действий пользователя
+        '''
         pass
 
     def render(self, screen):
-        '''Рисует сцену'''
+        '''Рисует сцену
+
+        Args:
+            screen: внутренняя поверхность игры
+        '''
         pass
 
 
@@ -50,7 +63,17 @@ class PlayingScene(BaseScene):
         pickuprender,
         sound_manager,
     ):
-        '''Получает state, renderers и HUD для игрового режима'''
+        '''Создает основную игровую сцену
+
+        Args:
+            state: общее состояние игровой сессии
+            scene_manager: менеджер переключения сцен
+            weaponrender: renderer оружия
+            spriterender: renderer врагов
+            hud: renderer игрового интерфейса
+            pickuprender: renderer ресурсов
+            sound_manager: менеджер звуков
+        '''
         super().__init__(state, scene_manager)
         self.weaponrender = weaponrender
         self.spriterender = spriterender
@@ -59,7 +82,11 @@ class PlayingScene(BaseScene):
         self.sound_manager = sound_manager
 
     def update(self, actions):
-        '''Обновляет игрока, врагов, двери, pickups и условия перехода сцены'''
+        '''Обновляет игровой мир и проверяет переходы между сценами
+
+        Args:
+            actions: словарь действий пользователя
+        '''
         if actions['esc']:
             self.sound_manager.stop_music()
             self.scene_manager.change_scene(GameState.MAIN_MENU)
@@ -70,9 +97,7 @@ class PlayingScene(BaseScene):
         }
 
         self.state.player.weapon.update()
-        shot_fired, reload_started = self.state.player.update(
-            actions, self.state.current_level
-        )
+        shot_fired, reload_started = self.state.player.update(actions, self.state.current_level)
         weapon = self.state.player.weapon
 
         if isinstance(weapon, Pistol):
@@ -116,9 +141,7 @@ class PlayingScene(BaseScene):
                 self.sound_manager.play_sound('door_close')
 
         if shot_fired:
-            hit = player_shoot(
-                self.state.player, self.state.enemies, self.state.current_level
-            )
+            hit = player_shoot(self.state.player, self.state.enemies, self.state.current_level)
             if hit:
                 self.hud.trigger_hitmark()
 
@@ -150,7 +173,11 @@ class PlayingScene(BaseScene):
                     self.scene_manager.change_scene(GameState.SECTOR_CLEAR)
 
     def render(self, screen):
-        '''Рисует игровой мир, спрайты, оружие и HUD'''
+        '''Рисует игровой мир, спрайты, оружие и HUD
+
+        Args:
+            screen: внутренняя поверхность игры
+        '''
         pygame.draw.rect(screen, (36, 42, 45), (0, 0, WIDTH, HEIGHT_HALF))
         pygame.draw.rect(screen, (18, 21, 22), (0, HEIGHT_HALF, WIDTH, HEIGHT_HALF))
         ray_casting(screen, self.state.player, self.state.current_level)
@@ -176,7 +203,13 @@ class MainMenuScene(BaseScene):
     '''Стартовое меню'''
 
     def __init__(self, state, scene_manager, sound_manager):
-        '''Создает шрифт главного меню'''
+        '''Создает главное меню
+
+        Args:
+            state: общее состояние игровой сессии
+            scene_manager: менеджер переключения сцен
+            sound_manager: менеджер звуков
+        '''
         super().__init__(state, scene_manager)
         self.sound_manager = sound_manager
         self.title_font = pygame.font.SysFont('Arial', 86, bold=True)
@@ -190,7 +223,11 @@ class MainMenuScene(BaseScene):
         self.selected_index = 0
 
     def update(self, actions):
-        '''Запускает игру по нажатию E'''
+        '''Обрабатывает навигацию и выбор пункта меню
+
+        Args:
+            actions: словарь действий пользователя
+        '''
         if actions['up_pressed']:
             self.selected_index = (self.selected_index - 1) % len(self.options)
 
@@ -218,7 +255,11 @@ class MainMenuScene(BaseScene):
                 self.state.running = False
 
     def render(self, screen):
-        '''Рисует главное меню'''
+        '''Рисует главное меню
+
+        Args:
+            screen: внутренняя поверхность игры
+        '''
         screen.fill((0, 0, 0))
 
         title = self.title_font.render('PROJECT GATE', True, (0, 255, 0))
@@ -238,7 +279,14 @@ class SettingsScene(BaseScene):
     '''Экран настройки разрешения, режима окна и громкости'''
 
     def __init__(self, state, scene_manager, display_settings, sound_manager):
-        '''Создает список параметров и получает менеджеры настроек'''
+        '''Создает экран настроек
+
+        Args:
+            state: общее состояние игровой сессии
+            scene_manager: менеджер переключения сцен
+            display_settings: настройки окна
+            sound_manager: менеджер звуков
+        '''
         super().__init__(state, scene_manager)
         self.display_settings = display_settings
         self.sound_manager = sound_manager
@@ -247,7 +295,11 @@ class SettingsScene(BaseScene):
         self.options = ['resolution', 'fullscreen', 'volume', 'back']
 
     def update(self, actions):
-        '''Обрабатывает навигацию и изменение выбранного параметра'''
+        '''Обрабатывает навигацию и изменение настроек
+
+        Args:
+            actions: словарь действий пользователя
+        '''
         if actions['up_pressed']:
             self.selected_index = (self.selected_index - 1) % len(self.options)
 
@@ -279,7 +331,11 @@ class SettingsScene(BaseScene):
             self.scene_manager.change_scene(GameState.MAIN_MENU)
 
     def render(self, screen):
-        '''Рисует текущие значения настроек'''
+        '''Рисует текущие значения настроек
+
+        Args:
+            screen: внутренняя поверхность игры
+        '''
         screen.fill((0, 0, 0))
 
         width, height = self.display_settings.resolution
@@ -320,7 +376,12 @@ class ResultScene(BaseScene):
     accent_color = (0, 255, 0)
 
     def __init__(self, state, scene_manager):
-        '''Создает набор шрифтов общего экрана результата'''
+        '''Создает общий экран результата
+
+        Args:
+            state: общее состояние игровой сессии
+            scene_manager: менеджер переключения сцен
+        '''
         super().__init__(state, scene_manager)
         self.title_font = pygame.font.SysFont('Arial', 64, bold=True)
         self.subtitle_font = pygame.font.SysFont('Arial', 28, bold=True)
@@ -333,7 +394,12 @@ class ResultScene(BaseScene):
         return ()
 
     def draw_frame(self, screen, rect):
-        '''Рисует рамку с яркими угловыми отметками'''
+        '''Рисует рамку экрана результата
+
+        Args:
+            screen: внутренняя поверхность игры
+            rect: прямоугольник рамки
+        '''
         pygame.draw.rect(screen, (0, 45, 20), rect, 1)
         corner = 32
         segments = (
@@ -350,7 +416,11 @@ class ResultScene(BaseScene):
             pygame.draw.line(screen, self.accent_color, start, end, 3)
 
     def render(self, screen):
-        '''Рисует общий фон, заголовок, статистику и подсказку'''
+        '''Рисует общий экран результата
+
+        Args:
+            screen: внутренняя поверхность игры
+        '''
         width, height = screen.get_size()
         screen.fill((0, 6, 3))
 
@@ -410,7 +480,11 @@ class SectorClearScene(ResultScene):
         )
 
     def update(self, actions):
-        '''Загружает следующий сектор или открывает экран победы'''
+        '''Загружает следующий сектор или открывает экран победы
+
+        Args:
+            actions: словарь действий пользователя
+        '''
         if actions['E']:
             if go_to_next_sector(self.state):
                 self.scene_manager.change_scene(GameState.PLAYING)
@@ -434,7 +508,11 @@ class GameOverScene(ResultScene):
         )
 
     def update(self, actions):
-        '''Возвращает игрока в главное меню'''
+        '''Возвращает игрока в главное меню
+
+        Args:
+            actions: словарь действий пользователя
+        '''
         if actions['E']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)
 
@@ -455,6 +533,10 @@ class FinalVictoryScene(ResultScene):
         )
 
     def update(self, actions):
-        '''Возвращает игрока в главное меню'''
+        '''Возвращает игрока в главное меню
+
+        Args:
+            actions: словарь действий пользователя
+        '''
         if actions['E']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)

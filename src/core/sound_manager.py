@@ -32,13 +32,25 @@ class SoundManager:
         self.music_loaded = False
 
     def load_sound(self, name, path):
-        '''Загружает звуковой эффект и сохраняет его под именем'''
+        '''Загружает звуковой эффект
+
+        Args:
+            name: имя эффекта для последующего воспроизведения
+            path: путь к звуковому файлу
+        '''
         sound = pygame.mixer.Sound(path)
         sound.set_volume(self.volume)
         self.sounds[name] = sound
 
     def play_sound(self, name):
-        '''Воспроизводит эффект и сообщает, был ли он найден'''
+        '''Воспроизводит зарегистрированный звуковой эффект
+
+        Args:
+            name: имя звукового эффекта
+
+        Returns:
+            True при успешном воспроизведении, иначе False
+        '''
         sound = self.sounds.get(name)
 
         if sound is None:
@@ -48,7 +60,11 @@ class SoundManager:
         return True
 
     def load_music(self, path):
-        '''Загружает фоновую музыку и применяет громкость'''
+        '''Загружает фоновую музыку и применяет громкость
+
+        Args:
+            path: путь к музыкальному файлу
+        '''
         pygame.mixer.music.load(path)
         pygame.mixer.music.set_volume(self.volume * 0.5)
         self.music_loaded = True
@@ -66,7 +82,11 @@ class SoundManager:
         pygame.mixer.music.stop()
 
     def set_volume(self, volume):
-        '''Устанавливает общую громкость в диапазоне от 0 до 1'''
+        '''Устанавливает общую громкость
+
+        Args:
+            volume: новое значение громкости от 0 до 1
+        '''
         self.volume = max(0.0, min(volume, 1.0))
 
         for sound in self.sounds.values():

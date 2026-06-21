@@ -15,7 +15,12 @@ class Enemy:
     '''Базовый враг с боевым состоянием и параметрами навигации'''
 
     def __init__(self, x, y):
-        '''Создает базового врага в координатах карты'''
+        '''Создает базового врага в координатах карты
+
+        Args:
+            x: начальная мировая координата по горизонтали
+            y: начальная мировая координата по вертикали
+        '''
         self.x = x
         self.y = y
         self.health = 0
@@ -44,7 +49,11 @@ class Enemy:
         self.score_awarded = False
 
     def take_damage(self, damage):
-        '''Наносит врагу урон и помечает его мертвым при нуле здоровья'''
+        '''Уменьшает здоровье врага
+
+        Args:
+            damage: количество получаемого урона
+        '''
         self.health -= damage
 
         if self.health <= 0:
@@ -52,7 +61,16 @@ class Enemy:
             self.alive = False
 
     def can_move(self, x, y, level):
-        '''Проверяет, может ли враг занять указанную позицию'''
+        '''Проверяет возможность перемещения врага
+
+        Args:
+            x: проверяемая мировая координата по горизонтали
+            y: проверяемая мировая координата по вертикали
+            level: текущий уровень
+
+        Returns:
+            True, если новая позиция свободна
+        '''
         return (
             not is_wall(x + 15, y, level)
             and not is_wall(x, y + 15, level)
@@ -61,7 +79,15 @@ class Enemy:
         )
 
     def move(self, player, level):
-        '''Двигает врага к игроку или атакует при достаточной близости'''
+        '''Двигает врага к цели текущего состояния FSM
+
+        Args:
+            player: модель игрока
+            level: текущий уровень
+
+        Returns:
+            True при выполненном перемещении, иначе False
+        '''
         if self.state == 'attack':
             return False
 
@@ -92,7 +118,16 @@ class Enemy:
         return self.move_to_point(target_x, target_y, level)
 
     def move_to_point(self, target_x, target_y, level):
-        '''Перемещает врага к мировой точке с учетом коллизий'''
+        '''Перемещает врага к мировой точке с учетом коллизий
+
+        Args:
+            target_x: мировая координата цели по горизонтали
+            target_y: мировая координата цели по вертикали
+            level: текущий уровень
+
+        Returns:
+            True при попытке движения, иначе False
+        '''
         dx = target_x - self.x
         dy = target_y - self.y
 
@@ -113,7 +148,14 @@ class Enemy:
         return True
 
     def try_attack(self, player):
-        '''Пытается атаковать игрока, если тот находится достаточно близко'''
+        '''Проверяет расстояние и пытается атаковать игрока
+
+        Args:
+            player: модель игрока
+
+        Returns:
+            True, если игрок находится в радиусе атаки
+        '''
         depth = get_depth(self, player)
 
         if depth > self.attack_distance:
@@ -123,7 +165,14 @@ class Enemy:
         return True
 
     def attack(self, player):
-        '''Наносит урон игроку, если cooldown атаки закончился'''
+        '''Наносит урон игроку после завершения cooldown
+
+        Args:
+            player: модель игрока
+
+        Returns:
+            True при успешной атаке, иначе False
+        '''
         if self.attack_cooldown > 0:
             return False
 
@@ -133,7 +182,15 @@ class Enemy:
         return True
 
     def update(self, player, level):
-        '''Обновляет cooldown'ы и поведение врага за один кадр'''
+        '''Обновляет таймеры, состояние и движение врага
+
+        Args:
+            player: модель игрока
+            level: текущий уровень
+
+        Returns:
+            True, если враг нанес игроку урон
+        '''
         if not self.alive:
             return False
 

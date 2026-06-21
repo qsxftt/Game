@@ -10,7 +10,14 @@ class Door:
     '''Дверь с простым FSM: closed -> opening -> open -> closing'''
 
     def __init__(self, x, y, orient, block_size):
-        '''Создает дверь в клетке карты'''
+        '''Создает дверь в клетке карты
+
+        Args:
+            x: мировая координата двери по горизонтали
+            y: мировая координата двери по вертикали
+            orient: ориентация дверной панели
+            block_size: размер клетки уровня
+        '''
         self.x = x
         self.y = y
         self.orient = orient
@@ -30,7 +37,11 @@ class Door:
         return True
 
     def update(self, blocked=False):
-        '''Обновляет анимацию и состояние двери на один кадр'''
+        '''Обновляет состояние и анимацию двери
+
+        Args:
+            blocked: находится ли живая сущность в клетке двери
+        '''
         if self.state == 'opening':
             self.open_progress += self.open_speed
 
@@ -58,7 +69,11 @@ class Door:
                 self.state = 'closed'
 
     def get_panel_segment(self):
-        '''Возвращает отрезок дверной панели для проверки пересечения лучом'''
+        '''Вычисляет положение движущейся дверной панели
+
+        Returns:
+            Ориентация и координаты концов отрезка панели
+        '''
         offset = self.block_size * self.open_progress
 
         if self.orient == 'hor':

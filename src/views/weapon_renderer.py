@@ -37,7 +37,17 @@ class WeaponRender:
     '''Рисует оружие от первого лица'''
     
     def get_frame(self, weapon, texture, frame_count, status=None):
-        '''Возвращает текущий кадр анимации оружия'''
+        '''Выбирает текущий кадр анимации оружия
+
+        Args:
+            weapon: выбранное оружие
+            texture: полоса кадров анимации
+            frame_count: количество кадров в текстуре
+            status: тип проигрываемой анимации
+
+        Returns:
+            Кадр и его исходные размеры
+        '''
         frame_width = texture.get_width() // frame_count
         frame_height = texture.get_height()
 
@@ -58,7 +68,12 @@ class WeaponRender:
         return frame, frame_width, frame_height
 
     def draw(self, screen, weapon):
-        '''Рисует оружие с учетом текущей анимации'''
+        '''Рисует оружие с учетом текущей анимации
+
+        Args:
+            screen: внутренняя поверхность игры
+            weapon: выбранное оружие
+        '''
         textures = WEAPON_TEXTURES[type(weapon)]
         frame_count = textures['frame_count']
 

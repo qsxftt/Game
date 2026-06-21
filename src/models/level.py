@@ -7,7 +7,12 @@ class Level:
     '''Хранит стены, двери, старт игрока, врагов, терминал и ресурсы уровня'''
 
     def __init__(self, block_size, text_map):
-        '''Создает уровень и сразу разбирает текстовую карту'''
+        '''Создает уровень и разбирает текстовую карту
+
+        Args:
+            block_size: размер одной клетки в мировых координатах
+            text_map: текстовая карта с обозначениями объектов
+        '''
         self.block_size = block_size
         self.text_map = text_map
         self.block_map = set()
@@ -69,7 +74,15 @@ class Level:
             self.doors[(x, y)] = Door(x, y, orient, self.block_size)
 
     def get_orient_door(self, x, y):
-        '''Определяет ориентацию двери по соседним стенам'''
+        '''Определяет ориентацию двери по соседним стенам
+
+        Args:
+            x: мировая координата двери по горизонтали
+            y: мировая координата двери по вертикали
+
+        Returns:
+            Строка hor или vert
+        '''
         left = (x - self.block_size, y) in self.block_map
         right = (x + self.block_size, y) in self.block_map
         up = (x, y - self.block_size) in self.block_map

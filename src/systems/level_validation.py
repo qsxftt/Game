@@ -2,7 +2,14 @@
 
 
 def get_walkable_cells(text_map):
-    '''Возвращает все клетки, по которым можно ходить'''
+    '''Возвращает все проходимые клетки карты
+
+    Args:
+        text_map: текстовая карта уровня
+
+    Returns:
+        Множество координат проходимых клеток
+    '''
     walkable = set()
 
     for y, row in enumerate(text_map):
@@ -12,9 +19,16 @@ def get_walkable_cells(text_map):
 
     return walkable
 
-
 def find_tile(text_map, target_tile):
-    '''Возвращает первую позицию указанного тайла или None'''
+    '''Находит первую позицию указанного тайла
+
+    Args:
+        text_map: текстовая карта уровня
+        target_tile: символ искомого тайла
+
+    Returns:
+        Координаты тайла или None
+    '''
     for y, row in enumerate(text_map):
         for x, tile in enumerate(row):
             if tile == target_tile:
@@ -22,9 +36,16 @@ def find_tile(text_map, target_tile):
 
     return None
 
-
 def find_all_tiles(text_map, target_tile):
-    '''Возвращает все позиции указанного тайла'''
+    '''Находит все позиции указанного тайла
+
+    Args:
+        text_map: текстовая карта уровня
+        target_tile: символ искомого тайла
+
+    Returns:
+        Список координат найденных тайлов
+    '''
     pos = []
 
     for y, row in enumerate(text_map):
@@ -33,7 +54,6 @@ def find_all_tiles(text_map, target_tile):
                 pos.append((x, y))
 
     return pos
-
 
 def get_neighbors(cell):
     '''Возвращает четыре соседние клетки'''
@@ -46,14 +66,20 @@ def get_neighbors(cell):
         (x, y - 1),
     ]
 
-
 # ============================================================
 # FLOOD FILL / BFS - ЛЕГКИЙ АЛГОРИТМ
 # ============================================================
 
-
 def get_reachable_cells(text_map, start):
-    '''Находит все достижимые клетки через BFS от стартовой позиции'''
+    '''Находит через BFS все клетки, достижимые от старта
+
+    Args:
+        text_map: текстовая карта уровня
+        start: начальная клетка обхода
+
+    Returns:
+        Множество достижимых координат
+    '''
     walkable = get_walkable_cells(text_map)
 
     visited = set()
@@ -73,7 +99,6 @@ def get_reachable_cells(text_map, start):
 
     return visited
 
-
 def all_pos_reachable(positions, reachable):
     '''Проверяет, входят ли все позиции в множество достижимых клеток'''
     for pos in positions:
@@ -81,7 +106,6 @@ def all_pos_reachable(positions, reachable):
             return False
 
     return True
-
 
 def reachable_neighbor(tile, reachable):
     '''Проверяет, есть ли рядом с тайлом хотя бы одна достижимая клетка'''
@@ -93,9 +117,15 @@ def reachable_neighbor(tile, reachable):
 
     return False
 
-
 def validate_level(text_map):
-    '''Проверяет, что игрок, терминал, враги и ресурсы доступны на карте'''
+    '''Проверяет достижимость всех важных объектов уровня
+
+    Args:
+        text_map: сгенерированная текстовая карта
+
+    Returns:
+        True, если уровень можно пройти, иначе False
+    '''
     player_pos = find_tile(text_map, 'P')
 
     if player_pos is None:

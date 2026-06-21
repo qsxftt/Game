@@ -15,7 +15,14 @@ class Room:
     '''Прямоугольная комната в сетке уровня'''
 
     def __init__(self, x, y, width, height):
-        '''Сохраняет позицию левого верхнего угла и размер комнаты в клетках'''
+        '''Создает прямоугольную комнату
+
+        Args:
+            x: левая граница комнаты
+            y: верхняя граница комнаты
+            width: ширина комнаты в клетках
+            height: высота комнаты в клетках
+        '''
         self.x = x
         self.y = y
         self.width = width
@@ -33,7 +40,15 @@ class BSPNode:
     '''Узел BSP-дерева: прямоугольная область карты, которую можно разделить'''
 
     def __init__(self, x, y, width, height, depth=0):
-        '''Сохраняет область узла, его глубину и ссылки на дочерние узлы'''
+        '''Создает узел BSP-дерева
+
+        Args:
+            x: левая граница области
+            y: верхняя граница области
+            width: ширина области в клетках
+            height: высота области в клетках
+            depth: глубина узла в BSP-дереве
+        '''
         self.x = x
         self.y = y
         self.width = width
@@ -66,7 +81,14 @@ class BSPNode:
         return 'hor'
 
     def split(self, min_leaf_size):
-        '''Делит текущий узел на два дочерних узла, если места достаточно'''
+        '''Делит узел на две дочерние области
+
+        Args:
+            min_leaf_size: минимальный размер дочерней области
+
+        Returns:
+            True при успешном разделении, иначе False
+        '''
         if not self.can_split(min_leaf_size):
             return False
 
@@ -105,7 +127,12 @@ class BSPNode:
         return False
 
     def split_recursive(self, max_depth, min_leaf_size):
-        '''Рекурсивно делит узел, пока не достигнут лимит глубины или размера'''
+        '''Рекурсивно строит ветви BSP-дерева
+
+        Args:
+            max_depth: максимальная глубина дерева
+            min_leaf_size: минимальный размер конечной области
+        '''
         if self.depth >= max_depth:
             return
 
@@ -127,7 +154,15 @@ class BSPNode:
         return leaves
 
     def create_room_inside(self, min_room_size, max_room_size):
-        '''Создает комнату внутри области узла с отступом от границ'''
+        '''Создает случайную комнату внутри области узла
+
+        Args:
+            min_room_size: минимальный размер стороны комнаты
+            max_room_size: максимальный размер стороны комнаты
+
+        Returns:
+            Созданная комната
+        '''
         room_width = rnd(min_room_size, min(max_room_size, self.width - 2))
         room_height = rnd(min_room_size, min(max_room_size, self.height - 2))
 
@@ -171,7 +206,19 @@ class LevelGenerator:
         bsp_max_depth=3,
         bsp_min_leaf_size=8,
     ):
-        '''Сохраняет параметры генерации текущего сектора'''
+        '''Создает генератор сектора
+
+        Args:
+            width: ширина карты в клетках
+            height: высота карты в клетках
+            enemy_count: количество врагов
+            medkit_count: количество аптечек
+            ammo_count: количество наборов патронов
+            min_room_size: минимальный размер комнаты
+            max_room_size: максимальный размер комнаты
+            bsp_max_depth: максимальная глубина BSP-дерева
+            bsp_min_leaf_size: минимальный размер области BSP
+        '''
         self.width = width
         self.height = height
         self.enemy_count = enemy_count
@@ -185,7 +232,11 @@ class LevelGenerator:
     # Основной процесс генерации
 
     def generate(self):
-        '''Пробует создать валидную BSP-карту и возвращает ее в текстовом виде'''
+        '''Создает и проверяет процедурную карту сектора
+
+        Returns:
+            Валидная текстовая карта уровня
+        '''
         for _ in range(100):
             text_map = self.build_bsp_map()
 
@@ -195,7 +246,11 @@ class LevelGenerator:
         raise RuntimeError('Ошибка генерации карты')
 
     def build_bsp_map(self):
-        '''Создает одну BSP-карту без повторных попыток валидации'''
+        '''Выполняет одну попытку создания BSP-карты
+
+        Returns:
+            Текстовая карта без проверки достижимости
+        '''
         grid = self.create_filled_grid()
 
         self.create_bsp_rooms(grid, self.bsp_max_depth, self.bsp_min_leaf_size)
@@ -231,7 +286,16 @@ class LevelGenerator:
     # Создание комнат через BSP
 
     def create_bsp_rooms(self, grid, max_depth=3, min_leaf_size=8):
-        '''Создает BSP-дерево, вырезает комнаты в листьях и соединяет их'''
+        '''Строит BSP-дерево и создает комнаты в его листьях
+
+        Args:
+            grid: изменяемая сетка уровня
+            max_depth: максимальная глубина BSP-дерева
+            min_leaf_size: минимальный размер области BSP
+
+        Returns:
+            Список созданных комнат
+        '''
         root = BSPNode(0, 0, self.width, self.height)
         root.split_recursive(max_depth, min_leaf_size)
 
@@ -255,7 +319,12 @@ class LevelGenerator:
     # Соединение комнат коридорами
 
     def connect_bsp_rooms(self, grid, node):
-        '''Соединяет комнаты из соседних веток BSP-дерева'''
+        '''Рекурсивно соединяет комнаты соседних веток BSP
+
+        Args:
+            grid: изменяемая сетка уровня
+            node: текущий узел BSP-дерева
+        '''
         if node.is_leaf():
             return
 
@@ -269,7 +338,13 @@ class LevelGenerator:
             self.create_corridor(grid, left_room, right_room)
 
     def create_corridor(self, grid, start, end):
-        '''Прокладывает коридор между центрами двух комнат'''
+        '''Прокладывает коридор между двумя комнатами
+
+        Args:
+            grid: изменяемая сетка уровня
+            start: начальная комната
+            end: конечная комната
+        '''
         start_point = start.get_center()
         end_point = end.get_center()
 
@@ -282,7 +357,16 @@ class LevelGenerator:
     # ============================================================
 
     def build_corridor_path(self, came_from, start, end):
-        '''Восстанавливает найденный путь коридора от конца к началу'''
+        '''Восстанавливает найденный путь коридора
+
+        Args:
+            came_from: словарь предыдущих клеток маршрута
+            start: начальная клетка
+            end: конечная клетка
+
+        Returns:
+            Список клеток коридора от start до end
+        '''
         current = end
         path = []
 
@@ -296,7 +380,19 @@ class LevelGenerator:
         return path
 
     def find_corridor_path(self, grid, start, end):
-        '''Ищет путь коридора алгоритмом Дейкстры с весами тайлов'''
+        '''Ищет путь коридора алгоритмом Дейкстры
+
+        Разным типам клеток назначается разная стоимость, поэтому маршрут
+        старается не проходить вдоль стен комнат и использует готовые коридоры
+
+        Args:
+            grid: сетка уровня с комнатами
+            start: начальная клетка маршрута
+            end: конечная клетка маршрута
+
+        Returns:
+            Список клеток найденного коридора
+        '''
         frontier = []
         heappush(frontier, (0, start))
 
@@ -344,7 +440,14 @@ class LevelGenerator:
             self.set_tile(grid, x, y, 'D')
 
     def place_terminal(self, grid, x, y, distance):
-        '''Ставит терминал в стену рядом ровно с одной свободной клеткой'''
+        '''Размещает терминал в подходящей стене вдали от игрока
+
+        Args:
+            grid: изменяемая сетка уровня
+            x: координата игрока по горизонтали
+            y: координата игрока по вертикали
+            distance: минимальное расстояние до терминала
+        '''
         while True:
             wall_x, wall_y = self.get_far_cell_wall(grid, x, y, distance)
             if self.can_place_terminal(grid, wall_x, wall_y):
@@ -357,14 +460,32 @@ class LevelGenerator:
             self.set_tile(grid, *self.get_empty_cell(grid), tile)
 
     def place_far_tiles(self, grid, x, y, tile, count, distance=4):
-        '''Ставит несколько тайлов на расстоянии от указанной клетки'''
+        '''Размещает тайлы не ближе заданного расстояния
+
+        Args:
+            grid: изменяемая сетка уровня
+            x: исходная координата по горизонтали
+            y: исходная координата по вертикали
+            tile: символ размещаемого тайла
+            count: количество тайлов
+            distance: минимальное расстояние до исходной клетки
+        '''
         for _ in range(count):
             self.set_tile(grid, *self.get_far_cell(grid, x, y, distance), tile)
 
     # Проверки размещения объектов
 
     def can_place_door(self, grid, x, y):
-        '''Проверяет, подходит ли клетка коридора для двери'''
+        '''Проверяет возможность размещения двери в коридоре
+
+        Args:
+            grid: сетка уровня
+            x: координата клетки по горизонтали
+            y: координата клетки по вертикали
+
+        Returns:
+            True, если клетка является входом в комнату
+        '''
         if grid[y][x] != 'C':
             return False
 
@@ -382,7 +503,16 @@ class LevelGenerator:
         return False
 
     def can_place_terminal(self, grid, wall_x, wall_y):
-        '''Проверяет, можно ли поставить терминал в выбранную стену'''
+        '''Проверяет возможность размещения терминала в стене
+
+        Args:
+            grid: сетка уровня
+            wall_x: координата стены по горизонтали
+            wall_y: координата стены по вертикали
+
+        Returns:
+            True, если рядом ровно одна свободная клетка
+        '''
         near = [
             (wall_x + 1, wall_y),
             (wall_x - 1, wall_y),
@@ -474,7 +604,16 @@ class LevelGenerator:
         return valid_near
 
     def get_corridor_cost(self, grid, x, y):
-        '''Возвращает стоимость прохождения тайла при создании коридора'''
+        '''Возвращает стоимость клетки для алгоритма Дейкстры
+
+        Args:
+            grid: сетка уровня
+            x: координата клетки по горизонтали
+            y: координата клетки по вертикали
+
+        Returns:
+            Числовая стоимость прохождения клетки
+        '''
         tile = grid[y][x]
 
         if tile == 'W':

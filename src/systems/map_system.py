@@ -13,7 +13,6 @@ def get_cell(x, y):
 
     return endX, endY
 
-
 def get_front_cell(player):
     '''Возвращает клетку на расстоянии одного блока перед игроком'''
     front_x = player.x + cos(player.angle) * block_size
@@ -23,9 +22,17 @@ def get_front_cell(player):
 
     return cell
 
-
 def get_block_type(x, y, level):
-    '''Возвращает тип блока в точке: wall, door, terminal или None'''
+    '''Определяет тип препятствия в мировой точке
+
+    Args:
+        x: мировая координата по горизонтали
+        y: мировая координата по вертикали
+        level: текущий уровень
+
+    Returns:
+        Строка wall, door, terminal или None
+    '''
     cell = get_cell(x, y)
 
     if cell in level.block_map:
@@ -44,18 +51,40 @@ def get_block_type(x, y, level):
 # PAINTER'S ALGORITHM - СОРТИРОВКА СПРАЙТОВ ПО ГЛУБИНЕ
 # ============================================================
 
-
 def get_sprite_sorted(pickups, enemies, player):
-    '''Возвращает pickups и enemies, отсортированные от дальних к ближним'''
+    '''Сортирует спрайты от дальних к ближним
+
+    Args:
+        pickups: список ресурсов уровня
+        enemies: список врагов уровня
+        player: модель игрока
+
+    Returns:
+        Общий список объектов в порядке отрисовки
+    '''
     sprites = pickups + enemies
     return sorted(sprites, key=lambda sprite: get_depth(sprite, player), reverse=True)
 
-
 def world_to_grid(x, y):
-    '''Переводит мировые координаты в координаты клетки текстовой карты'''
+    '''Переводит мировые координаты в координаты клетки
+
+    Args:
+        x: мировая координата по горизонтали
+        y: мировая координата по вертикали
+
+    Returns:
+        Координаты клетки текстовой карты
+    '''
     return int(x // block_size), int(y // block_size)
 
-
 def grid_to_world(x, y):
-    '''Возвращает центр клетки карты в мировых координатах'''
+    '''Переводит координаты клетки в мировые координаты
+
+    Args:
+        x: координата клетки по горизонтали
+        y: координата клетки по вертикали
+
+    Returns:
+        Мировые координаты центра клетки
+    '''
     return x * block_size + block_size // 2, y * block_size + block_size // 2

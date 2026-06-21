@@ -6,7 +6,16 @@ from src.systems.visibility_system import get_depth, is_in_fov, is_visible
 
 
 def player_shoot(player, enemies, level):
-    '''Обрабатывает попадание выстрела игрока по ближайшему врагу в прицеле'''
+    '''Ищет ближайшего врага в прицеле и наносит ему урон
+
+    Args:
+        player: модель игрока с выбранным оружием
+        enemies: список врагов текущего уровня
+        level: текущий уровень
+
+    Returns:
+        Пораженный враг или False при промахе
+    '''
     target = None
     max_depth = float('inf')
 
@@ -30,9 +39,17 @@ def player_shoot(player, enemies, level):
 
     return False
 
-
 def enemy_near_crosshair(enemy, player, level):
-    '''Проверяет, находится ли враг под прицелом игрока'''
+    '''Проверяет попадание направления прицела в хитбокс врага
+
+    Args:
+        enemy: проверяемый враг
+        player: модель игрока
+        level: текущий уровень
+
+    Returns:
+        True, если видимый враг находится под прицелом
+    '''
     if not enemy.alive:
         return False
 

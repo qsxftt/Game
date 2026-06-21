@@ -21,7 +21,11 @@ class DisplaySettings:
         return self.resolutions[self.resolution_index]
 
     def change_resolution(self, direction):
-        '''Переключает разрешение на соседний вариант'''
+        '''Переключает разрешение на соседний вариант
+
+        Args:
+            direction: направление переключения, обычно -1 или 1
+        '''
         self.resolution_index = (self.resolution_index + direction) % len(
             self.resolutions
         )

@@ -52,7 +52,12 @@ class HUDrender:
     # Общая отрисовка
 
     def draw(self, screen, state):
-        '''Рисует весь HUD одним вызовом'''
+        '''Рисует все элементы игрового интерфейса
+
+        Args:
+            screen: внутренняя поверхность игры
+            state: общее состояние игровой сессии
+        '''
         player = state.player
         level = state.current_level
 
@@ -72,7 +77,14 @@ class HUDrender:
         self.draw_message(screen, scale)
 
     def get_scale(self, screen):
-        '''Возвращает масштаб интерфейса для текущего разрешения'''
+        '''Вычисляет масштаб интерфейса для текущего разрешения
+
+        Args:
+            screen: внутренняя поверхность игры
+
+        Returns:
+            Коэффициент масштаба HUD
+        '''
         return min(
             screen.get_width() / self.base_width, screen.get_height() / self.base_height
         )
@@ -141,7 +153,13 @@ class HUDrender:
     # Здоровье
 
     def draw_health(self, screen, player, scale):
-        '''Рисует здоровье игрока в левом нижнем углу'''
+        '''Рисует панель здоровья игрока
+
+        Args:
+            screen: внутренняя поверхность игры
+            player: модель игрока
+            scale: текущий масштаб HUD
+        '''
         width = int(340 * scale)
         height = int(115 * scale)
         margin = int(20 * scale)
@@ -227,7 +245,13 @@ class HUDrender:
     # Сектор и задача
 
     def draw_objective(self, screen, state, scale):
-        '''Рисует состояние сектора в левом верхнем углу'''
+        '''Рисует текущую задачу и прогресс сектора
+
+        Args:
+            screen: внутренняя поверхность игры
+            state: общее состояние игровой сессии
+            scale: текущий масштаб HUD
+        '''
         margin = int(20 * scale)
         rect = pygame.Rect(margin, margin, int(390 * scale), int(108 * scale))
         self.draw_panel(screen, rect, scale)
@@ -273,7 +297,13 @@ class HUDrender:
         return rect, cell_size
 
     def draw_weapon(self, screen, weapon, scale):
-        '''Рисует выбранное оружие и количество патронов'''
+        '''Рисует выбранное оружие и количество патронов
+
+        Args:
+            screen: внутренняя поверхность игры
+            weapon: выбранное оружие
+            scale: текущий масштаб HUD
+        '''
         minimap_rect, _ = self.get_minimap_rect(screen, scale)
         margin = int(20 * scale)
         rect = pygame.Rect(
@@ -320,7 +350,14 @@ class HUDrender:
     # Мини-карта
 
     def draw_minimap(self, screen, player, enemies, level):
-        '''Рисует плавную локальную карту вокруг игрока'''
+        '''Рисует локальную мини-карту вокруг игрока
+
+        Args:
+            screen: внутренняя поверхность игры
+            player: модель игрока
+            enemies: список врагов уровня
+            level: текущий уровень
+        '''
         scale = self.get_scale(screen)
         rect, cell_size = self.get_minimap_rect(screen, scale)
         minimap = pygame.Surface(rect.size)
@@ -391,7 +428,15 @@ class HUDrender:
         )
 
     def get_radar_color(self, player, level):
-        '''Возвращает цвет радара с учётом расстояния до терминала'''
+        '''Выбирает цвет радара по расстоянию до терминала
+
+        Args:
+            player: модель игрока
+            level: текущий уровень
+
+        Returns:
+            Цвет рамки радара
+        '''
         if level.terminal_pos is None:
             return DARK_GREEN
 
@@ -471,7 +516,13 @@ class HUDrender:
         self.hitmark_end_time = pygame.time.get_ticks() + duration
 
     def show_message(self, text, duration=1800, color=ORANGE):
-        '''Показывает временное сообщение рядом с прицелом'''
+        '''Запускает временное сообщение рядом с прицелом
+
+        Args:
+            text: текст сообщения
+            duration: время отображения в миллисекундах
+            color: цвет текста
+        '''
         self.message = text
         self.message_color = color
         self.message_end_time = pygame.time.get_ticks() + duration
@@ -494,7 +545,11 @@ class HUDrender:
         screen.blit(text, text_rect)
 
     def update_damage_effect(self, player):
-        '''Запускает вспышку при уменьшении здоровья игрока'''
+        '''Обновляет эффект получения урона
+
+        Args:
+            player: модель игрока
+        '''
         if self.last_player is not player:
             self.last_player = player
             self.last_health = player.health

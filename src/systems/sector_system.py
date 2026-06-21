@@ -15,7 +15,6 @@ def all_enemies_dead(enemies):
     '''Возвращает True, если все враги сектора мертвы'''
     return all(not enemy.alive for enemy in enemies)
 
-
 def activate_terminal(player, level):
     '''Проверяет, смотрит ли игрок на клетку терминала'''
     cell = get_front_cell(player)
@@ -25,9 +24,12 @@ def activate_terminal(player, level):
 
     return False
 
-
 def load_sector(state):
-    '''Генерирует сектор и пересоздает состояние игрока, врагов и ресурсов'''
+    '''Генерирует сектор и создает его игровые сущности
+
+    Args:
+        state: общее состояние игровой сессии
+    '''
     generator = create_generator_for_sector(state.sector_index)
     text_map = generator.generate()
     level = Level(block_size, text_map)
@@ -54,9 +56,13 @@ def load_sector(state):
         elif pickup_type == 'ammo':
             state.pickups.append(Ammo(x, y))
 
-
 def start_new_game(state, game_mode):
-    '''Сбрасывает прошлую сессию и создаёт первый сектор'''
+    '''Сбрасывает прошлую сессию и создает первый сектор
+
+    Args:
+        state: общее состояние игровой сессии
+        game_mode: выбранный режим игры
+    '''
     state.sector_index = 0
     state.score = 0
     state.game_mode = game_mode
@@ -70,9 +76,15 @@ def start_new_game(state, game_mode):
     state.reset_sector_flags()
     load_sector(state)
 
-
 def go_to_next_sector(state):
-    '''Переходит к следующему сектору или сообщает, что игра дошла до финала'''
+    '''Переходит к следующему сектору
+
+    Args:
+        state: общее состояние игровой сессии
+
+    Returns:
+        True, если новый сектор загружен, иначе False
+    '''
     state.sector_index += 1
 
     if state.game_mode == GameState.ENDLESS or state.sector_index < TOTAL_SECTORS:
@@ -81,9 +93,15 @@ def go_to_next_sector(state):
 
     return False
 
-
 def create_generator_for_sector(sector_index):
-    '''Создает генератор с параметрами сложности для указанного сектора'''
+    '''Создает генератор с параметрами сложности сектора
+
+    Args:
+        sector_index: индекс создаваемого сектора
+
+    Returns:
+        Настроенный генератор уровня
+    '''
     i = min(sector_index, 4)
 
     widths = [20, 24, 28, 32, 36]

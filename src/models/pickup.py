@@ -7,7 +7,12 @@ class Pickup:
     '''Базовый ресурс на карте: аптечка, патроны или будущий pickup'''
 
     def __init__(self, x, y):
-        '''Создает ресурс в координатах мира'''
+        '''Создает ресурс в координатах мира
+
+        Args:
+            x: мировая координата по горизонтали
+            y: мировая координата по вертикали
+        '''
         self.x = x
         self.y = y
         self.amount = 0
@@ -18,7 +23,14 @@ class Pickup:
         self.type = None
 
     def update(self, player):
-        '''Обновляет анимацию и проверяет подбор игроком'''
+        '''Обновляет анимацию и проверяет подбор ресурса
+
+        Args:
+            player: модель игрока
+
+        Returns:
+            True при успешном подборе ресурса
+        '''
         if self.animation_cooldown >= 0:
             self.animation_cooldown -= 1
 
@@ -28,7 +40,14 @@ class Pickup:
         return self.pickup_item(player)
 
     def pickup_item(self, player):
-        '''Применяет эффект ресурса, если игрок подошел достаточно близко'''
+        '''Применяет эффект ресурса при приближении игрока
+
+        Args:
+            player: модель игрока
+
+        Returns:
+            True при успешном подборе, иначе False или None
+        '''
         if self.is_pickedup:
             return False
 

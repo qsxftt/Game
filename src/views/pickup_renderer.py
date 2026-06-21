@@ -23,7 +23,6 @@ PICKUP_TEXTURES = {
     },
 }
 
-
 def convert_pickup_textures():
     '''Оптимизирует прозрачные текстуры ресурсов под формат дисплея'''
     for visual in PICKUP_TEXTURES.values():
@@ -32,9 +31,16 @@ def convert_pickup_textures():
 
 class PickupRender:
     '''Рисует pickups как псевдо-3D спрайты'''
-    
+
     def get_frame(self, pickup):
-        '''Возвращает текущий кадр анимации ресурса'''
+        '''Выбирает текущий кадр анимации ресурса
+
+        Args:
+            pickup: отображаемый ресурс
+
+        Returns:
+            Кадр и его исходные размеры
+        '''
         visual = PICKUP_TEXTURES[type(pickup)]
         texture = visual['texture']
         frame_count = visual['frame_count']
@@ -52,7 +58,14 @@ class PickupRender:
         return frame, frame_width, frame_height
 
     def draw(self, pickup, screen, player, level):
-        '''Рисует один ресурс, если он не подобран, видим и находится в FOV'''
+        '''Рисует видимый ресурс как псевдо-3D спрайт
+
+        Args:
+            pickup: отображаемый ресурс
+            screen: внутренняя поверхность игры
+            player: модель игрока
+            level: текущий уровень
+        '''
         if pickup.is_pickedup:
             return False
 

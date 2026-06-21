@@ -19,7 +19,11 @@ class InputController:
         self.ESCAPE = False
 
     def get_actions(self):
-        '''Возвращает действия игрока за текущий кадр'''
+        '''Собирает непрерывные и одноразовые действия игрока
+
+        Returns:
+            Словарь действий за текущий кадр
+        '''
         keys = pygame.key.get_pressed()
 
         actions = {
@@ -53,7 +57,11 @@ class InputController:
         return actions
 
     def handle_event(self, event):
-        '''Запоминает одноразовые действия по событию KEYDOWN'''
+        '''Запоминает одноразовые нажатия клавиш
+
+        Args:
+            event: событие Pygame из очереди окна
+        '''
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_e:
                 self.E = True

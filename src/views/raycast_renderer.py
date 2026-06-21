@@ -23,13 +23,20 @@ from src.systems.map_system import get_block_type
 
 
 def apply_shade_texture(texture_column, shade):
-    '''Возвращает затемненную копию вертикальной колонки текстуры'''
+    '''Создает затемненную копию колонки текстуры
+
+    Args:
+        texture_column: исходная колонка текстуры
+        shade: коэффициент яркости от 0 до 1
+
+    Returns:
+        Затемненная поверхность Pygame
+    '''
     shade *= 255
     texture_column_copy = texture_column.copy()
     texture_column_copy.fill((shade, shade, shade), special_flags=pygame.BLEND_MULT)
 
     return texture_column_copy
-
 
 def convert_textures():
     '''Преобразует непрозрачные текстуры в формат экрана для быстрого blit'''
@@ -39,17 +46,23 @@ def convert_textures():
     DOOR_TEXTURE = DOOR_TEXTURE.convert()
     TERMINAL_TEXTURE = TERMINAL_TEXTURE.convert()
 
-
 # ============================================================
 # RAY CASTING
 # ============================================================
 
-
 def cast_ray_to_door(player, angle, door):
-    '''Проверяет пересечение луча с движущейся дверной панелью.
+    '''Проверяет пересечение луча с движущейся дверной панелью
 
     Дверь считается не целой клеткой, а тонким отрезком, который смещается во
     время открытия. Это позволяет ray casting рисовать открывающуюся дверь
+
+    Args:
+        player: модель игрока
+        angle: направление луча в радианах
+        door: проверяемая дверь
+
+    Returns:
+        Координаты попадания и глубина или None
     '''
     sin_a = sin(angle)
     cos_a = cos(angle)
@@ -72,13 +85,19 @@ def cast_ray_to_door(player, angle, door):
 
     return None
 
-
 def cast_single_ray(player, angle, level):
-    '''Выпускает один луч и возвращает ближайшее столкновение.
+    '''Выпускает один луч и находит ближайшее препятствие
 
     Луч отдельно проверяет пересечения с вертикальными и горизонтальными
     линиями сетки, а затем выбирает ближайшее найденное попадание.
-    Возвращает: hit_x, hit_y, depth, side, block_type
+
+    Args:
+        player: модель игрока
+        angle: направление луча в радианах
+        level: текущий уровень
+
+    Returns:
+        Координаты попадания, глубина, сторона и тип блока
     '''
     sin_a = sin(angle)
     cos_a = cos(angle)
@@ -176,9 +195,14 @@ def cast_single_ray(player, angle, level):
     else:
         return hor_x, hor_y, hor_depth, 'hor', hor_type
 
-
 def ray_casting(screen, player, level):
-    '''Рисует псевдо-3D стены, двери и терминал через веер лучей'''
+    '''Рисует псевдо-3D мир через веер лучей
+
+    Args:
+        screen: внутренняя поверхность игры
+        player: модель игрока
+        level: текущий уровень
+    '''
     start = player.angle - HALF_FOV
 
     for ray in range(NUM_RAYS):
