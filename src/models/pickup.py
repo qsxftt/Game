@@ -25,7 +25,7 @@ class Pickup:
             if self.animation_cooldown <= 0:
                 self.animation_cooldown = self.animation_speed
 
-        self.pickup_item(player)
+        return self.pickup_item(player)
 
     def pickup_item(self, player):
         """Применяет эффект ресурса, если игрок подошел достаточно близко."""

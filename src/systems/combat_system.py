@@ -25,7 +25,7 @@ def player_shoot(player, enemies, level):
 
     if target:
         target.take_damage(player.weapon.damage)
-        return True
+        return target
 
     return False
 

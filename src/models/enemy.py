@@ -148,9 +148,13 @@ class Enemy:
         if self.idle_wait_cooldown > 0:
             self.idle_wait_cooldown -= 1
 
+        health_before = player.health
+
         update_enemy_state(self, player, level)
 
         self.move(player, level)
+
+        return player.health < health_before
 
 class Dwarf(Enemy):
     """Конкретный тип врага с параметрами и текстурами."""

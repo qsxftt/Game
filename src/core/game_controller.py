@@ -20,6 +20,7 @@ from src.views.sprite_renderer import SpriteRender, convert_enemy_textures
 from src.views.weapon_renderer import WeaponRender, convert_weapon_textures
 from src.views.raycast_renderer import convert_textures
 from src.core.display_settings import DisplaySettings
+from src.core.sound_manager import SoundManager
 
 
 class GameController:
@@ -29,6 +30,7 @@ class GameController:
         """Инициализирует pygame, окно, состояние, renderers и сцены."""
         pygame.init()
 
+        self.sound_manager = SoundManager()
         self.display_settings = DisplaySettings()
         self.display = pygame.display.set_mode(self.display_settings.resolution)
         self.screen = pygame.Surface((WIDTH, HEIGHT)).convert()
@@ -44,7 +46,7 @@ class GameController:
         self.scene_manager = SceneManager()
 
         self.scene_manager.register(GameState.MAIN_MENU, MainMenuScene(self.state, self.scene_manager))
-        self.scene_manager.register(GameState.SETTINGS, SettingsScene(self.state, self.scene_manager, self.display_settings))
+        self.scene_manager.register(GameState.SETTINGS, SettingsScene(self.state, self.scene_manager, self.display_settings, self.sound_manager))
         self.scene_manager.register(
             GameState.PLAYING,
             PlayingScene(
@@ -54,6 +56,7 @@ class GameController:
                 self.spriterender,
                 self.hud,
                 self.pickuprender,
+                self.sound_manager
             ),
         )
         self.scene_manager.register(GameState.SECTOR_CLEAR, SectorClearScene(self.state, self.scene_manager))

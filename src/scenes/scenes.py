@@ -4,13 +4,15 @@ import pygame
 
 from src.core.config import HEIGHT, HEIGHT_HALF, TOTAL_SECTORS, WIDTH
 from src.models.game_state import GameState
-from src.models.pickup import Pickup
+from src.models.pickup import Pickup, Ammo, MedKit
 from src.systems.combat_system import player_shoot
 from src.systems.door_system import update_doors
 from src.systems.map_system import get_sprite_sorted
 from src.systems.sector_system import activate_terminal, all_enemies_dead, go_to_next_sector, start_new_game
 from src.views.raycast_renderer import ray_casting
 from src.systems.score_system import update_score, add_sector_score
+from src.models.weapon import Pistol
+from src.models.enemy import Dwarf, Dwarf2
 
 
 class BaseScene:
@@ -33,34 +35,75 @@ class BaseScene:
 class PlayingScene(BaseScene):
     """Основная игровая сцена."""
 
-    def __init__(self, state, scene_manager, weaponrender, spriterender, hud, pickuprender):
+    def __init__(self, state, scene_manager, weaponrender, spriterender, hud, pickuprender, sound_manager):
         """Получает state, renderers и HUD для игрового режима."""
         super().__init__(state, scene_manager)
         self.weaponrender = weaponrender
         self.spriterender = spriterender
         self.hud = hud
         self.pickuprender = pickuprender
+        self.sound_manager = sound_manager
 
     def update(self, actions):
         """Обновляет игрока, врагов, двери, pickups и условия перехода сцены."""
         if actions['esc']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)
             return
+        
+        door_states = {door: door.state for door in self.state.current_level.doors.values()}
 
         self.state.player.weapon.update()
-        shot_fired = self.state.player.update(actions, self.state.current_level)
+        shot_fired, reload_started = self.state.player.update(actions, self.state.current_level)
+        weapon = self.state.player.weapon
+
+        if isinstance(weapon, Pistol):
+            sound_prefix = 'pistol'
+        else:
+            sound_prefix = 'shotgun'
+
+        if shot_fired:
+            self.sound_manager.play_sound(f'{sound_prefix}_shot')
+
+        if reload_started:
+            self.sound_manager.play_sound(f'{sound_prefix}_reload')
+
+
         update_doors(self.state.current_level, self.state.player, self.state.enemies)
 
         for pickup in self.state.pickups:
-            pickup.update(self.state.player)
+            picked_up = pickup.update(self.state.player)
+
+            if picked_up:
+                if isinstance(pickup, MedKit):
+                    self.sound_manager.play_sound('medkit_pickup')
+                elif isinstance(pickup, Ammo):
+                    self.sound_manager.play_sound('ammo_pickup')
 
         for enemy in self.state.enemies:
-            enemy.update(self.state.player, self.state.current_level)
+            attacked = enemy.update(self.state.player, self.state.current_level)
+
+            if attacked:
+                if isinstance(enemy, Dwarf):
+                    self.sound_manager.play_sound('enemy_basic_attack')
+                elif isinstance(enemy, Dwarf2):
+                    self.sound_manager.play_sound('enemy_heavy_attack')
+
+                self.sound_manager.play_sound('player_hurt')
+
+        for door, previous_state in door_states.items():
+            if door.state == 'opening' and previous_state != 'opening':
+                self.sound_manager.play_sound('door_open')
+
+            elif door.state == 'closing' and previous_state != 'closing':
+                self.sound_manager.play_sound('door_close')
 
         if shot_fired:
             hit = player_shoot(self.state.player, self.state.enemies, self.state.current_level)
             if hit:
                 self.hud.trigger_hitmark()
+
+                if not hit.alive:
+                    self.sound_manager.play_sound('enemy_death')
 
         update_score(self.state)
 
@@ -76,6 +119,7 @@ class PlayingScene(BaseScene):
         if actions['E'] and not self.state.terminal_activated:
             if activate_terminal(self.state.player, self.state.current_level):
                 if self.state.sector_clean:
+                    self.sound_manager.play_sound('terminal_activate')
                     add_sector_score(self.state)
                     self.state.terminal_activated = True
                     self.scene_manager.change_scene(GameState.SECTOR_CLEAR)
@@ -158,14 +202,16 @@ class MainMenuScene(BaseScene):
             screen.blit(text, text.get_rect(center=(WIDTH // 2, y)))
 
 class SettingsScene(BaseScene):
-    def __init__(self, state, scene_manager, display_settings):
+    def __init__(self, state, scene_manager, display_settings, sound_manager):
         super().__init__(state, scene_manager)
         self.display_settings = display_settings
+        self.sound_manager = sound_manager
         self.font = pygame.font.SysFont('Arial', 52)
         self.selected_index = 0
         self.options = [
             'resolution',
             'fullscreen',
+            'volume',
             'back'
         ]
 
@@ -192,6 +238,12 @@ class SettingsScene(BaseScene):
             ):
                 self.display_settings.toggle_fullscreen()
 
+        elif selected_option == 'volume':
+            if actions['left_pressed']:
+                self.sound_manager.set_volume(self.sound_manager.volume - 0.1)
+            elif actions['right_pressed']:
+                self.sound_manager.set_volume(self.sound_manager.volume + 0.1)
+
         elif selected_option == 'back' and actions['E']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)
 
@@ -207,7 +259,8 @@ class SettingsScene(BaseScene):
         labels = {
             'resolution': f'РАЗРЕШЕНИЕ: {width}x{height}',
             'fullscreen': f'ПОЛНЫЙ ЭКРАН: {fullscreen}',
-            'back': 'НАЗАД',
+            'volume': f'ГРОМКОСТЬ: {round(self.sound_manager.volume * 100)}%',
+            'back': 'НАЗАД'
         }
 
         title = self.font.render('НАСТРОЙКИ', True, (0, 255, 0))

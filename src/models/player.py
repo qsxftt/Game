@@ -55,6 +55,7 @@ class Player:
         cos_a = cos(self.angle)
 
         shot_fired = False
+        reload_started = False
 
         if self.cooldown > 0:
             self.cooldown -= 1
@@ -92,7 +93,8 @@ class Player:
                 shot_fired = True
 
         if actions['R']:
-            self.weapon.reload()
+            if self.weapon.reload():
+                reload_started = True
 
         if self.can_move(self.x + dx, self.y, level):
             self.x += dx
@@ -100,4 +102,4 @@ class Player:
         if self.can_move(self.x, self.y + dy, level):
             self.y += dy
 
-        return shot_fired
+        return shot_fired, reload_started
