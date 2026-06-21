@@ -2,7 +2,7 @@
 
 import pygame
 
-from src.core.config import HEIGHT, HEIGHT_HALF, WIDTH
+from src.core.config import HEIGHT, HEIGHT_HALF, TOTAL_SECTORS, WIDTH
 from src.models.game_state import GameState
 from src.models.pickup import Pickup
 from src.systems.combat_system import player_shoot
@@ -106,6 +106,7 @@ class MainMenuScene(BaseScene):
     def __init__(self, state, scene_manager):
         """Создает шрифт главного меню."""
         super().__init__(state, scene_manager)
+        self.title_font = pygame.font.SysFont('Arial', 86, bold=True)
         self.font = pygame.font.SysFont('Arial', 52)
         self.options = [
             ('КАМПАНИЯ', GameState.CAMPAIGN),
@@ -143,6 +144,10 @@ class MainMenuScene(BaseScene):
     def render(self, screen):
         """Рисует главное меню."""
         screen.fill((0, 0, 0))
+
+        title = self.title_font.render('PROJECT GATE', True, (0, 255, 0))
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 4)))
+
         for index, (label, _) in enumerate(self.options):
             if index == self.selected_index:
                 color = (0, 255, 0)
@@ -220,82 +225,137 @@ class SettingsScene(BaseScene):
 
             screen.blit(text, text.get_rect(center=(WIDTH // 2, y)))
 
-class SectorClearScene(BaseScene):
-    """Экран между секторами."""
+class ResultScene(BaseScene):
+    """Общий экран результата в стиле терминала GATE."""
+
+    title = ''
+    subtitle = ''
+    hint = ''
+    accent_color = (0, 255, 0)
 
     def __init__(self, state, scene_manager):
-        """Создает шрифт экрана зачистки сектора."""
         super().__init__(state, scene_manager)
-        self.font = pygame.font.SysFont('Arial', 52)
+        self.title_font = pygame.font.SysFont('Arial', 64, bold=True)
+        self.subtitle_font = pygame.font.SysFont('Arial', 28, bold=True)
+        self.stats_font = pygame.font.SysFont('Arial', 30)
+        self.hint_font = pygame.font.SysFont('Arial', 24, bold=True)
+        self.system_font = pygame.font.SysFont('Arial', 18)
+
+    def get_stats(self):
+        """Возвращает строки статистики конкретного результата."""
+        return ()
+
+    def draw_frame(self, screen, rect):
+        """Рисует рамку с яркими угловыми отметками."""
+        pygame.draw.rect(screen, (0, 45, 20), rect, 1)
+        corner = 32
+        segments = (
+            ((rect.left, rect.top), (rect.left + corner, rect.top)),
+            ((rect.left, rect.top), (rect.left, rect.top + corner)),
+            ((rect.right, rect.top), (rect.right - corner, rect.top)),
+            ((rect.right, rect.top), (rect.right, rect.top + corner)),
+            ((rect.left, rect.bottom), (rect.left + corner, rect.bottom)),
+            ((rect.left, rect.bottom), (rect.left, rect.bottom - corner)),
+            ((rect.right, rect.bottom), (rect.right - corner, rect.bottom)),
+            ((rect.right, rect.bottom), (rect.right, rect.bottom - corner)),
+        )
+        for start, end in segments:
+            pygame.draw.line(screen, self.accent_color, start, end, 3)
+
+    def render(self, screen):
+        """Рисует общий фон, заголовок, статистику и подсказку."""
+        width, height = screen.get_size()
+        screen.fill((0, 6, 3))
+
+        grid_color = (0, 20, 9)
+        for x in range(0, width, 80):
+            pygame.draw.line(screen, grid_color, (x, 0), (x, height))
+        for y in range(0, height, 80):
+            pygame.draw.line(screen, grid_color, (0, y), (width, y))
+
+        system = self.system_font.render(
+            'GENESIS ANOMALY TESTING ENVIRONMENT', True, (70, 120, 85)
+        )
+        screen.blit(system, system.get_rect(center=(width // 2, 55)))
+
+        frame = pygame.Rect(0, 0, int(width * 0.68), int(height * 0.58))
+        frame.center = (width // 2, height // 2)
+        self.draw_frame(screen, frame)
+
+        title = self.title_font.render(self.title, True, self.accent_color)
+        subtitle = self.subtitle_font.render(self.subtitle, True, (180, 200, 185))
+        screen.blit(title, title.get_rect(center=(width // 2, frame.top + 105)))
+        screen.blit(subtitle, subtitle.get_rect(center=(width // 2, frame.top + 165)))
+
+        line_y = frame.top + 205
+        pygame.draw.line(
+            screen,
+            (0, 65, 28),
+            (frame.left + 90, line_y),
+            (frame.right - 90, line_y),
+            1,
+        )
+
+        for index, stat in enumerate(self.get_stats()):
+            text = self.stats_font.render(stat, True, (205, 220, 210))
+            y = line_y + 55 + index * 48
+            screen.blit(text, text.get_rect(center=(width // 2, y)))
+
+        if (pygame.time.get_ticks() // 600) % 2 == 0:
+            hint = self.hint_font.render(self.hint, True, self.accent_color)
+            screen.blit(hint, hint.get_rect(center=(width // 2, frame.bottom - 55)))
+
+
+class SectorClearScene(ResultScene):
+    title = 'СЕКТОР ЗАЧИЩЕН'
+    subtitle = 'УГРОЗЫ НЕЙТРАЛИЗОВАНЫ'
+    hint = 'E  ПРОДОЛЖИТЬ'
+    accent_color = (0, 255, 100)
+
+    def get_stats(self):
+        return (
+            f'СЕКТОР: {self.state.sector_index + 1}',
+            f'ЗДОРОВЬЕ: {int(self.state.player.health)}',
+            f'СЧЁТ: {self.state.score}',
+        )
 
     def update(self, actions):
-        """Переходит к следующему сектору или к финальной победе."""
         if actions['E']:
             if go_to_next_sector(self.state):
                 self.scene_manager.change_scene(GameState.PLAYING)
             else:
                 self.scene_manager.change_scene(GameState.FINAL_VICTORY)
 
-    def render(self, screen):
-        """Рисует экран зачистки сектора."""
-        screen.fill((0, 0, 0))
 
-        title = self.font.render('СЕКТОР ЗАЧИЩЕН', True, (0, 255, 0))
-        hint = self.font.render('нажми E чтобы продолжить', True, (0, 255, 0))
-        score = self.font.render(f'СЧЁТ: {self.state.score}', True, (0, 255, 0))
+class GameOverScene(ResultScene):
+    title = 'СИГНАЛ ПОТЕРЯН'
+    subtitle = 'СОТРУДНИК НЕ ОТВЕЧАЕТ'
+    hint = 'E  ГЛАВНОЕ МЕНЮ'
+    accent_color = (255, 55, 55)
 
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
-        screen.blit(score, score.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
-        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70)))
-
-
-class GameOverScene(BaseScene):
-    """Экран поражения."""
-
-    def __init__(self, state, scene_manager):
-        """Создает шрифт экрана поражения."""
-        super().__init__(state, scene_manager)
-        self.font = pygame.font.SysFont('Arial', 52)
+    def get_stats(self):
+        return (
+            f'ДОСТИГНУТЫЙ СЕКТОР: {self.state.sector_index + 1}',
+            f'ИТОГОВЫЙ СЧЁТ: {self.state.score}',
+        )
 
     def update(self, actions):
-        """Закрывает игру по нажатию E."""
         if actions['E']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)
 
-    def render(self, screen):
-        """Рисует экран поражения."""
-        screen.fill((0, 0, 0))
 
-        title = self.font.render('ИГРА ОКОНЧЕНА', True, (255, 0, 0))
-        hint = self.font.render('нажми E чтобы выйти', True, (255, 0, 0))
-        score = self.font.render(f'СЧЁТ: {self.state.score}', True, (255, 0, 0))
+class FinalVictoryScene(ResultScene):
+    title = 'ПРОТОКОЛ GATE ЗАВЕРШЁН'
+    subtitle = 'ВСЕ СЕКТОРЫ ЗАЧИЩЕНЫ'
+    hint = 'E  ГЛАВНОЕ МЕНЮ'
+    accent_color = (0, 220, 220)
 
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
-        screen.blit(score, score.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
-        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70)))
-
-
-class FinalVictoryScene(BaseScene):
-    """Финальный экран победы."""
-
-    def __init__(self, state, scene_manager):
-        """Создает шрифт финального экрана."""
-        super().__init__(state, scene_manager)
-        self.font = pygame.font.SysFont('Arial', 52)
+    def get_stats(self):
+        return (
+            f'СЕКТОРОВ ЗАЧИЩЕНО: {TOTAL_SECTORS}',
+            f'ИТОГОВЫЙ СЧЁТ: {self.state.score}',
+        )
 
     def update(self, actions):
-        """Закрывает игру по нажатию E."""
         if actions['E']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)
-
-    def render(self, screen):
-        """Рисует финальный экран победы."""
-        screen.fill((0, 0, 0))
-
-        title = self.font.render('ПОБЕДА', True, (0, 255, 0))
-        hint = self.font.render('нажми E чтобы выйти', True, (0, 255, 0))
-        score = self.font.render(f'СЧЁТ: {self.state.score}', True, (0, 255, 0))
-
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 70)))
-        screen.blit(score, score.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
-        screen.blit(hint, hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70)))
