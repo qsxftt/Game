@@ -24,7 +24,7 @@ class Door:
         self.state = 'opening'
         return True
 
-    def update(self):
+    def update(self, blocked=False):
         """Обновляет анимацию и состояние двери на один кадр."""
         if self.state == 'opening':
             self.open_progress += self.open_speed
@@ -35,12 +35,17 @@ class Door:
                 self.cooldown = self.delay
 
         elif self.state == 'open':
-            if self.cooldown > 0:
+            if blocked:
+                self.cooldown = self.delay
+            elif self.cooldown > 0:
                 self.cooldown -= 1
             else:
                 self.state = 'closing'
 
         elif self.state == 'closing':
+            if blocked:
+                self.state = 'opening'
+                return
             self.open_progress -= self.open_speed
 
             if self.open_progress <= 0:

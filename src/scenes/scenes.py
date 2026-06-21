@@ -49,7 +49,7 @@ class PlayingScene(BaseScene):
 
         self.state.player.weapon.update()
         shot_fired = self.state.player.update(actions, self.state.current_level)
-        update_doors(self.state.current_level)
+        update_doors(self.state.current_level, self.state.player, self.state.enemies)
 
         for pickup in self.state.pickups:
             pickup.update(self.state.player)

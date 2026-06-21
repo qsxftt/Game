@@ -24,6 +24,7 @@ class GameState:
         self.pickups = []
         self.running = True
         self.score = 0
+        self.enemy_prd = None
         self.game_mode = GameState.CAMPAIGN
 
     def reset_sector_flags(self):

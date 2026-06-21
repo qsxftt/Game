@@ -8,7 +8,7 @@ from src.models.player import Player
 from src.systems.level_generator import LevelGenerator
 from src.systems.map_system import get_front_cell
 from src.models.game_state import GameState
-from random import choice
+from src.systems.prd_system import PRD
 
 
 def all_enemies_dead(enemies):
@@ -32,13 +32,19 @@ def load_sector(state):
     text_map = generator.generate()
     level = Level(block_size, text_map)
 
-    enemy_classes = [Dwarf, Dwarf2]
     state.current_level = level
     if not state.player:
         state.player = Player(*state.current_level.player_start)
     else:
         state.player.set_start_pos(*state.current_level.player_start)
-    state.enemies = [choice(enemy_classes)(x, y) for x, y in state.current_level.enemies_pos]
+
+    state.enemies = []
+    for x, y in state.current_level.enemies_pos:
+        if state.enemy_prd.roll():
+            state.enemies.append(Dwarf2(x, y))
+        else:
+            state.enemies.append(Dwarf(x, y))
+
     state.pickups = []
     state.reset_sector_flags()
 
@@ -58,6 +64,7 @@ def start_new_game(state, game_mode):
     state.player = None
     state.enemies = []
     state.pickups = []
+    state.enemy_prd = PRD(0.1)
 
     state.reset_sector_flags()
     load_sector(state)
