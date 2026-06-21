@@ -15,9 +15,9 @@ from src.scenes.scenes import (
     SettingsScene
 )
 from src.views.hud_renderer import HUDrender
-from src.views.pickup_renderer import PickupRender
-from src.views.sprite_renderer import SpriteRender
-from src.views.weapon_renderer import WeaponRender
+from src.views.pickup_renderer import PickupRender, convert_pickup_textures
+from src.views.sprite_renderer import SpriteRender, convert_enemy_textures
+from src.views.weapon_renderer import WeaponRender, convert_weapon_textures
 from src.views.raycast_renderer import convert_textures
 from src.core.display_settings import DisplaySettings
 
@@ -33,7 +33,7 @@ class GameController:
         self.display = pygame.display.set_mode(self.display_settings.resolution)
         self.screen = pygame.Surface((WIDTH, HEIGHT)).convert()
 
-        convert_textures()
+        self.convert_all_textures()
         self.hud = HUDrender()
         self.weaponrender = WeaponRender()
         self.spriterender = SpriteRender()
@@ -62,6 +62,12 @@ class GameController:
 
         self.scene_manager.change_scene(GameState.MAIN_MENU)
 
+    def convert_all_textures(self):
+        convert_textures()
+        convert_enemy_textures()
+        convert_weapon_textures()
+        convert_pickup_textures()
+
     def apply_display_settings(self):
         """Применяет настройки настоящего окна."""
         if self.display_settings.fullscreen:
@@ -75,7 +81,7 @@ class GameController:
 
         # Повторно оптимизируем поверхности под новый режим экрана.
         self.screen = self.screen.convert()
-        convert_textures()
+        self.convert_all_textures()
 
         self.display_settings.changed = False
 

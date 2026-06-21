@@ -18,6 +18,10 @@ PICKUP_TEXTURES = {
     },
 }
 
+def convert_pickup_textures():
+    for visual in PICKUP_TEXTURES.values():
+        visual['texture'] = visual['texture'].convert_alpha()
+
 class PickupRender:
     """Рисует pickups как псевдо-3D спрайты."""
 
@@ -26,7 +30,7 @@ class PickupRender:
         visual = PICKUP_TEXTURES[type(pickup)]
         texture = visual['texture']
         frame_count = visual['frame_count']
-        
+
         frame_width = texture.get_width() / frame_count
         frame_height = texture.get_height()
 

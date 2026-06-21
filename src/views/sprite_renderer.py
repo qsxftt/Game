@@ -22,6 +22,11 @@ ENEMY_TEXTURES = {
     },
 }
 
+def convert_enemy_textures():
+    for textures in ENEMY_TEXTURES.values():
+        textures['walk'] = textures['walk'].convert_alpha()
+        textures['attack'] = textures['attack'].convert_alpha()
+
 class SpriteRender:
     """Рисует врагов как псевдо-3D спрайты."""
 

@@ -18,6 +18,10 @@ WEAPON_TEXTURES = {
     },
 }
 
+def convert_weapon_textures():
+    for textures in WEAPON_TEXTURES.values():
+        textures['main'] = textures['main'].convert_alpha()
+        textures['reload'] = textures['reload'].convert_alpha()
 
 class WeaponRender:
     """Рисует оружие от первого лица."""

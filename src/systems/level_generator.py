@@ -207,8 +207,8 @@ class LevelGenerator:
         player_x, player_y = self.get_empty_cell(grid)
         self.place_door(grid)
         self.set_tile(grid, player_x, player_y, 'P')
-        self.place_terminal(grid)
-        self.place_far_tiles(grid, player_x, player_y, 'E', self.enemy_count)
+        self.place_terminal(grid, player_x, player_y, self.max_room_size)
+        self.place_far_tiles(grid, player_x, player_y, 'E', self.enemy_count, self.max_room_size)
         self.place_random_tiles(grid, 'H', self.medkit_count)
         self.place_random_tiles(grid, 'A', self.ammo_count)
 
@@ -337,10 +337,10 @@ class LevelGenerator:
         for x, y in doors:
             self.set_tile(grid, x, y, 'D')
 
-    def place_terminal(self, grid):
+    def place_terminal(self, grid, x, y, distance):
         """Ставит терминал в стену рядом ровно с одной свободной клеткой."""
         while True:
-            wall_x, wall_y = self.get_wall_cell(grid)
+            wall_x, wall_y = self.get_far_cell_wall(grid, x, y, distance)
             if self.can_place_terminal(grid, wall_x, wall_y):
                 self.set_tile(grid, wall_x, wall_y, 'T')
                 return
@@ -350,10 +350,10 @@ class LevelGenerator:
         for _ in range(count):
             self.set_tile(grid, *self.get_empty_cell(grid), tile)
 
-    def place_far_tiles(self, grid, x, y, tile, count):
+    def place_far_tiles(self, grid, x, y, tile, count, distance=4):
         """Ставит несколько тайлов на расстоянии от указанной клетки."""
         for _ in range(count):
-            self.set_tile(grid, *self.get_far_cell(grid, x, y), tile)
+            self.set_tile(grid, *self.get_far_cell(grid, x, y, distance), tile)
 
     # Проверки размещения объектов
 
@@ -490,6 +490,13 @@ class LevelGenerator:
         """Ищет свободную клетку не ближе заданной дистанции."""
         while True:
             x1, y1 = self.get_empty_cell(grid)
+
+            if self.get_cell_distance(x, y, x1, y1) >= min_distance:
+                return x1, y1
+            
+    def get_far_cell_wall(self, grid, x, y, min_distance=4):
+        while True:
+            x1, y1 = self.get_wall_cell(grid)
 
             if self.get_cell_distance(x, y, x1, y1) >= min_distance:
                 return x1, y1
