@@ -23,7 +23,8 @@ AMBIENT_PATH = 'assets/sounds/laboratory_ambient.ogg'
 class SoundManager:
     def __init__(self):
         self.sounds = {}
-        self.volume = 1.0
+        self.volume = 0.5
+        self.music_loaded = False
 
     def load_sound(self, name, path):
         sound = pygame.mixer.Sound(path)
@@ -42,9 +43,14 @@ class SoundManager:
     def load_music(self, path):
         pygame.mixer.music.load(path)
         pygame.mixer.music.set_volume(self.volume)
+        self.music_loaded = True
 
     def play_music(self):
+        if not self.music_loaded:
+            return False
+        
         pygame.mixer.music.play(-1)
+        return True
 
     def stop_music(self):
         pygame.mixer.music.stop()

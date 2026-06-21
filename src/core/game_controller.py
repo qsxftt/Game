@@ -31,6 +31,7 @@ class GameController:
         pygame.init()
 
         self.sound_manager = SoundManager()
+        self.sound_manager.load_all()
         self.display_settings = DisplaySettings()
         self.display = pygame.display.set_mode(self.display_settings.resolution)
         self.screen = pygame.Surface((WIDTH, HEIGHT)).convert()
@@ -45,7 +46,7 @@ class GameController:
         self.state = GameState()
         self.scene_manager = SceneManager()
 
-        self.scene_manager.register(GameState.MAIN_MENU, MainMenuScene(self.state, self.scene_manager))
+        self.scene_manager.register(GameState.MAIN_MENU, MainMenuScene(self.state, self.scene_manager, self.sound_manager))
         self.scene_manager.register(GameState.SETTINGS, SettingsScene(self.state, self.scene_manager, self.display_settings, self.sound_manager))
         self.scene_manager.register(
             GameState.PLAYING,

@@ -47,6 +47,7 @@ class PlayingScene(BaseScene):
     def update(self, actions):
         """Обновляет игрока, врагов, двери, pickups и условия перехода сцены."""
         if actions['esc']:
+            self.sound_manager.stop_music()
             self.scene_manager.change_scene(GameState.MAIN_MENU)
             return
         
@@ -108,6 +109,7 @@ class PlayingScene(BaseScene):
         update_score(self.state)
 
         if self.state.player.health <= 0:
+            self.sound_manager.stop_music()
             print('Game Over')
             self.scene_manager.change_scene(GameState.GAME_OVER)
 
@@ -122,9 +124,14 @@ class PlayingScene(BaseScene):
                     self.sound_manager.play_sound('terminal_activate')
                     add_sector_score(self.state)
                     self.state.terminal_activated = True
+                    if (self.state.game_mode == GameState.CAMPAIGN and self.state.sector_index == TOTAL_SECTORS - 1):
+                        self.sound_manager.stop_music()
+                        
                     self.scene_manager.change_scene(GameState.SECTOR_CLEAR)
                 else:
                     print('Сектор еще не зачищен')
+
+
 
     def render(self, screen):
         """Рисует мир, sprites, оружие, HUD и debug-карту."""
@@ -147,9 +154,10 @@ class PlayingScene(BaseScene):
 class MainMenuScene(BaseScene):
     """Стартовое меню."""
 
-    def __init__(self, state, scene_manager):
+    def __init__(self, state, scene_manager, sound_manager):
         """Создает шрифт главного меню."""
         super().__init__(state, scene_manager)
+        self.sound_manager = sound_manager
         self.title_font = pygame.font.SysFont('Arial', 86, bold=True)
         self.font = pygame.font.SysFont('Arial', 52)
         self.options = [
@@ -169,14 +177,17 @@ class MainMenuScene(BaseScene):
             self.selected_index = (self.selected_index + 1) % len(self.options)
 
         if actions['E']:
+            self.sound_manager.play_sound('menu_select')
             _, action = self.options[self.selected_index]
 
             if action == GameState.CAMPAIGN:
                 start_new_game(self.state, GameState.CAMPAIGN)
+                self.sound_manager.play_music()
                 self.scene_manager.change_scene(GameState.PLAYING)
 
             elif action == GameState.ENDLESS:
                 start_new_game(self.state, GameState.ENDLESS)
+                self.sound_manager.play_music()
                 self.scene_manager.change_scene(GameState.PLAYING)
 
             elif action == GameState.SETTINGS:
@@ -224,6 +235,9 @@ class SettingsScene(BaseScene):
 
         selected_option = self.options[self.selected_index]
 
+        if actions['E']:
+            self.sound_manager.play_sound('menu_select')
+
         if selected_option == 'resolution':
             if actions['left_pressed']:
                 self.display_settings.change_resolution(-1)
@@ -231,11 +245,7 @@ class SettingsScene(BaseScene):
                 self.display_settings.change_resolution(1)
 
         elif selected_option == 'fullscreen':
-            if (
-                actions['left_pressed']
-                or actions['right_pressed']
-                or actions['E']
-            ):
+            if (actions['left_pressed'] or actions['right_pressed'] or actions['E']):
                 self.display_settings.toggle_fullscreen()
 
         elif selected_option == 'volume':
