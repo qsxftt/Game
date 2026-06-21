@@ -1,9 +1,5 @@
 """Модели врагов."""
 
-from src.core.config import (
-    ENEMY12_TEXTURE,
-    ENEMY1_TEXTURE,
-)
 from src.systems.collision_system import is_wall
 from src.systems.enemy_ai_system import get_next_path_point, get_target_cell, update_path, update_enemy_state, open_next_door
 from src.systems.visibility_system import get_depth
@@ -30,10 +26,6 @@ class Enemy:
         self.attack_distance = 0
         self.frame_walk_cooldown = 0
         self.frame_walk_delay = 0
-        self.frame_walk_count = 0
-        self.frame_attack_count = 0
-        self.texture_walk = None
-        self.texture_attack = None
 
         self.state = 'idle'
         self.path = []
@@ -171,11 +163,7 @@ class Dwarf(Enemy):
         self.speed = 2
         self.attack_distance = 100
         self.attack_delay = 50
-        self.frame_attack_count = 8
         self.frame_walk_delay = 25
-        self.frame_walk_count = 4
-        self.texture_walk = ENEMY1_TEXTURE
-        self.texture_attack = ENEMY12_TEXTURE
         self.hitbox_radius = 40
 
         self.score_value = 100
@@ -191,11 +179,7 @@ class Dwarf2(Enemy):
         self.speed = 3
         self.attack_distance = 100
         self.attack_delay = 50
-        self.frame_attack_count = 4
         self.frame_walk_delay = 25
-        self.frame_walk_count = 8
-        self.texture_walk = ENEMY12_TEXTURE
-        self.texture_attack = ENEMY1_TEXTURE
         self.hitbox_radius = 40
 
         self.score_value = 200

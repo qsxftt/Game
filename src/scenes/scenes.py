@@ -21,10 +21,6 @@ class BaseScene:
         self.state = state
         self.scene_manager = scene_manager
 
-    def handle_event(self, event):
-        """Обрабатывает pygame event для сцены."""
-        pass
-
     def update(self, actions):
         """Обновляет сцену за один кадр."""
         pass

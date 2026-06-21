@@ -297,27 +297,6 @@ class HUDrender:
             (ammo_x + ammo.get_width() + int(8 * scale), ammo_y + int(20 * scale)),
         )
 
-        icon = getattr(weapon, 'icon', None)
-        if icon is not None:
-            max_width = int(rect.width * 0.48)
-            max_height = int(43 * scale)
-            icon_width, icon_height = icon.get_size()
-            icon_scale = min(max_width / icon_width, max_height / icon_height)
-            icon_size = (
-                max(1, int(icon_width * icon_scale)),
-                max(1, int(icon_height * icon_scale)),
-            )
-            cache_key = (id(icon), icon_size)
-            scaled_icon = self.icon_cache.get(cache_key)
-
-            if scaled_icon is None:
-                scaled_icon = pygame.transform.smoothscale(icon, icon_size)
-                self.icon_cache[cache_key] = scaled_icon
-
-            icon_x = rect.right - scaled_icon.get_width() - int(12 * scale)
-            icon_y = rect.y + int(12 * scale)
-            screen.blit(scaled_icon, (icon_x, icon_y))
-
         if weapon.reload_cooldown > 0 and weapon.reload_delay > 0:
             progress = 1 - weapon.reload_cooldown / weapon.reload_delay
             progress = max(0, min(progress, 1))

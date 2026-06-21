@@ -2,15 +2,28 @@
 
 import pygame
 
-from src.core.config import HEIGHT_HALF, WIDTH
+from src.core.config import HEIGHT_HALF, WIDTH, PISTOLR_TEXTURE, PISTOL_TEXTURE
+from src.models.weapon import Pistol, Shotgun
+
+WEAPON_TEXTURES = {
+    Pistol: {
+        'main': PISTOL_TEXTURE,
+        'reload': PISTOLR_TEXTURE,
+        'frame_count': 5,
+    },
+    Shotgun: {
+        'main': PISTOL_TEXTURE,
+        'reload': PISTOLR_TEXTURE,
+        'frame_count': 5,
+    },
+}
 
 
 class WeaponRender:
     """Рисует оружие от первого лица."""
 
-    def get_frame(self, weapon, texture, status=None):
+    def get_frame(self, weapon, texture, frame_count, status=None):
         """Возвращает текущий кадр анимации оружия."""
-        frame_count = weapon.frame_count
         frame_width = texture.get_width() // frame_count
         frame_height = texture.get_height()
 
@@ -28,12 +41,15 @@ class WeaponRender:
 
     def draw(self, screen, weapon):
         """Рисует оружие с учетом текущей анимации."""
+        textures = WEAPON_TEXTURES[type(weapon)]
+        frame_count = textures['frame_count']
+
         if weapon.shoot_cooldown > 0:
-            frame, frame_width, frame_height = self.get_frame(weapon, weapon.texture, 'shoot')
+            frame, frame_width, frame_height = self.get_frame(weapon, textures['main'], frame_count, 'shoot')
         elif weapon.reload_cooldown > 0:
-            frame, frame_width, frame_height = self.get_frame(weapon, weapon.texture_reload, 'reload')
+            frame, frame_width, frame_height = self.get_frame(weapon, textures['reload'], frame_count, 'reload')
         else:
-            frame, frame_width, frame_height = self.get_frame(weapon, weapon.texture)
+            frame, frame_width, frame_height = self.get_frame(weapon, textures['main'], frame_count)
 
         screen_width = frame_width * HEIGHT_HALF / frame_height
         frame = pygame.transform.scale(frame, (screen_width, HEIGHT_HALF))

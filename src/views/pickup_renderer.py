@@ -2,20 +2,35 @@
 
 import pygame
 
-from src.core.config import HEIGHT, SCREEN_DISTANCE, block_size
+from src.core.config import HEIGHT, SCREEN_DISTANCE, block_size, AMMO_TEXTURE, MEDKIT_TEXTURE
 from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
+from src.models.pickup import Ammo, MedKit
 
+
+PICKUP_TEXTURES = {
+    Ammo: {
+        'texture': AMMO_TEXTURE,
+        'frame_count': 1,
+    },
+    MedKit: {
+        'texture': MEDKIT_TEXTURE,
+        'frame_count': 1,
+    },
+}
 
 class PickupRender:
     """Рисует pickups как псевдо-3D спрайты."""
 
     def get_frame(self, pickup):
         """Возвращает текущий кадр анимации ресурса."""
-        texture = pickup.texture
-        frame_width = texture.get_width() / pickup.frame_count
+        visual = PICKUP_TEXTURES[type(pickup)]
+        texture = visual['texture']
+        frame_count = visual['frame_count']
+        
+        frame_width = texture.get_width() / frame_count
         frame_height = texture.get_height()
 
-        frame_index = round((1 - pickup.animation_cooldown / pickup.animation_speed) * (pickup.frame_count - 1))
+        frame_index = round((1 - pickup.animation_cooldown / pickup.animation_speed) * (frame_count - 1))
         x = frame_index * frame_width
 
         frame = texture.subsurface(x, 0, frame_width, frame_height)

@@ -1,9 +1,5 @@
 """Модели подбираемых ресурсов."""
 
-from src.core.config import (
-    AMMO_TEXTURE,
-    MEDKIT_TEXTURE,
-)
 from src.systems.visibility_system import get_depth
 
 
@@ -16,19 +12,17 @@ class Pickup:
         self.y = y
         self.amount = 0
         self.is_pickedup = False
-        self.frame_count = 0
         self.animation_speed = 0
         self.animation_cooldown = 0
         self.pickup_radius = 0
         self.type = None
-        self.texture = None
 
     def update(self, player):
         """Обновляет анимацию и проверяет подбор игроком."""
-        if self.animation_cooldown > 0:
+        if self.animation_cooldown >= 0:
             self.animation_cooldown -= 1
 
-            if self.animation_cooldown == 0:
+            if self.animation_cooldown <= 0:
                 self.animation_cooldown = self.animation_speed
 
         self.pickup_item(player)
@@ -42,11 +36,15 @@ class Pickup:
 
         if depth <= self.pickup_radius:
             if self.type == 'medkit':
+                if player.health >= player.max_health:
+                    return False
+                
                 player.health = min(player.max_health, player.health + self.amount)
             elif self.type == 'ammo':
                 player.weapon.reserve_ammo += self.amount
 
             self.is_pickedup = True
+            return True
 
 
 class MedKit(Pickup):
@@ -56,11 +54,9 @@ class MedKit(Pickup):
         """Создает аптечку."""
         super().__init__(x, y)
         self.amount = 10
-        self.frame_count = 1
         self.animation_speed = 20
         self.pickup_radius = 50
         self.type = 'medkit'
-        self.texture = MEDKIT_TEXTURE
 
 
 class Ammo(Pickup):
@@ -70,8 +66,6 @@ class Ammo(Pickup):
         """Создает пачку патронов."""
         super().__init__(x, y)
         self.amount = 10
-        self.frame_count = 1
         self.animation_speed = 20
         self.pickup_radius = 50
         self.type = 'ammo'
-        self.texture = AMMO_TEXTURE

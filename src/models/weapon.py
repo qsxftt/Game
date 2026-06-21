@@ -1,7 +1,5 @@
 """Модели оружия."""
 
-from src.core.config import PISTOL_TEXTURE, PISTOLR_TEXTURE, PISTOL_ICON, SHOTGUN_ICON
-
 
 class Weapon:
     """Базовое оружие: урон, патроны, cooldown и перезарядка."""
@@ -21,10 +19,6 @@ class Weapon:
         self.reload_delay = 0
         self.reload_cooldown = 0
 
-        self.icon = None
-        self.texture = None
-        self.texture_reload = None
-        self.frame_count = 0
 
     def update(self):
         """Обновляет cooldown выстрела и завершает перезарядку."""
@@ -85,9 +79,6 @@ class Pistol(Weapon):
         self.magazine_size = 10
         self.shoot_delay = 20
         self.reload_delay = 60
-        self.texture = PISTOL_TEXTURE
-        self.frame_count = 5
-        self.texture_reload = PISTOLR_TEXTURE
         self.reserve_ammo = 30
         self.attack_distance = 1200
 
@@ -103,8 +94,5 @@ class Shotgun(Weapon):
         self.magazine_size = 3
         self.shoot_delay = 50
         self.reload_delay = 60
-        self.texture = PISTOL_TEXTURE
-        self.frame_count = 5
-        self.texture_reload = PISTOLR_TEXTURE
         self.reserve_ammo = 15 
         self.attack_distance = 300
