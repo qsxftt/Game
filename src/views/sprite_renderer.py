@@ -2,23 +2,23 @@
 
 import pygame
 
-from src.core.config import HEIGHT_HALF, SCREEN_DISTANCE, block_size, ENEMY1_TEXTURE, ENEMY12_TEXTURE
+from src.core.config import HEIGHT_HALF, SCREEN_DISTANCE, block_size, BRUTE_ATTACK_TEXTURE, BRUTE_WALK_TEXTURE, SCIENTIST_ATTACK_TEXTURE, SCIENTIST_WALK_TEXTURE
 from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
 from src.models.enemy import Dwarf, Dwarf2
 
 
 ENEMY_TEXTURES = {
     Dwarf: {
-        'walk': ENEMY1_TEXTURE,
-        'walk_frames': 4,
-        'attack': ENEMY12_TEXTURE,
-        'attack_frames': 8,
+        'walk': SCIENTIST_WALK_TEXTURE,
+        'walk_frames': 6,
+        'attack': SCIENTIST_ATTACK_TEXTURE,
+        'attack_frames': 6,
     },
     Dwarf2: {
-        'walk': ENEMY12_TEXTURE,
-        'walk_frames': 8,
-        'attack': ENEMY1_TEXTURE,
-        'attack_frames': 4,
+        'walk': BRUTE_WALK_TEXTURE,
+        'walk_frames': 5,
+        'attack': BRUTE_ATTACK_TEXTURE,
+        'attack_frames': 5,
     },
 }
 
@@ -65,7 +65,7 @@ class SpriteRender:
 
         depth = max(get_depth(enemy, player), 50)
         screen_x = get_screen_x(enemy, player)
-        enemy_height = int(block_size * SCREEN_DISTANCE / depth * 0.75)
+        enemy_height = int(block_size * SCREEN_DISTANCE / depth)
         enemy_width = int(frame_width * enemy_height / frame_height)
 
         frame = pygame.transform.scale(frame, (enemy_width, enemy_height))

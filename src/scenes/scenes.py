@@ -135,8 +135,8 @@ class PlayingScene(BaseScene):
 
     def render(self, screen):
         """Рисует мир, sprites, оружие, HUD и debug-карту."""
-        pygame.draw.rect(screen, (66, 170, 255), (0, 0, WIDTH, HEIGHT_HALF))
-        pygame.draw.rect(screen, (25, 25, 25), (0, HEIGHT_HALF, WIDTH, HEIGHT_HALF))
+        pygame.draw.rect(screen, (36, 42, 45), (0, 0, WIDTH, HEIGHT_HALF))
+        pygame.draw.rect(screen, (18, 21, 22), (0, HEIGHT_HALF, WIDTH, HEIGHT_HALF))
         ray_casting(screen, self.state.player, self.state.current_level)
 
         sprites = get_sprite_sorted(self.state.pickups, self.state.enemies, self.state.player)

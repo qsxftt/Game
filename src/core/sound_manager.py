@@ -42,7 +42,7 @@ class SoundManager:
     
     def load_music(self, path):
         pygame.mixer.music.load(path)
-        pygame.mixer.music.set_volume(self.volume)
+        pygame.mixer.music.set_volume(self.volume * 0.5)
         self.music_loaded = True
 
     def play_music(self):
@@ -61,7 +61,7 @@ class SoundManager:
         for sound in self.sounds.values():
             sound.set_volume(self.volume)
 
-        pygame.mixer.music.set_volume(self.volume)
+        pygame.mixer.music.set_volume(self.volume * 0.5)
 
     def load_all(self):
         for name, path in SOUND_PATHS.items():

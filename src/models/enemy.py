@@ -167,7 +167,7 @@ class Dwarf(Enemy):
         self.speed = 2
         self.attack_distance = 100
         self.attack_delay = 50
-        self.frame_walk_delay = 25
+        self.frame_walk_delay = 50
         self.hitbox_radius = 40
 
         self.score_value = 100
@@ -183,7 +183,7 @@ class Dwarf2(Enemy):
         self.speed = 3
         self.attack_distance = 100
         self.attack_delay = 50
-        self.frame_walk_delay = 25
+        self.frame_walk_delay = 50
         self.hitbox_radius = 40
 
         self.score_value = 200

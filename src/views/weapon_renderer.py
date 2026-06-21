@@ -2,7 +2,7 @@
 
 import pygame
 
-from src.core.config import HEIGHT_HALF, WIDTH, PISTOLR_TEXTURE, PISTOL_TEXTURE
+from src.core.config import HEIGHT_HALF, WIDTH, PISTOLR_TEXTURE, PISTOL_TEXTURE, SHOTGUN_TEXTURE, SHOTGUNR_TEXTURE
 from src.models.weapon import Pistol, Shotgun
 
 WEAPON_TEXTURES = {
@@ -12,8 +12,8 @@ WEAPON_TEXTURES = {
         'frame_count': 5,
     },
     Shotgun: {
-        'main': PISTOL_TEXTURE,
-        'reload': PISTOLR_TEXTURE,
+        'main': SHOTGUN_TEXTURE,
+        'reload': SHOTGUNR_TEXTURE,
         'frame_count': 5,
     },
 }
