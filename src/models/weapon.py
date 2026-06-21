@@ -73,7 +73,7 @@ class Pistol(Weapon):
         '''Настраивает урон, магазин, задержки и текстуры пистолета'''
         super().__init__()
         self.name = 'Pistol'
-        self.damage = 35
+        self.damage = 20
         self.ammo = 10
         self.magazine_size = 10
         self.shoot_delay = 20
@@ -90,9 +90,9 @@ class Shotgun(Weapon):
         super().__init__()
         self.name = 'Shotgun'
         self.damage = 50
-        self.ammo = 3
-        self.magazine_size = 3
+        self.ammo = 2
+        self.magazine_size = 2
         self.shoot_delay = 50
         self.reload_delay = 60
-        self.reserve_ammo = 15
+        self.reserve_ammo = 8
         self.attack_distance = 300

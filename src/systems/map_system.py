@@ -40,6 +40,11 @@ def get_block_type(x, y, level):
     return None
 
 
+# ============================================================
+# PAINTER'S ALGORITHM - СОРТИРОВКА СПРАЙТОВ ПО ГЛУБИНЕ
+# ============================================================
+
+
 def get_sprite_sorted(pickups, enemies, player):
     '''Возвращает pickups и enemies, отсортированные от дальних к ближним'''
     sprites = pickups + enemies

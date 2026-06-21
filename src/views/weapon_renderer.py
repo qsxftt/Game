@@ -35,7 +35,7 @@ def convert_weapon_textures():
 
 class WeaponRender:
     '''Рисует оружие от первого лица'''
-
+    
     def get_frame(self, weapon, texture, frame_count, status=None):
         '''Возвращает текущий кадр анимации оружия'''
         frame_width = texture.get_width() // frame_count

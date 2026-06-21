@@ -60,6 +60,11 @@ def is_visible(obj, player, level):
     return obj_depth < wall_depth
 
 
+# ============================================================
+# LINE OF SIGHT - ПОШАГОВАЯ ПРОВЕРКА ЛУЧА
+# ============================================================
+
+
 def has_line_of_sight(x1, y1, x2, y2, level, step=10):
     '''Проверяет свободный от препятствий отрезок между двумя точками'''
     from src.systems.map_system import get_block_type

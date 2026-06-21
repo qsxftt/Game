@@ -6,6 +6,11 @@ from random import randint as rnd
 from src.systems.level_validation import validate_level
 
 
+# ============================================================
+# BSP DUNGEON GENERATION - СЛОЖНЫЙ АЛГОРИТМ
+# ============================================================
+
+
 class Room:
     '''Прямоугольная комната в сетке уровня'''
 
@@ -271,6 +276,10 @@ class LevelGenerator:
         for x, y in self.find_corridor_path(grid, start_point, end_point):
             if grid[y][x] == 'W':
                 self.set_tile(grid, x, y, 'C')
+
+    # ============================================================
+    # АЛГОРИТМ ДЕЙКСТРЫ
+    # ============================================================
 
     def build_corridor_path(self, came_from, start, end):
         '''Восстанавливает найденный путь коридора от конца к началу'''

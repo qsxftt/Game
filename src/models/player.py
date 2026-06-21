@@ -2,7 +2,6 @@
 
 from math import cos, pi, sin
 
-from src.core.config import PLAYER_RADIUS
 from src.models.weapon import Pistol, Shotgun
 from src.systems.collision_system import is_wall
 from src.systems.door_system import open_door
@@ -19,7 +18,7 @@ class Player:
         self.health = self.max_health
         self.angle = 0
         self.speed = 5
-        self.radius = PLAYER_RADIUS
+        self.radius = 15
         self.cooldown = 0
         self.delay = 20
 

@@ -32,7 +32,7 @@ def convert_pickup_textures():
 
 class PickupRender:
     '''Рисует pickups как псевдо-3D спрайты'''
-
+    
     def get_frame(self, pickup):
         '''Возвращает текущий кадр анимации ресурса'''
         visual = PICKUP_TEXTURES[type(pickup)]
@@ -71,5 +71,5 @@ class PickupRender:
 
         frame = pygame.transform.scale(frame, (pickup_width, pickup_height))
         screen.blit(
-            frame, (screen_x - pickup_width // 2, (HEIGHT - pickup_height // 2) * 0.53)
+            frame, (screen_x - pickup_width // 2, (HEIGHT - pickup_height // 2) * 0.55)
         )

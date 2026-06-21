@@ -40,6 +40,11 @@ def convert_textures():
     TERMINAL_TEXTURE = TERMINAL_TEXTURE.convert()
 
 
+# ============================================================
+# RAY CASTING
+# ============================================================
+
+
 def cast_ray_to_door(player, angle, door):
     '''Проверяет пересечение луча с движущейся дверной панелью.
 

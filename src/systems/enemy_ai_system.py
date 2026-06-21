@@ -8,6 +8,11 @@ from src.systems.path_system import WALKABLE_TILES, find_path
 from src.systems.visibility_system import get_depth, has_line_of_sight, is_visible
 
 
+# ============================================================
+# PATROL + LOS - ЛЕГКИЙ АЛГОРИТМ ИИ ВРАГОВ
+# ============================================================
+
+
 def can_see_player(enemy, player, level):
     '''Проверяет, видит ли враг игрока с учетом дистанции и препятствий'''
     if get_depth(enemy, player) > enemy.vision_distance:
@@ -21,6 +26,11 @@ def update_path(enemy, target_cell, level):
     start_cell = world_to_grid(enemy.x, enemy.y)
     enemy.path = find_path(level.text_map, start_cell, target_cell)
     enemy.path_update_cooldown = enemy.path_update_delay
+
+
+# ============================================================
+# FSM ВРАГА - УЛЬТРА-ЛЕГКИЙ АЛГОРИТМ
+# ============================================================
 
 
 def update_enemy_state(enemy, player, level):
@@ -54,6 +64,11 @@ def get_target_cell(enemy, player, level):
         return enemy.idle_target_cell
 
     return None
+
+
+# ============================================================
+# RANDOM WALK - УЛЬТРА-ЛЕГКИЙ АЛГОРИТМ
+# ============================================================
 
 
 def get_random_idle_cell(enemy, level):
