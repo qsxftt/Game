@@ -1,13 +1,12 @@
-"""Отрисовка HUD игрока и локальной мини-карты."""
+'''Отрисовка HUD игрока и локальной мини-карты'''
 
 from math import cos, sin
 
 import pygame
 
 from src.core.config import TOTAL_SECTORS
-from src.systems.visibility_system import is_visible
 from src.models.game_state import GameState
-
+from src.systems.visibility_system import is_visible
 
 GREEN = (0, 255, 0)
 DARK_GREEN = (8, 95, 18)
@@ -19,10 +18,10 @@ PANEL_COLOR = (0, 8, 4, 185)
 
 
 class HUDrender:
-    """Рисует основные показатели игрока и состояние сектора."""
+    '''Рисует основные показатели игрока и состояние сектора'''
 
     def __init__(self):
-        """Создаёт настройки и временное состояние интерфейса."""
+        '''Создаёт настройки и временное состояние интерфейса'''
         self.base_width = 1200
         self.base_height = 800
         self.minimap_radius = 5
@@ -53,7 +52,7 @@ class HUDrender:
     # Общая отрисовка
 
     def draw(self, screen, state):
-        """Рисует весь HUD одним вызовом."""
+        '''Рисует весь HUD одним вызовом'''
         player = state.player
         level = state.current_level
 
@@ -73,11 +72,13 @@ class HUDrender:
         self.draw_message(screen, scale)
 
     def get_scale(self, screen):
-        """Возвращает масштаб интерфейса для текущего разрешения."""
-        return min(screen.get_width() / self.base_width, screen.get_height() / self.base_height)
+        '''Возвращает масштаб интерфейса для текущего разрешения'''
+        return min(
+            screen.get_width() / self.base_width, screen.get_height() / self.base_height
+        )
 
     def update_fonts(self, scale):
-        """Обновляет шрифты при изменении масштаба HUD."""
+        '''Обновляет шрифты при изменении масштаба HUD'''
         scale = round(scale, 2)
 
         if scale == self.font_scale:
@@ -103,7 +104,7 @@ class HUDrender:
     # Панели
 
     def draw_panel(self, screen, rect, scale, border_color=GREEN):
-        """Рисует полупрозрачную панель с угловыми отметками."""
+        '''Рисует полупрозрачную панель с угловыми отметками'''
         panel = self.panel_cache.get(rect.size)
 
         if panel is None:
@@ -115,7 +116,7 @@ class HUDrender:
         self.draw_frame(screen, rect, scale, border_color)
 
     def draw_frame(self, screen, rect, scale, color, corner_size=9):
-        """Рисует тонкую рамку и яркие углы вокруг прямоугольника."""
+        '''Рисует тонкую рамку и яркие углы вокруг прямоугольника'''
         pygame.draw.rect(screen, DARK_GREEN, rect, 1)
 
         corner = max(5, int(corner_size * scale))
@@ -140,7 +141,7 @@ class HUDrender:
     # Здоровье
 
     def draw_health(self, screen, player, scale):
-        """Рисует здоровье игрока в левом нижнем углу."""
+        '''Рисует здоровье игрока в левом нижнем углу'''
         width = int(340 * scale)
         height = int(115 * scale)
         margin = int(20 * scale)
@@ -219,16 +220,14 @@ class HUDrender:
             label = self.small_font.render(
                 str(round(max_health * part)), True, MIDDLE_GREEN
             )
-            label_rect = label.get_rect(
-                center=(tick_x, ruler_y + int(14 * scale))
-            )
+            label_rect = label.get_rect(center=(tick_x, ruler_y + int(14 * scale)))
             screen.blit(label, label_rect)
 
     # ------------------------------------------------------------------
     # Сектор и задача
 
     def draw_objective(self, screen, state, scale):
-        """Рисует состояние сектора в левом верхнем углу."""
+        '''Рисует состояние сектора в левом верхнем углу'''
         margin = int(20 * scale)
         rect = pygame.Rect(margin, margin, int(390 * scale), int(108 * scale))
         self.draw_panel(screen, rect, scale)
@@ -240,7 +239,9 @@ class HUDrender:
 
         enemies_left = sum(enemy.alive for enemy in state.enemies)
         sector = self.medium_font.render(sector_text, True, GREEN)
-        threats = self.medium_font.render(f'УГРОЗЫ: {enemies_left}', True, RED if enemies_left else GREEN)
+        threats = self.medium_font.render(
+            f'УГРОЗЫ: {enemies_left}', True, RED if enemies_left else GREEN
+        )
 
         if state.terminal_activated:
             task = 'ЗАДАЧА: ТЕРМИНАЛ АКТИВИРОВАН'
@@ -264,7 +265,7 @@ class HUDrender:
     # Оружие
 
     def get_minimap_rect(self, screen, scale):
-        """Возвращает прямоугольник мини-карты и размер одной клетки."""
+        '''Возвращает прямоугольник мини-карты и размер одной клетки'''
         cell_size = max(1, int(self.minimap_cell_size * scale))
         size = (self.minimap_radius * 2 + 1) * cell_size
         margin = int(20 * scale)
@@ -272,7 +273,7 @@ class HUDrender:
         return rect, cell_size
 
     def draw_weapon(self, screen, weapon, scale):
-        """Рисует выбранное оружие и количество патронов."""
+        '''Рисует выбранное оружие и количество патронов'''
         minimap_rect, _ = self.get_minimap_rect(screen, scale)
         margin = int(20 * scale)
         rect = pygame.Rect(
@@ -288,7 +289,9 @@ class HUDrender:
 
         ammo_color = RED if weapon.ammo == 0 else WHITE
         ammo = self.large_font.render(str(weapon.ammo), True, ammo_color)
-        reserve = self.medium_font.render(f'/ {weapon.reserve_ammo}', True, MIDDLE_GREEN)
+        reserve = self.medium_font.render(
+            f'/ {weapon.reserve_ammo}', True, MIDDLE_GREEN
+        )
         ammo_x = rect.x + int(15 * scale)
         ammo_y = rect.y + int(39 * scale)
         screen.blit(ammo, (ammo_x, ammo_y))
@@ -306,9 +309,7 @@ class HUDrender:
             bar_height = max(3, int(5 * scale))
             label = self.small_font.render('ПЕРЕЗАРЯДКА', True, ORANGE)
             screen.blit(label, (bar_x, bar_y - label.get_height() - int(3 * scale)))
-            pygame.draw.rect(
-                screen, (45, 25, 0), (bar_x, bar_y, bar_width, bar_height)
-            )
+            pygame.draw.rect(screen, (45, 25, 0), (bar_x, bar_y, bar_width, bar_height))
             pygame.draw.rect(
                 screen,
                 ORANGE,
@@ -319,7 +320,7 @@ class HUDrender:
     # Мини-карта
 
     def draw_minimap(self, screen, player, enemies, level):
-        """Рисует плавную локальную карту вокруг игрока."""
+        '''Рисует плавную локальную карту вокруг игрока'''
         scale = self.get_scale(screen)
         rect, cell_size = self.get_minimap_rect(screen, scale)
         minimap = pygame.Surface(rect.size)
@@ -356,9 +357,7 @@ class HUDrender:
 
                 cell_x = round(center_x + dx * map_scale)
                 cell_y = round(center_y + dy * map_scale)
-                pygame.draw.rect(
-                    minimap, color, (cell_x, cell_y, cell_size, cell_size)
-                )
+                pygame.draw.rect(minimap, color, (cell_x, cell_y, cell_size, cell_size))
 
         for enemy in enemies:
             if not enemy.alive:
@@ -373,9 +372,7 @@ class HUDrender:
 
             enemy_x = round(center_x + dx * map_scale)
             enemy_y = round(center_y + dy * map_scale)
-            pygame.draw.circle(
-                minimap, RED, (enemy_x, enemy_y), max(2, cell_size // 3)
-            )
+            pygame.draw.circle(minimap, RED, (enemy_x, enemy_y), max(2, cell_size // 3))
 
         direction_x = center_x + cos(player.angle) * cell_size
         direction_y = center_y + sin(player.angle) * cell_size
@@ -386,24 +383,22 @@ class HUDrender:
             (direction_x, direction_y),
             max(1, int(2 * scale)),
         )
-        pygame.draw.circle(
-            minimap, GREEN, (center_x, center_y), max(2, cell_size // 3)
-        )
+        pygame.draw.circle(minimap, GREEN, (center_x, center_y), max(2, cell_size // 3))
 
         screen.blit(minimap, rect.topleft)
-        self.draw_frame(screen, rect, scale, self.get_radar_color(player, level), corner_size=20)
+        self.draw_frame(
+            screen, rect, scale, self.get_radar_color(player, level), corner_size=20
+        )
 
     def get_radar_color(self, player, level):
-        """Возвращает цвет радара с учётом расстояния до терминала."""
+        '''Возвращает цвет радара с учётом расстояния до терминала'''
         if level.terminal_pos is None:
             return DARK_GREEN
 
         terminal_x, terminal_y = level.terminal_pos
         terminal_x += level.block_size // 2
         terminal_y += level.block_size // 2
-        distance = (
-            (terminal_x - player.x) ** 2 + (terminal_y - player.y) ** 2
-        ) ** 0.5
+        distance = ((terminal_x - player.x) ** 2 + (terminal_y - player.y) ** 2) ** 0.5
 
         if distance < 300:
             interval = 150
@@ -422,7 +417,7 @@ class HUDrender:
     # Прицел и временные эффекты
 
     def draw_crosshair(self, screen, scale=None):
-        """Рисует прицел в центре текущего экрана."""
+        '''Рисует прицел в центре текущего экрана'''
         if scale is None:
             scale = self.get_scale(screen)
 
@@ -451,30 +446,38 @@ class HUDrender:
         gap = max(4, int(7 * scale))
         length = max(4, int(7 * scale))
         marks = (
-            ((center_x - gap - length, center_y - gap - length), (center_x - gap, center_y - gap)),
-            ((center_x + gap, center_y - gap), (center_x + gap + length, center_y - gap - length)),
-            ((center_x - gap - length, center_y + gap + length), (center_x - gap, center_y + gap)),
-            ((center_x + gap, center_y + gap), (center_x + gap + length, center_y + gap + length)),
+            (
+                (center_x - gap - length, center_y - gap - length),
+                (center_x - gap, center_y - gap),
+            ),
+            (
+                (center_x + gap, center_y - gap),
+                (center_x + gap + length, center_y - gap - length),
+            ),
+            (
+                (center_x - gap - length, center_y + gap + length),
+                (center_x - gap, center_y + gap),
+            ),
+            (
+                (center_x + gap, center_y + gap),
+                (center_x + gap + length, center_y + gap + length),
+            ),
         )
         for start, end in marks:
             pygame.draw.line(screen, RED, start, end, thickness)
 
-    def draw_crossfire(self, screen):
-        """Оставляет совместимость со старым вызовом прицела."""
-        self.draw_crosshair(screen)
-
     def trigger_hitmark(self, duration=160):
-        """Показывает отметку успешного попадания."""
+        '''Показывает отметку успешного попадания'''
         self.hitmark_end_time = pygame.time.get_ticks() + duration
 
     def show_message(self, text, duration=1800, color=ORANGE):
-        """Показывает временное сообщение рядом с прицелом."""
+        '''Показывает временное сообщение рядом с прицелом'''
         self.message = text
         self.message_color = color
         self.message_end_time = pygame.time.get_ticks() + duration
 
     def draw_message(self, screen, scale):
-        """Рисует активное временное сообщение."""
+        '''Рисует активное временное сообщение'''
         if not self.message or pygame.time.get_ticks() >= self.message_end_time:
             return
 
@@ -487,13 +490,11 @@ class HUDrender:
             )
         )
         shadow_offset = max(1, int(2 * scale))
-        screen.blit(
-            shadow, (text_rect.x + shadow_offset, text_rect.y + shadow_offset)
-        )
+        screen.blit(shadow, (text_rect.x + shadow_offset, text_rect.y + shadow_offset))
         screen.blit(text, text_rect)
 
     def update_damage_effect(self, player):
-        """Запускает вспышку при уменьшении здоровья игрока."""
+        '''Запускает вспышку при уменьшении здоровья игрока'''
         if self.last_player is not player:
             self.last_player = player
             self.last_health = player.health
@@ -507,7 +508,7 @@ class HUDrender:
         self.last_health = player.health
 
     def draw_damage_effect(self, screen):
-        """Рисует затухающую красную вспышку поверх игрового мира."""
+        '''Рисует затухающую красную вспышку поверх игрового мира'''
         now = pygame.time.get_ticks()
         if now >= self.damage_end_time:
             return
@@ -517,4 +518,3 @@ class HUDrender:
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         overlay.fill((255, 0, 0, alpha))
         screen.blit(overlay, (0, 0))
-

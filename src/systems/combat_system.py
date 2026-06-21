@@ -1,11 +1,12 @@
-"""Система боя."""
+'''Система боя'''
 
 from math import cos, sin
+
 from src.systems.visibility_system import get_depth, is_in_fov, is_visible
 
 
 def player_shoot(player, enemies, level):
-    """Обрабатывает попадание выстрела игрока по ближайшему врагу в прицеле."""
+    '''Обрабатывает попадание выстрела игрока по ближайшему врагу в прицеле'''
     target = None
     max_depth = float('inf')
 
@@ -31,10 +32,10 @@ def player_shoot(player, enemies, level):
 
 
 def enemy_near_crosshair(enemy, player, level):
-    """Проверяет, находится ли враг под прицелом игрока."""
+    '''Проверяет, находится ли враг под прицелом игрока'''
     if not enemy.alive:
         return False
-    
+
     if not is_in_fov(enemy, player):
         return False
 
@@ -47,7 +48,7 @@ def enemy_near_crosshair(enemy, player, level):
     direction_x = cos(player.angle)
     direction_y = sin(player.angle)
 
-    forward_distance = (dx * direction_x + dy * direction_y)
+    forward_distance = dx * direction_x + dy * direction_y
 
     if forward_distance <= 0:
         return False

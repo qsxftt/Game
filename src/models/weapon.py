@@ -1,11 +1,11 @@
-"""Модели оружия."""
+'''Модели оружия'''
 
 
 class Weapon:
-    """Базовое оружие: урон, патроны, cooldown и перезарядка."""
+    '''Базовое оружие: урон, патроны, cooldown и перезарядка'''
 
     def __init__(self):
-        """Создает пустое оружие, которое настраивается наследником."""
+        '''Создает пустое оружие, которое настраивается наследником'''
         self.name = ''
         self.damage = 0
         self.ammo = 0
@@ -19,9 +19,8 @@ class Weapon:
         self.reload_delay = 0
         self.reload_cooldown = 0
 
-
     def update(self):
-        """Обновляет cooldown выстрела и завершает перезарядку."""
+        '''Обновляет cooldown выстрела и завершает перезарядку'''
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
 
@@ -35,14 +34,14 @@ class Weapon:
                 self.reserve_ammo -= ammo_to
 
     def can_shoot(self):
-        """Проверяет, может ли оружие выстрелить прямо сейчас."""
+        '''Проверяет, может ли оружие выстрелить прямо сейчас'''
         if self.ammo > 0 and self.shoot_cooldown == 0 and self.reload_cooldown == 0:
             return True
         else:
             return False
 
     def shoot(self):
-        """Пытается выстрелить и возвращает True при успешном выстреле."""
+        '''Пытается выстрелить и возвращает True при успешном выстреле'''
         if not self.can_shoot():
             return False
 
@@ -52,7 +51,7 @@ class Weapon:
         return True
 
     def reload(self):
-        """Запускает перезарядку, если она возможна."""
+        '''Запускает перезарядку, если она возможна'''
         if self.ammo == self.magazine_size:
             return False
 
@@ -68,10 +67,10 @@ class Weapon:
 
 
 class Pistol(Weapon):
-    """Стартовый пистолет игрока."""
+    '''Стартовый пистолет игрока'''
 
     def __init__(self):
-        """Настраивает урон, магазин, задержки и текстуры пистолета."""
+        '''Настраивает урон, магазин, задержки и текстуры пистолета'''
         super().__init__()
         self.name = 'Pistol'
         self.damage = 35
@@ -82,11 +81,12 @@ class Pistol(Weapon):
         self.reserve_ammo = 30
         self.attack_distance = 1200
 
+
 class Shotgun(Weapon):
-    """Стартовый пистолет игрока."""
+    '''Стартовый пистолет игрока'''
 
     def __init__(self):
-        """Настраивает урон, магазин, задержки и текстуры пистолета."""
+        '''Настраивает урон, магазин, задержки и текстуры пистолета'''
         super().__init__()
         self.name = 'Shotgun'
         self.damage = 50
@@ -94,5 +94,5 @@ class Shotgun(Weapon):
         self.magazine_size = 3
         self.shoot_delay = 50
         self.reload_delay = 60
-        self.reserve_ammo = 15 
+        self.reserve_ammo = 15
         self.attack_distance = 300

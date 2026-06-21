@@ -1,19 +1,21 @@
-"""Модели врагов."""
+'''Модели врагов'''
 
 from src.systems.collision_system import is_wall
-from src.systems.enemy_ai_system import get_next_path_point, get_target_cell, update_path, update_enemy_state, open_next_door
+from src.systems.enemy_ai_system import (
+    get_next_path_point,
+    get_target_cell,
+    open_next_door,
+    update_enemy_state,
+    update_path,
+)
 from src.systems.visibility_system import get_depth
 
 
 class Enemy:
-    """Базовый враг.
-
-    Временно содержит часть логики видимости и расчета screen_x. Позже это можно
-    вынести в VisibilitySystem, чтобы модель меньше зависела от ray casting.
-    """
+    '''Базовый враг с боевым состоянием и параметрами навигации'''
 
     def __init__(self, x, y):
-        """Создает базового врага в координатах карты."""
+        '''Создает базового врага в координатах карты'''
         self.x = x
         self.y = y
         self.health = 0
@@ -42,7 +44,7 @@ class Enemy:
         self.score_awarded = False
 
     def take_damage(self, damage):
-        """Наносит врагу урон и помечает его мертвым при нуле здоровья."""
+        '''Наносит врагу урон и помечает его мертвым при нуле здоровья'''
         self.health -= damage
 
         if self.health <= 0:
@@ -50,7 +52,7 @@ class Enemy:
             self.alive = False
 
     def can_move(self, x, y, level):
-        """Проверяет, может ли враг занять указанную позицию."""
+        '''Проверяет, может ли враг занять указанную позицию'''
         return (
             not is_wall(x + 15, y, level)
             and not is_wall(x, y + 15, level)
@@ -59,15 +61,15 @@ class Enemy:
         )
 
     def move(self, player, level):
-        """Двигает врага к игроку или атакует при достаточной близости."""
+        '''Двигает врага к игроку или атакует при достаточной близости'''
         if self.state == 'attack':
             return False
-        
+
         target_cell = get_target_cell(self, player, level)
 
         if not target_cell:
             return False
-        
+
         if self.path_update_cooldown == 0:
             update_path(self, target_cell, level)
 
@@ -84,16 +86,17 @@ class Enemy:
                 self.idle_wait_cooldown = self.idle_wait_delay
 
             return False
-        
+
         target_x, target_y = target_point
-        
+
         return self.move_to_point(target_x, target_y, level)
 
     def move_to_point(self, target_x, target_y, level):
+        '''Перемещает врага к мировой точке с учетом коллизий'''
         dx = target_x - self.x
         dy = target_y - self.y
 
-        move_depth = (dx ** 2 + dy ** 2) ** 0.5
+        move_depth = (dx**2 + dy**2) ** 0.5
 
         if move_depth == 0:
             return False
@@ -110,16 +113,17 @@ class Enemy:
         return True
 
     def try_attack(self, player):
+        '''Пытается атаковать игрока, если тот находится достаточно близко'''
         depth = get_depth(self, player)
 
         if depth > self.attack_distance:
             return False
-        
+
         self.attack(player)
         return True
 
     def attack(self, player):
-        """Наносит урон игроку, если cooldown атаки закончился."""
+        '''Наносит урон игроку, если cooldown атаки закончился'''
         if self.attack_cooldown > 0:
             return False
 
@@ -129,7 +133,7 @@ class Enemy:
         return True
 
     def update(self, player, level):
-        """Обновляет cooldown'ы и поведение врага за один кадр."""
+        '''Обновляет cooldown'ы и поведение врага за один кадр'''
         if not self.alive:
             return False
 
@@ -156,11 +160,12 @@ class Enemy:
 
         return player.health < health_before
 
+
 class Dwarf(Enemy):
-    """Конкретный тип врага с параметрами и текстурами."""
+    '''Слабый зараженный ученый'''
 
     def __init__(self, x, y):
-        """Создает врага Dwarf с заданными характеристиками."""
+        '''Создает зараженного ученого'''
         super().__init__(x, y)
         self.health = 100
         self.damage = 10
@@ -172,11 +177,12 @@ class Dwarf(Enemy):
 
         self.score_value = 100
 
+
 class Dwarf2(Enemy):
-    """Конкретный тип врага с параметрами и текстурами."""
+    '''Сильный аномальный монстр'''
 
     def __init__(self, x, y):
-        """Создает врага Dwarf с заданными характеристиками."""
+        '''Создает аномального монстра'''
         super().__init__(x, y)
         self.health = 200
         self.damage = 30

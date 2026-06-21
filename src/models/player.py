@@ -1,4 +1,4 @@
-"""Модель игрока."""
+'''Модель игрока'''
 
 from math import cos, pi, sin
 
@@ -9,10 +9,10 @@ from src.systems.door_system import open_door
 
 
 class Player:
-    """Игрок: позиция, здоровье, угол камеры и текущее оружие."""
+    '''Игрок: позиция, здоровье, угол камеры и текущее оружие'''
 
     def __init__(self, x, y):
-        """Создает игрока в переданных координатах мира."""
+        '''Создает игрока в переданных координатах мира'''
         self.x = x
         self.y = y
         self.max_health = 100
@@ -28,19 +28,21 @@ class Player:
         self.weapon = self.weapons[self.weapon_index]
 
     def can_move(self, x, y, level):
-        """Проверяет, может ли игрок занять позицию с учетом радиуса."""
+        '''Проверяет, может ли игрок занять позицию с учетом радиуса'''
         return (
             not is_wall(x + self.radius, y, level)
             and not is_wall(x, y + self.radius, level)
             and not is_wall(x - self.radius, y, level)
             and not is_wall(x, y - self.radius, level)
         )
-    
+
     def set_start_pos(self, x, y):
+        '''Перемещает игрока в стартовую позицию нового сектора'''
         self.x = x
         self.y = y
-    
+
     def switch_weapon(self):
+        '''Переключает оружие, если игрок не стреляет и не перезаряжается'''
         if self.weapon.shoot_cooldown > 0 or self.weapon.reload_cooldown > 0:
             return False
 
@@ -50,7 +52,7 @@ class Player:
         return True
 
     def update(self, actions, level):
-        """Обрабатывает действия игрока за кадр и возвращает факт выстрела."""
+        '''Обрабатывает ввод и возвращает события выстрела и перезарядки'''
         sin_a = sin(self.angle)
         cos_a = cos(self.angle)
 

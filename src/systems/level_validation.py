@@ -1,8 +1,8 @@
-"""Проверка сгенерированной текстовой карты на достижимость важных объектов."""
+'''Проверка сгенерированной текстовой карты на достижимость важных объектов'''
 
 
 def get_walkable_cells(text_map):
-    """Возвращает все клетки, по которым можно ходить."""
+    '''Возвращает все клетки, по которым можно ходить'''
     walkable = set()
 
     for y, row in enumerate(text_map):
@@ -14,7 +14,7 @@ def get_walkable_cells(text_map):
 
 
 def find_tile(text_map, target_tile):
-    """Возвращает первую позицию указанного тайла или None."""
+    '''Возвращает первую позицию указанного тайла или None'''
     for y, row in enumerate(text_map):
         for x, tile in enumerate(row):
             if tile == target_tile:
@@ -24,7 +24,7 @@ def find_tile(text_map, target_tile):
 
 
 def find_all_tiles(text_map, target_tile):
-    """Возвращает все позиции указанного тайла."""
+    '''Возвращает все позиции указанного тайла'''
     pos = []
 
     for y, row in enumerate(text_map):
@@ -36,7 +36,7 @@ def find_all_tiles(text_map, target_tile):
 
 
 def get_neighbors(cell):
-    """Возвращает четыре соседние клетки"""
+    '''Возвращает четыре соседние клетки'''
     x, y = cell
 
     return [
@@ -48,7 +48,7 @@ def get_neighbors(cell):
 
 
 def get_reachable_cells(text_map, start):
-    """Находит все достижимые клетки через BFS от стартовой позиции."""
+    '''Находит все достижимые клетки через BFS от стартовой позиции'''
     walkable = get_walkable_cells(text_map)
 
     visited = set()
@@ -70,7 +70,7 @@ def get_reachable_cells(text_map, start):
 
 
 def all_pos_reachable(positions, reachable):
-    """Проверяет, входят ли все позиции в множество достижимых клеток."""
+    '''Проверяет, входят ли все позиции в множество достижимых клеток'''
     for pos in positions:
         if pos not in reachable:
             return False
@@ -79,7 +79,7 @@ def all_pos_reachable(positions, reachable):
 
 
 def reachable_neighbor(tile, reachable):
-    """Проверяет, есть ли рядом с тайлом хотя бы одна достижимая клетка."""
+    '''Проверяет, есть ли рядом с тайлом хотя бы одна достижимая клетка'''
     positions = get_neighbors(tile)
 
     for pos in positions:
@@ -90,7 +90,7 @@ def reachable_neighbor(tile, reachable):
 
 
 def validate_level(text_map):
-    """Проверяет, что игрок, терминал, враги и ресурсы доступны на карте."""
+    '''Проверяет, что игрок, терминал, враги и ресурсы доступны на карте'''
     player_pos = find_tile(text_map, 'P')
 
     if player_pos is None:

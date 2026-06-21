@@ -1,23 +1,23 @@
-"""Логика загрузки и переключения секторов."""
+'''Логика загрузки и переключения секторов'''
 
 from src.core.config import TOTAL_SECTORS, block_size
 from src.models.enemy import Dwarf, Dwarf2
+from src.models.game_state import GameState
 from src.models.level import Level
 from src.models.pickup import Ammo, MedKit
 from src.models.player import Player
 from src.systems.level_generator import LevelGenerator
 from src.systems.map_system import get_front_cell
-from src.models.game_state import GameState
 from src.systems.prd_system import PRD
 
 
 def all_enemies_dead(enemies):
-    """Возвращает True, если все враги сектора мертвы."""
+    '''Возвращает True, если все враги сектора мертвы'''
     return all(not enemy.alive for enemy in enemies)
 
 
 def activate_terminal(player, level):
-    """Проверяет, смотрит ли игрок на клетку терминала."""
+    '''Проверяет, смотрит ли игрок на клетку терминала'''
     cell = get_front_cell(player)
 
     if cell == level.terminal_pos:
@@ -27,7 +27,7 @@ def activate_terminal(player, level):
 
 
 def load_sector(state):
-    """Генерирует сектор и пересоздает состояние игрока, врагов и ресурсов."""
+    '''Генерирует сектор и пересоздает состояние игрока, врагов и ресурсов'''
     generator = create_generator_for_sector(state.sector_index)
     text_map = generator.generate()
     level = Level(block_size, text_map)
@@ -54,8 +54,9 @@ def load_sector(state):
         elif pickup_type == 'ammo':
             state.pickups.append(Ammo(x, y))
 
+
 def start_new_game(state, game_mode):
-    """Сбрасывает прошлую сессию и создаёт первый сектор."""
+    '''Сбрасывает прошлую сессию и создаёт первый сектор'''
     state.sector_index = 0
     state.score = 0
     state.game_mode = game_mode
@@ -71,17 +72,18 @@ def start_new_game(state, game_mode):
 
 
 def go_to_next_sector(state):
-    """Переходит к следующему сектору или сообщает, что игра дошла до финала."""
+    '''Переходит к следующему сектору или сообщает, что игра дошла до финала'''
     state.sector_index += 1
 
-    if (state.game_mode == GameState.ENDLESS or state.sector_index < TOTAL_SECTORS):
+    if state.game_mode == GameState.ENDLESS or state.sector_index < TOTAL_SECTORS:
         load_sector(state)
         return True
 
     return False
 
+
 def create_generator_for_sector(sector_index):
-    """Создает генератор с параметрами сложности для указанного сектора."""
+    '''Создает генератор с параметрами сложности для указанного сектора'''
     i = min(sector_index, 4)
 
     widths = [20, 24, 28, 32, 36]
@@ -107,5 +109,5 @@ def create_generator_for_sector(sector_index):
         min_room_size=3,
         max_room_size=max_room_sizes[i],
         bsp_max_depth=bsp_depths[i],
-        bsp_min_leaf_size=8
+        bsp_min_leaf_size=8,
     )

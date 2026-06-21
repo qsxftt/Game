@@ -1,11 +1,11 @@
-"""Модель двери."""
+'''Модель двери'''
 
 
 class Door:
-    """Дверь с простым FSM: closed -> opening -> open -> closing."""
+    '''Дверь с простым FSM: closed -> opening -> open -> closing'''
 
     def __init__(self, x, y, orient, block_size):
-        """Создает дверь в клетке карты."""
+        '''Создает дверь в клетке карты'''
         self.x = x
         self.y = y
         self.orient = orient
@@ -17,7 +17,7 @@ class Door:
         self.cooldown = 0
 
     def open(self):
-        """Начинает открытие двери, если она сейчас закрыта."""
+        '''Начинает открытие двери, если она сейчас закрыта'''
         if self.state != 'closed':
             return False
 
@@ -25,7 +25,7 @@ class Door:
         return True
 
     def update(self, blocked=False):
-        """Обновляет анимацию и состояние двери на один кадр."""
+        '''Обновляет анимацию и состояние двери на один кадр'''
         if self.state == 'opening':
             self.open_progress += self.open_speed
 
@@ -53,7 +53,7 @@ class Door:
                 self.state = 'closed'
 
     def get_panel_segment(self):
-        """Возвращает отрезок дверной панели для проверки пересечения лучом."""
+        '''Возвращает отрезок дверной панели для проверки пересечения лучом'''
         offset = self.block_size * self.open_progress
 
         if self.orient == 'hor':

@@ -1,11 +1,18 @@
-"""Renderer спрайтовых объектов мира."""
+'''Renderer спрайтовых объектов мира'''
 
 import pygame
 
-from src.core.config import HEIGHT_HALF, SCREEN_DISTANCE, block_size, BRUTE_ATTACK_TEXTURE, BRUTE_WALK_TEXTURE, SCIENTIST_ATTACK_TEXTURE, SCIENTIST_WALK_TEXTURE
-from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
+from src.core.config import (
+    BRUTE_ATTACK_TEXTURE,
+    BRUTE_WALK_TEXTURE,
+    HEIGHT_HALF,
+    SCIENTIST_ATTACK_TEXTURE,
+    SCIENTIST_WALK_TEXTURE,
+    SCREEN_DISTANCE,
+    block_size,
+)
 from src.models.enemy import Dwarf, Dwarf2
-
+from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
 
 ENEMY_TEXTURES = {
     Dwarf: {
@@ -22,23 +29,31 @@ ENEMY_TEXTURES = {
     },
 }
 
+
 def convert_enemy_textures():
+    '''Оптимизирует прозрачные текстуры врагов под формат дисплея'''
     for textures in ENEMY_TEXTURES.values():
         textures['walk'] = textures['walk'].convert_alpha()
         textures['attack'] = textures['attack'].convert_alpha()
 
+
 class SpriteRender:
-    """Рисует врагов как псевдо-3D спрайты."""
+    '''Рисует врагов как псевдо-3D спрайты'''
 
     def get_frame(self, enemy, texture, frame_count, status='walk'):
-        """Возвращает кадр анимации врага для указанного состояния."""
+        '''Возвращает кадр анимации врага для указанного состояния'''
         frame_width = texture.get_width() / frame_count
         frame_height = texture.get_height()
 
         if status == 'attack':
-            frame_index = round((1 - enemy.attack_cooldown / enemy.attack_delay) * (frame_count - 1))
+            frame_index = round(
+                (1 - enemy.attack_cooldown / enemy.attack_delay) * (frame_count - 1)
+            )
         elif status == 'walk':
-            frame_index = round((1 - enemy.frame_walk_cooldown / enemy.frame_walk_delay) * (frame_count - 1))
+            frame_index = round(
+                (1 - enemy.frame_walk_cooldown / enemy.frame_walk_delay)
+                * (frame_count - 1)
+            )
 
         x = frame_width * frame_index
         frame = texture.subsurface(x, 0, frame_width, frame_height)
@@ -46,22 +61,26 @@ class SpriteRender:
         return frame, frame_width, frame_height
 
     def draw(self, enemy, screen, player, level):
-        """Рисует одного врага, если он жив, видим и находится в FOV."""
+        '''Рисует одного врага, если он жив, видим и находится в FOV'''
         if not enemy.alive:
             return False
 
         if not is_in_fov(enemy, player):
             return False
-        
+
         if not is_visible(enemy, player, level):
             return False
 
         textures = ENEMY_TEXTURES[type(enemy)]
 
         if enemy.attack_cooldown > 0:
-            frame, frame_width, frame_height = self.get_frame(enemy, textures['attack'], textures['attack_frames'], 'attack')
+            frame, frame_width, frame_height = self.get_frame(
+                enemy, textures['attack'], textures['attack_frames'], 'attack'
+            )
         else:
-            frame, frame_width, frame_height = self.get_frame(enemy, textures['walk'], textures['walk_frames'], 'walk')
+            frame, frame_width, frame_height = self.get_frame(
+                enemy, textures['walk'], textures['walk_frames'], 'walk'
+            )
 
         depth = max(get_depth(enemy, player), 50)
         screen_x = get_screen_x(enemy, player)
@@ -69,4 +88,6 @@ class SpriteRender:
         enemy_width = int(frame_width * enemy_height / frame_height)
 
         frame = pygame.transform.scale(frame, (enemy_width, enemy_height))
-        screen.blit(frame, (screen_x - enemy_width // 2, HEIGHT_HALF - enemy_height // 2))
+        screen.blit(
+            frame, (screen_x - enemy_width // 2, HEIGHT_HALF - enemy_height // 2)
+        )

@@ -1,10 +1,12 @@
-"""Главный контроллер игрового цикла."""
+'''Главный контроллер игрового цикла'''
 
 import pygame
 
 from src.controllers.input_controller import InputController
 from src.core.config import FPS, HEIGHT, WIDTH
+from src.core.display_settings import DisplaySettings
 from src.core.scene_manager import SceneManager
+from src.core.sound_manager import SoundManager
 from src.models.game_state import GameState
 from src.scenes.scenes import (
     FinalVictoryScene,
@@ -12,22 +14,20 @@ from src.scenes.scenes import (
     MainMenuScene,
     PlayingScene,
     SectorClearScene,
-    SettingsScene
+    SettingsScene,
 )
 from src.views.hud_renderer import HUDrender
 from src.views.pickup_renderer import PickupRender, convert_pickup_textures
+from src.views.raycast_renderer import convert_textures
 from src.views.sprite_renderer import SpriteRender, convert_enemy_textures
 from src.views.weapon_renderer import WeaponRender, convert_weapon_textures
-from src.views.raycast_renderer import convert_textures
-from src.core.display_settings import DisplaySettings
-from src.core.sound_manager import SoundManager
 
 
 class GameController:
-    """Собирает игру и управляет циклом update/render."""
+    '''Собирает игру и управляет циклом update/render'''
 
     def __init__(self):
-        """Инициализирует pygame, окно, состояние, renderers и сцены."""
+        '''Инициализирует pygame, окно, состояние, renderers и сцены'''
         pygame.init()
 
         self.sound_manager = SoundManager()
@@ -46,8 +46,19 @@ class GameController:
         self.state = GameState()
         self.scene_manager = SceneManager()
 
-        self.scene_manager.register(GameState.MAIN_MENU, MainMenuScene(self.state, self.scene_manager, self.sound_manager))
-        self.scene_manager.register(GameState.SETTINGS, SettingsScene(self.state, self.scene_manager, self.display_settings, self.sound_manager))
+        self.scene_manager.register(
+            GameState.MAIN_MENU,
+            MainMenuScene(self.state, self.scene_manager, self.sound_manager),
+        )
+        self.scene_manager.register(
+            GameState.SETTINGS,
+            SettingsScene(
+                self.state,
+                self.scene_manager,
+                self.display_settings,
+                self.sound_manager,
+            ),
+        )
         self.scene_manager.register(
             GameState.PLAYING,
             PlayingScene(
@@ -57,23 +68,30 @@ class GameController:
                 self.spriterender,
                 self.hud,
                 self.pickuprender,
-                self.sound_manager
+                self.sound_manager,
             ),
         )
-        self.scene_manager.register(GameState.SECTOR_CLEAR, SectorClearScene(self.state, self.scene_manager))
-        self.scene_manager.register(GameState.GAME_OVER, GameOverScene(self.state, self.scene_manager))
-        self.scene_manager.register(GameState.FINAL_VICTORY, FinalVictoryScene(self.state, self.scene_manager))
+        self.scene_manager.register(
+            GameState.SECTOR_CLEAR, SectorClearScene(self.state, self.scene_manager)
+        )
+        self.scene_manager.register(
+            GameState.GAME_OVER, GameOverScene(self.state, self.scene_manager)
+        )
+        self.scene_manager.register(
+            GameState.FINAL_VICTORY, FinalVictoryScene(self.state, self.scene_manager)
+        )
 
         self.scene_manager.change_scene(GameState.MAIN_MENU)
 
     def convert_all_textures(self):
+        '''Оптимизирует все игровые текстуры под формат дисплея'''
         convert_textures()
         convert_enemy_textures()
         convert_weapon_textures()
         convert_pickup_textures()
 
     def apply_display_settings(self):
-        """Применяет настройки настоящего окна."""
+        '''Применяет настройки настоящего окна'''
         if self.display_settings.fullscreen:
             size = (0, 0)
             flags = pygame.FULLSCREEN
@@ -90,7 +108,7 @@ class GameController:
         self.display_settings.changed = False
 
     def present_frame(self):
-        """Выводит внутренний кадр в настоящее окно."""
+        '''Выводит внутренний кадр в настоящее окно'''
         internal_width, internal_height = self.screen.get_size()
         display_width, display_height = self.display.get_size()
 
@@ -111,7 +129,7 @@ class GameController:
         pygame.display.flip()
 
     def run(self):
-        """Запускает игровой цикл и закрывает pygame после выхода."""
+        '''Запускает игровой цикл и закрывает pygame после выхода'''
         while self.state.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

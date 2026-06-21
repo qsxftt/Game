@@ -1,13 +1,13 @@
-"""Модель уровня, собранная из текстовой карты."""
+'''Модель уровня, собранная из текстовой карты'''
 
 from src.models.door import Door
 
 
 class Level:
-    """Хранит стены, двери, старт игрока, врагов, терминал и ресурсы уровня."""
+    '''Хранит стены, двери, старт игрока, врагов, терминал и ресурсы уровня'''
 
     def __init__(self, block_size, text_map):
-        """Создает уровень и сразу разбирает текстовую карту."""
+        '''Создает уровень и сразу разбирает текстовую карту'''
         self.block_size = block_size
         self.text_map = text_map
         self.block_map = set()
@@ -21,7 +21,7 @@ class Level:
         self.build()
 
     def build(self):
-        """Переводит символы текстовой карты в игровые координаты и объекты."""
+        '''Переводит символы текстовой карты в игровые координаты и объекты'''
         y_block = 0
 
         for row in self.text_map:
@@ -33,15 +33,32 @@ class Level:
                 elif tile == 'D':
                     self.door_positions.append((x_block, y_block))
                 elif tile == 'P':
-                    self.player_start = (x_block + self.block_size // 2, y_block + self.block_size // 2)
+                    self.player_start = (
+                        x_block + self.block_size // 2,
+                        y_block + self.block_size // 2,
+                    )
                 elif tile == 'E':
-                    self.enemies_pos.append((x_block + self.block_size // 2, y_block + self.block_size // 2))
+                    self.enemies_pos.append(
+                        (x_block + self.block_size // 2, y_block + self.block_size // 2)
+                    )
                 elif tile == 'T':
                     self.terminal_pos = (x_block, y_block)
                 elif tile == 'H':
-                    self.pickups_pos.append((x_block + self.block_size // 2, y_block + self.block_size // 2, 'medkit'))
+                    self.pickups_pos.append(
+                        (
+                            x_block + self.block_size // 2,
+                            y_block + self.block_size // 2,
+                            'medkit',
+                        )
+                    )
                 elif tile == 'A':
-                    self.pickups_pos.append((x_block + self.block_size // 2, y_block + self.block_size // 2, 'ammo'))
+                    self.pickups_pos.append(
+                        (
+                            x_block + self.block_size // 2,
+                            y_block + self.block_size // 2,
+                            'ammo',
+                        )
+                    )
 
                 x_block += self.block_size
 
@@ -52,7 +69,7 @@ class Level:
             self.doors[(x, y)] = Door(x, y, orient, self.block_size)
 
     def get_orient_door(self, x, y):
-        """Определяет ориентацию двери по соседним стенам."""
+        '''Определяет ориентацию двери по соседним стенам'''
         left = (x - self.block_size, y) in self.block_map
         right = (x + self.block_size, y) in self.block_map
         up = (x, y - self.block_size) in self.block_map

@@ -1,9 +1,8 @@
-"""Глобальные настройки, константы и загружаемые ресурсы игры."""
+'''Глобальные настройки, константы и загружаемые ресурсы игры'''
 
 from math import pi, tan
 
 import pygame
-
 
 # Экран
 WIDTH = 1600
@@ -11,14 +10,6 @@ HEIGHT = 1000
 WIDTH_HALF = WIDTH // 2
 HEIGHT_HALF = HEIGHT // 2
 FPS = 60
-
-# Цвета
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GRAY = (128, 128, 128)
-GREEN = (0, 255, 0)
-YELLOW = (255, 220, 0)
-WHITE = (255, 255, 255)
 
 # Текстуры
 WALL_TEXTURE = pygame.image.load('assets/textures/wall.png')
@@ -35,8 +26,6 @@ SCIENTIST_ATTACK_TEXTURE = pygame.image.load('assets/enemies/scientist_attack.pn
 MEDKIT_TEXTURE = pygame.image.load('assets/pickups/medkit.png')
 AMMO_TEXTURE = pygame.image.load('assets/pickups/ammo.png')
 
-PISTOL_ICON = pygame.image.load('assets/icons/pistol_icon.png')
-SHOTGUN_ICON = pygame.image.load('assets/icons/shotgun_icon.png')
 
 # Карта
 block_size = 100

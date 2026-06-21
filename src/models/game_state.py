@@ -1,8 +1,8 @@
-"""Общее состояние текущей игровой сессии."""
+'''Общее состояние текущей игровой сессии'''
 
 
 class GameState:
-    """Хранит активную сцену, сектор и основные игровые сущности."""
+    '''Хранит активную сцену, сектор и основные игровые сущности'''
 
     PLAYING = 'playing'
     SECTOR_CLEAR = 'sector_clear'
@@ -14,7 +14,7 @@ class GameState:
     SETTINGS = 'settings'
 
     def __init__(self):
-        """Создает начальное состояние игры."""
+        '''Создает начальное состояние игры'''
         self.sector_index = 0
         self.sector_clean = False
         self.terminal_activated = False
@@ -28,6 +28,6 @@ class GameState:
         self.game_mode = GameState.CAMPAIGN
 
     def reset_sector_flags(self):
-        """Сбрасывает флаги, которые относятся только к текущему сектору."""
+        '''Сбрасывает флаги, которые относятся только к текущему сектору'''
         self.sector_clean = False
         self.terminal_activated = False

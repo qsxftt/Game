@@ -1,11 +1,16 @@
-"""Renderer подбираемых ресурсов."""
+'''Renderer подбираемых ресурсов'''
 
 import pygame
 
-from src.core.config import HEIGHT, SCREEN_DISTANCE, block_size, AMMO_TEXTURE, MEDKIT_TEXTURE
-from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
+from src.core.config import (
+    AMMO_TEXTURE,
+    HEIGHT,
+    MEDKIT_TEXTURE,
+    SCREEN_DISTANCE,
+    block_size,
+)
 from src.models.pickup import Ammo, MedKit
-
+from src.systems.visibility_system import get_depth, get_screen_x, is_in_fov, is_visible
 
 PICKUP_TEXTURES = {
     Ammo: {
@@ -18,15 +23,18 @@ PICKUP_TEXTURES = {
     },
 }
 
+
 def convert_pickup_textures():
+    '''Оптимизирует прозрачные текстуры ресурсов под формат дисплея'''
     for visual in PICKUP_TEXTURES.values():
         visual['texture'] = visual['texture'].convert_alpha()
 
+
 class PickupRender:
-    """Рисует pickups как псевдо-3D спрайты."""
+    '''Рисует pickups как псевдо-3D спрайты'''
 
     def get_frame(self, pickup):
-        """Возвращает текущий кадр анимации ресурса."""
+        '''Возвращает текущий кадр анимации ресурса'''
         visual = PICKUP_TEXTURES[type(pickup)]
         texture = visual['texture']
         frame_count = visual['frame_count']
@@ -34,7 +42,9 @@ class PickupRender:
         frame_width = texture.get_width() / frame_count
         frame_height = texture.get_height()
 
-        frame_index = round((1 - pickup.animation_cooldown / pickup.animation_speed) * (frame_count - 1))
+        frame_index = round(
+            (1 - pickup.animation_cooldown / pickup.animation_speed) * (frame_count - 1)
+        )
         x = frame_index * frame_width
 
         frame = texture.subsurface(x, 0, frame_width, frame_height)
@@ -42,10 +52,10 @@ class PickupRender:
         return frame, frame_width, frame_height
 
     def draw(self, pickup, screen, player, level):
-        """Рисует один ресурс, если он не подобран, видим и находится в FOV."""
+        '''Рисует один ресурс, если он не подобран, видим и находится в FOV'''
         if pickup.is_pickedup:
             return False
-        
+
         if not is_in_fov(pickup, player):
             return False
 
@@ -60,4 +70,6 @@ class PickupRender:
         pickup_width = int(frame_width * pickup_height / frame_height)
 
         frame = pygame.transform.scale(frame, (pickup_width, pickup_height))
-        screen.blit(frame, (screen_x - pickup_width // 2, (HEIGHT - pickup_height // 2) * 0.53))
+        screen.blit(
+            frame, (screen_x - pickup_width // 2, (HEIGHT - pickup_height // 2) * 0.53)
+        )

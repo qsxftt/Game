@@ -1,42 +1,56 @@
-"""Игровые сцены: меню, игра, переходы и финальные экраны."""
+'''Игровые сцены: меню, игра, переходы и финальные экраны'''
 
 import pygame
 
 from src.core.config import HEIGHT, HEIGHT_HALF, TOTAL_SECTORS, WIDTH
+from src.models.enemy import Dwarf, Dwarf2
 from src.models.game_state import GameState
-from src.models.pickup import Pickup, Ammo, MedKit
+from src.models.pickup import Ammo, MedKit, Pickup
+from src.models.weapon import Pistol
 from src.systems.combat_system import player_shoot
 from src.systems.door_system import update_doors
 from src.systems.map_system import get_sprite_sorted
-from src.systems.sector_system import activate_terminal, all_enemies_dead, go_to_next_sector, start_new_game
+from src.systems.score_system import add_sector_score, update_score
+from src.systems.sector_system import (
+    activate_terminal,
+    all_enemies_dead,
+    go_to_next_sector,
+    start_new_game,
+)
 from src.views.raycast_renderer import ray_casting
-from src.systems.score_system import update_score, add_sector_score
-from src.models.weapon import Pistol
-from src.models.enemy import Dwarf, Dwarf2
 
 
 class BaseScene:
-    """Базовый интерфейс сцены."""
+    '''Базовый интерфейс сцены'''
 
     def __init__(self, state, scene_manager):
-        """Сохраняет общее состояние игры и менеджер сцен."""
+        '''Сохраняет общее состояние игры и менеджер сцен'''
         self.state = state
         self.scene_manager = scene_manager
 
     def update(self, actions):
-        """Обновляет сцену за один кадр."""
+        '''Обновляет сцену за один кадр'''
         pass
 
     def render(self, screen):
-        """Рисует сцену."""
+        '''Рисует сцену'''
         pass
 
 
 class PlayingScene(BaseScene):
-    """Основная игровая сцена."""
+    '''Основная игровая сцена'''
 
-    def __init__(self, state, scene_manager, weaponrender, spriterender, hud, pickuprender, sound_manager):
-        """Получает state, renderers и HUD для игрового режима."""
+    def __init__(
+        self,
+        state,
+        scene_manager,
+        weaponrender,
+        spriterender,
+        hud,
+        pickuprender,
+        sound_manager,
+    ):
+        '''Получает state, renderers и HUD для игрового режима'''
         super().__init__(state, scene_manager)
         self.weaponrender = weaponrender
         self.spriterender = spriterender
@@ -45,16 +59,20 @@ class PlayingScene(BaseScene):
         self.sound_manager = sound_manager
 
     def update(self, actions):
-        """Обновляет игрока, врагов, двери, pickups и условия перехода сцены."""
+        '''Обновляет игрока, врагов, двери, pickups и условия перехода сцены'''
         if actions['esc']:
             self.sound_manager.stop_music()
             self.scene_manager.change_scene(GameState.MAIN_MENU)
             return
-        
-        door_states = {door: door.state for door in self.state.current_level.doors.values()}
+
+        door_states = {
+            door: door.state for door in self.state.current_level.doors.values()
+        }
 
         self.state.player.weapon.update()
-        shot_fired, reload_started = self.state.player.update(actions, self.state.current_level)
+        shot_fired, reload_started = self.state.player.update(
+            actions, self.state.current_level
+        )
         weapon = self.state.player.weapon
 
         if isinstance(weapon, Pistol):
@@ -67,7 +85,6 @@ class PlayingScene(BaseScene):
 
         if reload_started:
             self.sound_manager.play_sound(f'{sound_prefix}_reload')
-
 
         update_doors(self.state.current_level, self.state.player, self.state.enemies)
 
@@ -99,7 +116,9 @@ class PlayingScene(BaseScene):
                 self.sound_manager.play_sound('door_close')
 
         if shot_fired:
-            hit = player_shoot(self.state.player, self.state.enemies, self.state.current_level)
+            hit = player_shoot(
+                self.state.player, self.state.enemies, self.state.current_level
+            )
             if hit:
                 self.hud.trigger_hitmark()
 
@@ -110,11 +129,9 @@ class PlayingScene(BaseScene):
 
         if self.state.player.health <= 0:
             self.sound_manager.stop_music()
-            print('Game Over')
             self.scene_manager.change_scene(GameState.GAME_OVER)
 
         if not self.state.sector_clean and all_enemies_dead(self.state.enemies):
-            print('Сектор зачищен')
             self.state.sector_clean = True
             self.hud.show_message('СЕКТОР ЗАЧИЩЕН')
 
@@ -124,38 +141,42 @@ class PlayingScene(BaseScene):
                     self.sound_manager.play_sound('terminal_activate')
                     add_sector_score(self.state)
                     self.state.terminal_activated = True
-                    if (self.state.game_mode == GameState.CAMPAIGN and self.state.sector_index == TOTAL_SECTORS - 1):
+                    if (
+                        self.state.game_mode == GameState.CAMPAIGN
+                        and self.state.sector_index == TOTAL_SECTORS - 1
+                    ):
                         self.sound_manager.stop_music()
-                        
+
                     self.scene_manager.change_scene(GameState.SECTOR_CLEAR)
-                else:
-                    print('Сектор еще не зачищен')
-
-
 
     def render(self, screen):
-        """Рисует мир, sprites, оружие, HUD и debug-карту."""
+        '''Рисует игровой мир, спрайты, оружие и HUD'''
         pygame.draw.rect(screen, (36, 42, 45), (0, 0, WIDTH, HEIGHT_HALF))
         pygame.draw.rect(screen, (18, 21, 22), (0, HEIGHT_HALF, WIDTH, HEIGHT_HALF))
         ray_casting(screen, self.state.player, self.state.current_level)
 
-        sprites = get_sprite_sorted(self.state.pickups, self.state.enemies, self.state.player)
+        sprites = get_sprite_sorted(
+            self.state.pickups, self.state.enemies, self.state.player
+        )
         for sprite in sprites:
             if isinstance(sprite, Pickup):
-                self.pickuprender.draw(sprite, screen, self.state.player, self.state.current_level)
+                self.pickuprender.draw(
+                    sprite, screen, self.state.player, self.state.current_level
+                )
             else:
-                self.spriterender.draw(sprite, screen, self.state.player, self.state.current_level)
+                self.spriterender.draw(
+                    sprite, screen, self.state.player, self.state.current_level
+                )
 
         self.weaponrender.draw(screen, self.state.player.weapon)
         self.hud.draw(screen, self.state)
 
 
-
 class MainMenuScene(BaseScene):
-    """Стартовое меню."""
+    '''Стартовое меню'''
 
     def __init__(self, state, scene_manager, sound_manager):
-        """Создает шрифт главного меню."""
+        '''Создает шрифт главного меню'''
         super().__init__(state, scene_manager)
         self.sound_manager = sound_manager
         self.title_font = pygame.font.SysFont('Arial', 86, bold=True)
@@ -169,7 +190,7 @@ class MainMenuScene(BaseScene):
         self.selected_index = 0
 
     def update(self, actions):
-        """Запускает игру по нажатию E."""
+        '''Запускает игру по нажатию E'''
         if actions['up_pressed']:
             self.selected_index = (self.selected_index - 1) % len(self.options)
 
@@ -197,7 +218,7 @@ class MainMenuScene(BaseScene):
                 self.state.running = False
 
     def render(self, screen):
-        """Рисует главное меню."""
+        '''Рисует главное меню'''
         screen.fill((0, 0, 0))
 
         title = self.title_font.render('PROJECT GATE', True, (0, 255, 0))
@@ -212,21 +233,21 @@ class MainMenuScene(BaseScene):
             y = HEIGHT // 2 - 40 + index * 60
             screen.blit(text, text.get_rect(center=(WIDTH // 2, y)))
 
+
 class SettingsScene(BaseScene):
+    '''Экран настройки разрешения, режима окна и громкости'''
+
     def __init__(self, state, scene_manager, display_settings, sound_manager):
+        '''Создает список параметров и получает менеджеры настроек'''
         super().__init__(state, scene_manager)
         self.display_settings = display_settings
         self.sound_manager = sound_manager
         self.font = pygame.font.SysFont('Arial', 52)
         self.selected_index = 0
-        self.options = [
-            'resolution',
-            'fullscreen',
-            'volume',
-            'back'
-        ]
+        self.options = ['resolution', 'fullscreen', 'volume', 'back']
 
     def update(self, actions):
+        '''Обрабатывает навигацию и изменение выбранного параметра'''
         if actions['up_pressed']:
             self.selected_index = (self.selected_index - 1) % len(self.options)
 
@@ -245,7 +266,7 @@ class SettingsScene(BaseScene):
                 self.display_settings.change_resolution(1)
 
         elif selected_option == 'fullscreen':
-            if (actions['left_pressed'] or actions['right_pressed'] or actions['E']):
+            if actions['left_pressed'] or actions['right_pressed'] or actions['E']:
                 self.display_settings.toggle_fullscreen()
 
         elif selected_option == 'volume':
@@ -258,6 +279,7 @@ class SettingsScene(BaseScene):
             self.scene_manager.change_scene(GameState.MAIN_MENU)
 
     def render(self, screen):
+        '''Рисует текущие значения настроек'''
         screen.fill((0, 0, 0))
 
         width, height = self.display_settings.resolution
@@ -270,7 +292,7 @@ class SettingsScene(BaseScene):
             'resolution': f'РАЗРЕШЕНИЕ: {width}x{height}',
             'fullscreen': f'ПОЛНЫЙ ЭКРАН: {fullscreen}',
             'volume': f'ГРОМКОСТЬ: {round(self.sound_manager.volume * 100)}%',
-            'back': 'НАЗАД'
+            'back': 'НАЗАД',
         }
 
         title = self.font.render('НАСТРОЙКИ', True, (0, 255, 0))
@@ -288,8 +310,9 @@ class SettingsScene(BaseScene):
 
             screen.blit(text, text.get_rect(center=(WIDTH // 2, y)))
 
+
 class ResultScene(BaseScene):
-    """Общий экран результата в стиле терминала GATE."""
+    '''Общий экран результата в стиле терминала GATE'''
 
     title = ''
     subtitle = ''
@@ -297,6 +320,7 @@ class ResultScene(BaseScene):
     accent_color = (0, 255, 0)
 
     def __init__(self, state, scene_manager):
+        '''Создает набор шрифтов общего экрана результата'''
         super().__init__(state, scene_manager)
         self.title_font = pygame.font.SysFont('Arial', 64, bold=True)
         self.subtitle_font = pygame.font.SysFont('Arial', 28, bold=True)
@@ -305,11 +329,11 @@ class ResultScene(BaseScene):
         self.system_font = pygame.font.SysFont('Arial', 18)
 
     def get_stats(self):
-        """Возвращает строки статистики конкретного результата."""
+        '''Возвращает строки статистики конкретного результата'''
         return ()
 
     def draw_frame(self, screen, rect):
-        """Рисует рамку с яркими угловыми отметками."""
+        '''Рисует рамку с яркими угловыми отметками'''
         pygame.draw.rect(screen, (0, 45, 20), rect, 1)
         corner = 32
         segments = (
@@ -326,7 +350,7 @@ class ResultScene(BaseScene):
             pygame.draw.line(screen, self.accent_color, start, end, 3)
 
     def render(self, screen):
-        """Рисует общий фон, заголовок, статистику и подсказку."""
+        '''Рисует общий фон, заголовок, статистику и подсказку'''
         width, height = screen.get_size()
         screen.fill((0, 6, 3))
 
@@ -370,12 +394,15 @@ class ResultScene(BaseScene):
 
 
 class SectorClearScene(ResultScene):
+    '''Показывает статистику завершенного сектора'''
+
     title = 'СЕКТОР ЗАЧИЩЕН'
     subtitle = 'УГРОЗЫ НЕЙТРАЛИЗОВАНЫ'
     hint = 'E  ПРОДОЛЖИТЬ'
     accent_color = (0, 255, 100)
 
     def get_stats(self):
+        '''Возвращает номер сектора, здоровье и текущий счет'''
         return (
             f'СЕКТОР: {self.state.sector_index + 1}',
             f'ЗДОРОВЬЕ: {int(self.state.player.health)}',
@@ -383,6 +410,7 @@ class SectorClearScene(ResultScene):
         )
 
     def update(self, actions):
+        '''Загружает следующий сектор или открывает экран победы'''
         if actions['E']:
             if go_to_next_sector(self.state):
                 self.scene_manager.change_scene(GameState.PLAYING)
@@ -391,34 +419,42 @@ class SectorClearScene(ResultScene):
 
 
 class GameOverScene(ResultScene):
+    '''Показывает результат после гибели игрока'''
+
     title = 'СИГНАЛ ПОТЕРЯН'
     subtitle = 'СОТРУДНИК НЕ ОТВЕЧАЕТ'
     hint = 'E  ГЛАВНОЕ МЕНЮ'
     accent_color = (255, 55, 55)
 
     def get_stats(self):
+        '''Возвращает достигнутый сектор и итоговый счет'''
         return (
             f'ДОСТИГНУТЫЙ СЕКТОР: {self.state.sector_index + 1}',
             f'ИТОГОВЫЙ СЧЁТ: {self.state.score}',
         )
 
     def update(self, actions):
+        '''Возвращает игрока в главное меню'''
         if actions['E']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)
 
 
 class FinalVictoryScene(ResultScene):
+    '''Показывает итог успешного прохождения кампании'''
+
     title = 'ПРОТОКОЛ GATE ЗАВЕРШЁН'
     subtitle = 'ВСЕ СЕКТОРЫ ЗАЧИЩЕНЫ'
     hint = 'E  ГЛАВНОЕ МЕНЮ'
     accent_color = (0, 220, 220)
 
     def get_stats(self):
+        '''Возвращает число секторов и итоговый счет кампании'''
         return (
             f'СЕКТОРОВ ЗАЧИЩЕНО: {TOTAL_SECTORS}',
             f'ИТОГОВЫЙ СЧЁТ: {self.state.score}',
         )
 
     def update(self, actions):
+        '''Возвращает игрока в главное меню'''
         if actions['E']:
             self.scene_manager.change_scene(GameState.MAIN_MENU)

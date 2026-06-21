@@ -1,13 +1,13 @@
-"""Модели подбираемых ресурсов."""
+'''Модели подбираемых ресурсов'''
 
 from src.systems.visibility_system import get_depth
 
 
 class Pickup:
-    """Базовый ресурс на карте: аптечка, патроны или будущий pickup."""
+    '''Базовый ресурс на карте: аптечка, патроны или будущий pickup'''
 
     def __init__(self, x, y):
-        """Создает ресурс в координатах мира."""
+        '''Создает ресурс в координатах мира'''
         self.x = x
         self.y = y
         self.amount = 0
@@ -18,7 +18,7 @@ class Pickup:
         self.type = None
 
     def update(self, player):
-        """Обновляет анимацию и проверяет подбор игроком."""
+        '''Обновляет анимацию и проверяет подбор игроком'''
         if self.animation_cooldown >= 0:
             self.animation_cooldown -= 1
 
@@ -28,7 +28,7 @@ class Pickup:
         return self.pickup_item(player)
 
     def pickup_item(self, player):
-        """Применяет эффект ресурса, если игрок подошел достаточно близко."""
+        '''Применяет эффект ресурса, если игрок подошел достаточно близко'''
         if self.is_pickedup:
             return False
 
@@ -38,7 +38,7 @@ class Pickup:
             if self.type == 'medkit':
                 if player.health >= player.max_health:
                     return False
-                
+
                 player.health = min(player.max_health, player.health + self.amount)
             elif self.type == 'ammo':
                 player.weapon.reserve_ammo += self.amount
@@ -48,10 +48,10 @@ class Pickup:
 
 
 class MedKit(Pickup):
-    """Аптечка, восстанавливающая здоровье игрока."""
+    '''Аптечка, восстанавливающая здоровье игрока'''
 
     def __init__(self, x, y):
-        """Создает аптечку."""
+        '''Создает аптечку'''
         super().__init__(x, y)
         self.amount = 10
         self.animation_speed = 20
@@ -60,10 +60,10 @@ class MedKit(Pickup):
 
 
 class Ammo(Pickup):
-    """Пачка патронов, пополняющая запас оружия."""
+    '''Пачка патронов, пополняющая запас оружия'''
 
     def __init__(self, x, y):
-        """Создает пачку патронов."""
+        '''Создает пачку патронов'''
         super().__init__(x, y)
         self.amount = 10
         self.animation_speed = 20

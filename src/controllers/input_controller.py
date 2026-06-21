@@ -1,13 +1,13 @@
-"""Контроллер ввода игрока."""
+'''Контроллер ввода игрока'''
 
 import pygame
 
 
 class InputController:
-    """Считывает клавиатуру и превращает ее состояние в словарь действий."""
+    '''Считывает клавиатуру и превращает ее состояние в словарь действий'''
 
     def __init__(self):
-        """Создает флаги одноразовых нажатий."""
+        '''Создает флаги одноразовых нажатий'''
         self.E = False
         self.R = False
         self.Q = False
@@ -19,7 +19,7 @@ class InputController:
         self.ESCAPE = False
 
     def get_actions(self):
-        """Возвращает действия игрока за текущий кадр."""
+        '''Возвращает действия игрока за текущий кадр'''
         keys = pygame.key.get_pressed()
 
         actions = {
@@ -53,7 +53,7 @@ class InputController:
         return actions
 
     def handle_event(self, event):
-        """Запоминает одноразовые действия по событию KEYDOWN."""
+        '''Запоминает одноразовые действия по событию KEYDOWN'''
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_e:
                 self.E = True
